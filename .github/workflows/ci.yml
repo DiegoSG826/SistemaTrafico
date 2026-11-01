@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.13.9'
+          python-version: '3.13'
           cache: pip
       - run: pip install -r requirements.lock
       - run: python -m pytest --cov=backend.app.controller --cov=backend.app.schemas --cov-branch --cov-fail-under=80 --cov-report=json:reports/coverage.json --junitxml=reports/tests.xml
