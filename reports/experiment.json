@@ -1,0 +1,1322 @@
+{
+  "model_version": "rf-v1-90d-s42-ba0ba6390f",
+  "artifact_hash": "4770313dcd8200b7a8c8fe38e4af112c20f459d0d5734713dc2ab5c827ca888b",
+  "protocol": "paired-v1",
+  "ci_method": "bootstrap-paired-runs-stratified-by-scenario",
+  "repetitions": 10,
+  "warmup_s": 900,
+  "measure_s": 7200,
+  "seed_start": 10001,
+  "seed_scenario_stride": 100,
+  "mean_delay_reduction": 0.2937497494204123,
+  "ci95": [
+    0.2864363546957724,
+    0.301003714061875
+  ],
+  "queue_guard_passed": true,
+  "invariants_passed": true,
+  "eligible_control": true,
+  "runs": [
+    {
+      "seed": 10001,
+      "scenario": "valley",
+      "fixed": {
+        "delay_vehicle_s": 41258,
+        "queue_mean_veh": 5.730277777777777,
+        "queue_p95_veh": 11.0,
+        "departures_veh": 1227,
+        "pending_veh": 1,
+        "served_wait_mean_s": 33.800325998370006,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 42444,
+        "queue_mean_veh": 5.895,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1230,
+        "pending_veh": 1,
+        "served_wait_mean_s": 34.81544715447154,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10002,
+      "scenario": "valley",
+      "fixed": {
+        "delay_vehicle_s": 43878,
+        "queue_mean_veh": 6.094166666666666,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1274,
+        "pending_veh": 3,
+        "served_wait_mean_s": 34.562009419152275,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 44471,
+        "queue_mean_veh": 6.176527777777777,
+        "queue_p95_veh": 13.0,
+        "departures_veh": 1274,
+        "pending_veh": 3,
+        "served_wait_mean_s": 35.027472527472526,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10003,
+      "scenario": "valley",
+      "fixed": {
+        "delay_vehicle_s": 41965,
+        "queue_mean_veh": 5.8284722222222225,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1229,
+        "pending_veh": 3,
+        "served_wait_mean_s": 34.15378356387307,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 43160,
+        "queue_mean_veh": 5.9944444444444445,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1228,
+        "pending_veh": 4,
+        "served_wait_mean_s": 35.13517915309446,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10004,
+      "scenario": "valley",
+      "fixed": {
+        "delay_vehicle_s": 38754,
+        "queue_mean_veh": 5.3825,
+        "queue_p95_veh": 11.0,
+        "departures_veh": 1166,
+        "pending_veh": 0,
+        "served_wait_mean_s": 33.38336192109777,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 40042,
+        "queue_mean_veh": 5.561388888888889,
+        "queue_p95_veh": 11.0,
+        "departures_veh": 1162,
+        "pending_veh": 3,
+        "served_wait_mean_s": 34.51807228915663,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10005,
+      "scenario": "valley",
+      "fixed": {
+        "delay_vehicle_s": 43340,
+        "queue_mean_veh": 6.019444444444445,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1227,
+        "pending_veh": 9,
+        "served_wait_mean_s": 35.47269763651182,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 43290,
+        "queue_mean_veh": 6.0125,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1224,
+        "pending_veh": 12,
+        "served_wait_mean_s": 35.39787581699346,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10006,
+      "scenario": "valley",
+      "fixed": {
+        "delay_vehicle_s": 40789,
+        "queue_mean_veh": 5.6651388888888885,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1217,
+        "pending_veh": 1,
+        "served_wait_mean_s": 33.531635168447,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 40875,
+        "queue_mean_veh": 5.677083333333333,
+        "queue_p95_veh": 11.0,
+        "departures_veh": 1213,
+        "pending_veh": 3,
+        "served_wait_mean_s": 33.66529266281945,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10007,
+      "scenario": "valley",
+      "fixed": {
+        "delay_vehicle_s": 42848,
+        "queue_mean_veh": 5.9511111111111115,
+        "queue_p95_veh": 13.0,
+        "departures_veh": 1193,
+        "pending_veh": 3,
+        "served_wait_mean_s": 35.970662196144175,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 43178,
+        "queue_mean_veh": 5.996944444444445,
+        "queue_p95_veh": 13.0,
+        "departures_veh": 1191,
+        "pending_veh": 2,
+        "served_wait_mean_s": 36.26784214945424,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10008,
+      "scenario": "valley",
+      "fixed": {
+        "delay_vehicle_s": 42646,
+        "queue_mean_veh": 5.923055555555556,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1234,
+        "pending_veh": 0,
+        "served_wait_mean_s": 34.626418152350084,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 43238,
+        "queue_mean_veh": 6.005277777777778,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1233,
+        "pending_veh": 0,
+        "served_wait_mean_s": 35.10786699107867,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10009,
+      "scenario": "valley",
+      "fixed": {
+        "delay_vehicle_s": 41549,
+        "queue_mean_veh": 5.770694444444445,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1230,
+        "pending_veh": 4,
+        "served_wait_mean_s": 33.760162601626014,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 42214,
+        "queue_mean_veh": 5.8630555555555555,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1231,
+        "pending_veh": 5,
+        "served_wait_mean_s": 34.36880584890333,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10010,
+      "scenario": "valley",
+      "fixed": {
+        "delay_vehicle_s": 42484,
+        "queue_mean_veh": 5.900555555555556,
+        "queue_p95_veh": 11.0,
+        "departures_veh": 1231,
+        "pending_veh": 2,
+        "served_wait_mean_s": 34.49634443541836,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 43133,
+        "queue_mean_veh": 5.990694444444444,
+        "queue_p95_veh": 12.0,
+        "departures_veh": 1232,
+        "pending_veh": 1,
+        "served_wait_mean_s": 35.00974025974026,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10101,
+      "scenario": "peak",
+      "fixed": {
+        "delay_vehicle_s": 5471598,
+        "queue_mean_veh": 759.9441666666667,
+        "queue_p95_veh": 1239.0,
+        "departures_veh": 2400,
+        "pending_veh": 1276,
+        "served_wait_mean_s": 1553.2,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 5604528,
+        "queue_mean_veh": 778.4066666666666,
+        "queue_p95_veh": 1268.0,
+        "departures_veh": 2373,
+        "pending_veh": 1306,
+        "served_wait_mean_s": 1592.5347661188368,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10102,
+      "scenario": "peak",
+      "fixed": {
+        "delay_vehicle_s": 5113686,
+        "queue_mean_veh": 710.2341666666666,
+        "queue_p95_veh": 1191.0,
+        "departures_veh": 2400,
+        "pending_veh": 1202,
+        "served_wait_mean_s": 1456.26875,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 5210354,
+        "queue_mean_veh": 723.6602777777778,
+        "queue_p95_veh": 1217.0,
+        "departures_veh": 2374,
+        "pending_veh": 1228,
+        "served_wait_mean_s": 1481.63900589722,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10103,
+      "scenario": "peak",
+      "fixed": {
+        "delay_vehicle_s": 5113222,
+        "queue_mean_veh": 710.1697222222223,
+        "queue_p95_veh": 1161.0,
+        "departures_veh": 2400,
+        "pending_veh": 1160,
+        "served_wait_mean_s": 1470.27875,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 5231460,
+        "queue_mean_veh": 726.5916666666667,
+        "queue_p95_veh": 1191.0,
+        "departures_veh": 2370,
+        "pending_veh": 1191,
+        "served_wait_mean_s": 1506.1742616033755,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10104,
+      "scenario": "peak",
+      "fixed": {
+        "delay_vehicle_s": 5062453,
+        "queue_mean_veh": 703.1184722222222,
+        "queue_p95_veh": 1129.0,
+        "departures_veh": 2400,
+        "pending_veh": 1161,
+        "served_wait_mean_s": 1474.3316666666667,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 5197184,
+        "queue_mean_veh": 721.8311111111111,
+        "queue_p95_veh": 1164.0,
+        "departures_veh": 2363,
+        "pending_veh": 1198,
+        "served_wait_mean_s": 1512.2983495556496,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10105,
+      "scenario": "peak",
+      "fixed": {
+        "delay_vehicle_s": 4734835,
+        "queue_mean_veh": 657.6159722222222,
+        "queue_p95_veh": 1093.0,
+        "departures_veh": 2400,
+        "pending_veh": 1110,
+        "served_wait_mean_s": 1374.6208333333334,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 4860919,
+        "queue_mean_veh": 675.1276388888889,
+        "queue_p95_veh": 1127.0,
+        "departures_veh": 2364,
+        "pending_veh": 1146,
+        "served_wait_mean_s": 1414.8760575296108,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10106,
+      "scenario": "peak",
+      "fixed": {
+        "delay_vehicle_s": 5432568,
+        "queue_mean_veh": 754.5233333333333,
+        "queue_p95_veh": 1212.0,
+        "departures_veh": 2400,
+        "pending_veh": 1214,
+        "served_wait_mean_s": 1551.7329166666666,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 5539581,
+        "queue_mean_veh": 769.38625,
+        "queue_p95_veh": 1241.0,
+        "departures_veh": 2372,
+        "pending_veh": 1244,
+        "served_wait_mean_s": 1575.3587689713322,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10107,
+      "scenario": "peak",
+      "fixed": {
+        "delay_vehicle_s": 4431658,
+        "queue_mean_veh": 615.5080555555555,
+        "queue_p95_veh": 1011.0,
+        "departures_veh": 2400,
+        "pending_veh": 1032,
+        "served_wait_mean_s": 1330.91875,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 4569092,
+        "queue_mean_veh": 634.5961111111111,
+        "queue_p95_veh": 1042.0,
+        "departures_veh": 2373,
+        "pending_veh": 1063,
+        "served_wait_mean_s": 1373.370417193426,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10108,
+      "scenario": "peak",
+      "fixed": {
+        "delay_vehicle_s": 4885302,
+        "queue_mean_veh": 678.5141666666667,
+        "queue_p95_veh": 1123.0,
+        "departures_veh": 2400,
+        "pending_veh": 1128,
+        "served_wait_mean_s": 1414.6245833333332,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 4999489,
+        "queue_mean_veh": 694.3734722222222,
+        "queue_p95_veh": 1150.0,
+        "departures_veh": 2372,
+        "pending_veh": 1157,
+        "served_wait_mean_s": 1445.2858347386173,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10109,
+      "scenario": "peak",
+      "fixed": {
+        "delay_vehicle_s": 4642545,
+        "queue_mean_veh": 644.7979166666667,
+        "queue_p95_veh": 1042.0499999999993,
+        "departures_veh": 2400,
+        "pending_veh": 1077,
+        "served_wait_mean_s": 1394.44625,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 4775842,
+        "queue_mean_veh": 663.3113888888889,
+        "queue_p95_veh": 1078.0,
+        "departures_veh": 2365,
+        "pending_veh": 1116,
+        "served_wait_mean_s": 1429.92177589852,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10110,
+      "scenario": "peak",
+      "fixed": {
+        "delay_vehicle_s": 4860029,
+        "queue_mean_veh": 675.0040277777778,
+        "queue_p95_veh": 1076.0,
+        "departures_veh": 2400,
+        "pending_veh": 1107,
+        "served_wait_mean_s": 1439.1691666666666,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 4983812,
+        "queue_mean_veh": 692.1961111111111,
+        "queue_p95_veh": 1105.0,
+        "departures_veh": 2372,
+        "pending_veh": 1138,
+        "served_wait_mean_s": 1476.877318718381,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10201,
+      "scenario": "imbalance",
+      "fixed": {
+        "delay_vehicle_s": 4560795,
+        "queue_mean_veh": 633.44375,
+        "queue_p95_veh": 1047.0,
+        "departures_veh": 1802,
+        "pending_veh": 1076,
+        "served_wait_mean_s": 1432.5715871254163,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 2371159,
+        "queue_mean_veh": 329.3276388888889,
+        "queue_p95_veh": 519.0,
+        "departures_veh": 2345,
+        "pending_veh": 505,
+        "served_wait_mean_s": 815.8754797441364,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10202,
+      "scenario": "imbalance",
+      "fixed": {
+        "delay_vehicle_s": 4641264,
+        "queue_mean_veh": 644.62,
+        "queue_p95_veh": 1081.0,
+        "departures_veh": 1823,
+        "pending_veh": 1089,
+        "served_wait_mean_s": 1406.223258365332,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 2516725,
+        "queue_mean_veh": 349.5451388888889,
+        "queue_p95_veh": 547.0499999999993,
+        "departures_veh": 2365,
+        "pending_veh": 519,
+        "served_wait_mean_s": 849.2541226215645,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10203,
+      "scenario": "imbalance",
+      "fixed": {
+        "delay_vehicle_s": 4715755,
+        "queue_mean_veh": 654.9659722222223,
+        "queue_p95_veh": 1054.0,
+        "departures_veh": 1768,
+        "pending_veh": 1070,
+        "served_wait_mean_s": 1499.0441176470588,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 2506106,
+        "queue_mean_veh": 348.0702777777778,
+        "queue_p95_veh": 502.0,
+        "departures_veh": 2328,
+        "pending_veh": 490,
+        "served_wait_mean_s": 881.7229381443299,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10204,
+      "scenario": "imbalance",
+      "fixed": {
+        "delay_vehicle_s": 4783679,
+        "queue_mean_veh": 664.3998611111111,
+        "queue_p95_veh": 1136.0,
+        "departures_veh": 1819,
+        "pending_veh": 1140,
+        "served_wait_mean_s": 1441.4326553051128,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 2644859,
+        "queue_mean_veh": 367.3415277777778,
+        "queue_p95_veh": 604.0,
+        "departures_veh": 2363,
+        "pending_veh": 571,
+        "served_wait_mean_s": 867.2619551417689,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10205,
+      "scenario": "imbalance",
+      "fixed": {
+        "delay_vehicle_s": 4691206,
+        "queue_mean_veh": 651.5563888888889,
+        "queue_p95_veh": 1087.0499999999993,
+        "departures_veh": 1803,
+        "pending_veh": 1100,
+        "served_wait_mean_s": 1443.8508042151968,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 2556143,
+        "queue_mean_veh": 355.0198611111111,
+        "queue_p95_veh": 556.0,
+        "departures_veh": 2356,
+        "pending_veh": 528,
+        "served_wait_mean_s": 865.4070458404075,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10206,
+      "scenario": "imbalance",
+      "fixed": {
+        "delay_vehicle_s": 4354287,
+        "queue_mean_veh": 604.7620833333333,
+        "queue_p95_veh": 1005.0499999999993,
+        "departures_veh": 1790,
+        "pending_veh": 1042,
+        "served_wait_mean_s": 1381.0106145251398,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 2241579,
+        "queue_mean_veh": 311.3304166666667,
+        "queue_p95_veh": 484.0,
+        "departures_veh": 2338,
+        "pending_veh": 481,
+        "served_wait_mean_s": 784.5970915312232,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10207,
+      "scenario": "imbalance",
+      "fixed": {
+        "delay_vehicle_s": 4922610,
+        "queue_mean_veh": 683.6958333333333,
+        "queue_p95_veh": 1106.0,
+        "departures_veh": 1826,
+        "pending_veh": 1135,
+        "served_wait_mean_s": 1501.5569550930998,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 2880469,
+        "queue_mean_veh": 400.0651388888889,
+        "queue_p95_veh": 602.0,
+        "departures_veh": 2359,
+        "pending_veh": 580,
+        "served_wait_mean_s": 967.2848664688428,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10208,
+      "scenario": "imbalance",
+      "fixed": {
+        "delay_vehicle_s": 4950188,
+        "queue_mean_veh": 687.5261111111112,
+        "queue_p95_veh": 1121.0,
+        "departures_veh": 1815,
+        "pending_veh": 1134,
+        "served_wait_mean_s": 1519.1118457300277,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 2800908,
+        "queue_mean_veh": 389.015,
+        "queue_p95_veh": 602.0,
+        "departures_veh": 2358,
+        "pending_veh": 565,
+        "served_wait_mean_s": 933.9978795589483,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10209,
+      "scenario": "imbalance",
+      "fixed": {
+        "delay_vehicle_s": 5261756,
+        "queue_mean_veh": 730.7994444444445,
+        "queue_p95_veh": 1156.0,
+        "departures_veh": 1786,
+        "pending_veh": 1201,
+        "served_wait_mean_s": 1606.9188129899217,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 3093824,
+        "queue_mean_veh": 429.6977777777778,
+        "queue_p95_veh": 607.0,
+        "departures_veh": 2353,
+        "pending_veh": 616,
+        "served_wait_mean_s": 1045.5172120696982,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10210,
+      "scenario": "imbalance",
+      "fixed": {
+        "delay_vehicle_s": 4967873,
+        "queue_mean_veh": 689.9823611111111,
+        "queue_p95_veh": 1144.0,
+        "departures_veh": 1796,
+        "pending_veh": 1174,
+        "served_wait_mean_s": 1499.868040089087,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 2794073,
+        "queue_mean_veh": 388.06569444444443,
+        "queue_p95_veh": 598.0,
+        "departures_veh": 2340,
+        "pending_veh": 603,
+        "served_wait_mean_s": 933.0299145299145,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10301,
+      "scenario": "rain_incident",
+      "fixed": {
+        "delay_vehicle_s": 1036318,
+        "queue_mean_veh": 143.93305555555557,
+        "queue_p95_veh": 231.0,
+        "departures_veh": 1909,
+        "pending_veh": 229,
+        "served_wait_mean_s": 481.3205866946045,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 217348,
+        "queue_mean_veh": 30.18722222222222,
+        "queue_p95_veh": 79.0,
+        "departures_veh": 2103,
+        "pending_veh": 16,
+        "served_wait_mean_s": 106.10936757013789,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10302,
+      "scenario": "rain_incident",
+      "fixed": {
+        "delay_vehicle_s": 1157433,
+        "queue_mean_veh": 160.75458333333333,
+        "queue_p95_veh": 245.0,
+        "departures_veh": 1904,
+        "pending_veh": 240,
+        "served_wait_mean_s": 533.0199579831933,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 255965,
+        "queue_mean_veh": 35.550694444444446,
+        "queue_p95_veh": 71.0,
+        "departures_veh": 2117,
+        "pending_veh": 8,
+        "served_wait_mean_s": 123.38308927727917,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10303,
+      "scenario": "rain_incident",
+      "fixed": {
+        "delay_vehicle_s": 1004849,
+        "queue_mean_veh": 139.5623611111111,
+        "queue_p95_veh": 223.0,
+        "departures_veh": 1905,
+        "pending_veh": 218,
+        "served_wait_mean_s": 464.1679790026247,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 255725,
+        "queue_mean_veh": 35.517361111111114,
+        "queue_p95_veh": 83.0,
+        "departures_veh": 2090,
+        "pending_veh": 21,
+        "served_wait_mean_s": 124.58229665071771,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10304,
+      "scenario": "rain_incident",
+      "fixed": {
+        "delay_vehicle_s": 802565,
+        "queue_mean_veh": 111.46736111111112,
+        "queue_p95_veh": 159.0,
+        "departures_veh": 1936,
+        "pending_veh": 167,
+        "served_wait_mean_s": 385.18698347107437,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 201166,
+        "queue_mean_veh": 27.939722222222223,
+        "queue_p95_veh": 62.0,
+        "departures_veh": 2064,
+        "pending_veh": 17,
+        "served_wait_mean_s": 99.1671511627907,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10305,
+      "scenario": "rain_incident",
+      "fixed": {
+        "delay_vehicle_s": 872306,
+        "queue_mean_veh": 121.1536111111111,
+        "queue_p95_veh": 179.0,
+        "departures_veh": 1919,
+        "pending_veh": 170,
+        "served_wait_mean_s": 419.7988535695675,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 136289,
+        "queue_mean_veh": 18.929027777777776,
+        "queue_p95_veh": 42.0,
+        "departures_veh": 2058,
+        "pending_veh": 12,
+        "served_wait_mean_s": 67.6584062196307,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10306,
+      "scenario": "rain_incident",
+      "fixed": {
+        "delay_vehicle_s": 933944,
+        "queue_mean_veh": 129.71444444444444,
+        "queue_p95_veh": 196.0,
+        "departures_veh": 1942,
+        "pending_veh": 187,
+        "served_wait_mean_s": 440.71215242018536,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 221906,
+        "queue_mean_veh": 30.82027777777778,
+        "queue_p95_veh": 71.0,
+        "departures_veh": 2108,
+        "pending_veh": 6,
+        "served_wait_mean_s": 109.49810246679317,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10307,
+      "scenario": "rain_incident",
+      "fixed": {
+        "delay_vehicle_s": 821200,
+        "queue_mean_veh": 114.05555555555556,
+        "queue_p95_veh": 181.0,
+        "departures_veh": 1940,
+        "pending_veh": 180,
+        "served_wait_mean_s": 383.99278350515465,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 198200,
+        "queue_mean_veh": 27.52777777777778,
+        "queue_p95_veh": 62.0,
+        "departures_veh": 2107,
+        "pending_veh": 7,
+        "served_wait_mean_s": 97.62268628381585,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10308,
+      "scenario": "rain_incident",
+      "fixed": {
+        "delay_vehicle_s": 1112214,
+        "queue_mean_veh": 154.47416666666666,
+        "queue_p95_veh": 235.0,
+        "departures_veh": 1916,
+        "pending_veh": 220,
+        "served_wait_mean_s": 521.2463465553236,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 285098,
+        "queue_mean_veh": 39.596944444444446,
+        "queue_p95_veh": 82.0,
+        "departures_veh": 2115,
+        "pending_veh": 7,
+        "served_wait_mean_s": 139.75508274231677,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10309,
+      "scenario": "rain_incident",
+      "fixed": {
+        "delay_vehicle_s": 1108463,
+        "queue_mean_veh": 153.95319444444445,
+        "queue_p95_veh": 219.0,
+        "departures_veh": 1959,
+        "pending_veh": 225,
+        "served_wait_mean_s": 510.0770801429301,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 221466,
+        "queue_mean_veh": 30.759166666666665,
+        "queue_p95_veh": 65.0,
+        "departures_veh": 2146,
+        "pending_veh": 11,
+        "served_wait_mean_s": 106.02982292637465,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10310,
+      "scenario": "rain_incident",
+      "fixed": {
+        "delay_vehicle_s": 941126,
+        "queue_mean_veh": 130.71194444444444,
+        "queue_p95_veh": 227.0,
+        "departures_veh": 1952,
+        "pending_veh": 225,
+        "served_wait_mean_s": 420.79456967213116,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 291283,
+        "queue_mean_veh": 40.45597222222222,
+        "queue_p95_veh": 90.0,
+        "departures_veh": 2111,
+        "pending_veh": 46,
+        "served_wait_mean_s": 138.85788725722406,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10401,
+      "scenario": "oversaturation",
+      "fixed": {
+        "delay_vehicle_s": 28125445,
+        "queue_mean_veh": 3906.3118055555556,
+        "queue_p95_veh": 6520.0,
+        "departures_veh": 2400,
+        "pending_veh": 6723,
+        "served_wait_mean_s": 3342.9108333333334,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 28150624,
+        "queue_mean_veh": 3909.8088888888888,
+        "queue_p95_veh": 6528.0,
+        "departures_veh": 2391,
+        "pending_veh": 6732,
+        "served_wait_mean_s": 3343.1710581346715,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10402,
+      "scenario": "oversaturation",
+      "fixed": {
+        "delay_vehicle_s": 28493868,
+        "queue_mean_veh": 3957.4816666666666,
+        "queue_p95_veh": 6621.049999999999,
+        "departures_veh": 2400,
+        "pending_veh": 6805,
+        "served_wait_mean_s": 3357.545833333333,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 28499518,
+        "queue_mean_veh": 3958.2663888888887,
+        "queue_p95_veh": 6623.0,
+        "departures_veh": 2397,
+        "pending_veh": 6808,
+        "served_wait_mean_s": 3356.501877346683,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10403,
+      "scenario": "oversaturation",
+      "fixed": {
+        "delay_vehicle_s": 28686083,
+        "queue_mean_veh": 3984.1781944444447,
+        "queue_p95_veh": 6695.0,
+        "departures_veh": 2400,
+        "pending_veh": 6911,
+        "served_wait_mean_s": 3344.1125,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 28706584,
+        "queue_mean_veh": 3987.0255555555555,
+        "queue_p95_veh": 6701.0,
+        "departures_veh": 2392,
+        "pending_veh": 6919,
+        "served_wait_mean_s": 3343.452759197324,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10404,
+      "scenario": "oversaturation",
+      "fixed": {
+        "delay_vehicle_s": 29007672,
+        "queue_mean_veh": 4028.8433333333332,
+        "queue_p95_veh": 6816.0,
+        "departures_veh": 2400,
+        "pending_veh": 7059,
+        "served_wait_mean_s": 3346.6254166666668,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 29026963,
+        "queue_mean_veh": 4031.522638888889,
+        "queue_p95_veh": 6820.0,
+        "departures_veh": 2394,
+        "pending_veh": 7065,
+        "served_wait_mean_s": 3347.9327485380118,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10405,
+      "scenario": "oversaturation",
+      "fixed": {
+        "delay_vehicle_s": 28021310,
+        "queue_mean_veh": 3891.848611111111,
+        "queue_p95_veh": 6560.0,
+        "departures_veh": 2400,
+        "pending_veh": 6748,
+        "served_wait_mean_s": 3345.735833333333,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 28053440,
+        "queue_mean_veh": 3896.311111111111,
+        "queue_p95_veh": 6569.0,
+        "departures_veh": 2390,
+        "pending_veh": 6758,
+        "served_wait_mean_s": 3347.841841004184,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10406,
+      "scenario": "oversaturation",
+      "fixed": {
+        "delay_vehicle_s": 29091057,
+        "queue_mean_veh": 4040.4245833333334,
+        "queue_p95_veh": 6785.049999999999,
+        "departures_veh": 2400,
+        "pending_veh": 6987,
+        "served_wait_mean_s": 3386.5554166666666,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 29114439,
+        "queue_mean_veh": 4043.6720833333334,
+        "queue_p95_veh": 6790.049999999999,
+        "departures_veh": 2394,
+        "pending_veh": 6993,
+        "served_wait_mean_s": 3389.4636591478697,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10407,
+      "scenario": "oversaturation",
+      "fixed": {
+        "delay_vehicle_s": 28367367,
+        "queue_mean_veh": 3939.912083333333,
+        "queue_p95_veh": 6656.0,
+        "departures_veh": 2400,
+        "pending_veh": 6883,
+        "served_wait_mean_s": 3356.3670833333335,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 28381408,
+        "queue_mean_veh": 3941.862222222222,
+        "queue_p95_veh": 6660.049999999999,
+        "departures_veh": 2394,
+        "pending_veh": 6889,
+        "served_wait_mean_s": 3355.4010025062657,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10408,
+      "scenario": "oversaturation",
+      "fixed": {
+        "delay_vehicle_s": 28664336,
+        "queue_mean_veh": 3981.157777777778,
+        "queue_p95_veh": 6702.0,
+        "departures_veh": 2400,
+        "pending_veh": 6904,
+        "served_wait_mean_s": 3315.349583333333,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 28685084,
+        "queue_mean_veh": 3984.0394444444446,
+        "queue_p95_veh": 6709.0,
+        "departures_veh": 2393,
+        "pending_veh": 6911,
+        "served_wait_mean_s": 3316.018804847472,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10409,
+      "scenario": "oversaturation",
+      "fixed": {
+        "delay_vehicle_s": 28478137,
+        "queue_mean_veh": 3955.2968055555557,
+        "queue_p95_veh": 6639.0,
+        "departures_veh": 2400,
+        "pending_veh": 6826,
+        "served_wait_mean_s": 3377.27875,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 28496601,
+        "queue_mean_veh": 3957.86125,
+        "queue_p95_veh": 6644.0,
+        "departures_veh": 2394,
+        "pending_veh": 6832,
+        "served_wait_mean_s": 3378.282372598162,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    },
+    {
+      "seed": 10410,
+      "scenario": "oversaturation",
+      "fixed": {
+        "delay_vehicle_s": 28421529,
+        "queue_mean_veh": 3947.434583333333,
+        "queue_p95_veh": 6748.0,
+        "departures_veh": 2400,
+        "pending_veh": 6939,
+        "served_wait_mean_s": 3334.4445833333334,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      },
+      "adaptive": {
+        "delay_vehicle_s": 28441703,
+        "queue_mean_veh": 3950.2365277777776,
+        "queue_p95_veh": 6754.0,
+        "departures_veh": 2391,
+        "pending_veh": 6948,
+        "served_wait_mean_s": 3332.719782517775,
+        "pedestrian_max_red_s": 100,
+        "conflicts": 0,
+        "pedestrian_omissions_complete_cycles": 0
+      }
+    }
+  ],
+  "limitation": "Sint\u00e9tico, cruces independientes, espera peatonal como tiempo rojo m\u00e1ximo; sin llegadas peatonales individuales"
+}

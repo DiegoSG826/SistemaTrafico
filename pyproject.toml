@@ -1,0 +1,14 @@
+[project]
+name = "sgt-cdmx"
+version = "0.2.0"
+description = "Prototipo académico de control de tráfico exclusivamente simulado"
+requires-python = ">=3.13,<3.14"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["postgres: requiere TEST_DATABASE_URL de PostgreSQL aislado"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"

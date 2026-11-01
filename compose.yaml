@@ -1,0 +1,99 @@
+services:
+  db:
+    image: postgres:17.6
+    environment:
+      POSTGRES_USER: traffic
+      POSTGRES_DB: traffic
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configurar POSTGRES_PASSWORD en .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U traffic -d traffic"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    networks: [internal]
+
+  init:
+    build: .
+    env_file: .env
+    environment:
+      <<: &common
+        DATABASE_URL: postgresql+psycopg://traffic_app:${APP_DB_PASSWORD:?Configurar APP_DB_PASSWORD}@db:5432/traffic
+        ML_SERVICE_URL: http://ml:8001
+        MODEL_DIR: /app/ml_model/artifacts
+      DATABASE_URL: postgresql+psycopg://traffic:${POSTGRES_PASSWORD}@db:5432/traffic
+    command: ["python", "-m", "database.manage"]
+    depends_on:
+      db: {condition: service_healthy}
+    networks: [internal]
+
+  ml:
+    build: .
+    environment:
+      MODEL_DIR: /app/ml_model/artifacts
+    command: ["uvicorn", "ml_model.service:app", "--host", "0.0.0.0", "--port", "8001"]
+    volumes:
+      - ./ml_model/artifacts:/app/ml_model/artifacts:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [internal]
+
+  api:
+    build: .
+    environment:
+      <<: *common
+      JWT_SECRET: ${JWT_SECRET:?Configurar JWT_SECRET}
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      init: {condition: service_completed_successfully}
+      ml: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [internal, frontend]
+
+  worker:
+    build: .
+    environment:
+      <<: *common
+      SIM_SPEED: ${SIM_SPEED:-10}
+      SIM_SEED: ${SIM_SEED:-20261031}
+    command: ["python", "-m", "backend.worker"]
+    depends_on:
+      init: {condition: service_completed_successfully}
+      ml: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "from backend.app.config import settings; from backend.app.database import connect,utcnow,aware; from backend.app.models import WorkerLease; e,f=connect(settings().database_url); s=f(); w=s.get(WorkerLease,1); assert w and (utcnow()-aware(w.heartbeat)).total_seconds()<5"]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+    networks: [internal]
+
+  dashboard:
+    build: .
+    environment:
+      API_URL: http://api:8000
+    command: ["streamlit", "run", "frontend/dashboard.py", "--server.address=0.0.0.0", "--server.port=8501", "--browser.gatherUsageStats=false"]
+    ports: ["127.0.0.1:8501:8501"]
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [frontend]
+
+volumes:
+  postgres_data:
+networks:
+  internal:
+    internal: true
+  frontend:

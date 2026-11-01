@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "services": [
+    "ml",
+    "api",
+    "worker",
+    "dashboard"
+  ],
+  "intersections": 5,
+  "database": "sqlite-isolated",
+  "model_mode": "degraded-unpromoted",
+  "authenticated_http": true,
+  "deferred_application_confirmed": true,
+  "vehicle_conservation": true,
+  "dashboard_http_healthy": true
+}
