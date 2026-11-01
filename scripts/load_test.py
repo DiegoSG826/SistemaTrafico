@@ -27,6 +27,7 @@ def main():
     deadline = time.monotonic()+args.seconds
     def run(_):
         samples = {"query": [], "prediction": [], "errors": 0, "conflicts": 0}
+        turn = _
         with httpx.Client(base_url=args.url, timeout=5, trust_env=False,
                          headers={"Authorization": f"Bearer {token}"}) as client:
             # Calentamiento sin contabilizar.
@@ -37,7 +38,9 @@ def main():
                     response = client.get("/intersections")
                     response.raise_for_status()
                     samples["query"].append(time.perf_counter()-start)
-                    item = response.json()["items"][0]
+                    items = response.json()["items"]
+                    item = items[turn % len(items)]
+                    turn += 1
                     start = time.perf_counter()
                     response = client.post("/predict_light", json={"intersection_id": item["id"],
                                                                   "previous_version": item["plan_version"]})

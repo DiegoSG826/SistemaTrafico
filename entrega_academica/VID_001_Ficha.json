@@ -1,0 +1,12 @@
+{
+  "id": "VID_001",
+  "duration_s": 267.66666666666663,
+  "fps": 6,
+  "resolution": [
+    1280,
+    840
+  ],
+  "audio": "Sin locuci\u00f3n; subt\u00edtulos en espa\u00f1ol incrustados y SRT",
+  "content": "14 diapositivas, capturas reales de instancia temporal y demostraci\u00f3n sint\u00e9tica del controlador",
+  "real_world_traffic_footage": false
+}

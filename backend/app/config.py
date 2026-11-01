@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-    database_url: str = "sqlite:///./data/traffic.db"
+    database_url: str = "sqlite:///./data/cuauhtemoc.db"
     admin_email: str = "admin@example.test"
     admin_password: str = ""
     app_db_password: str = ""

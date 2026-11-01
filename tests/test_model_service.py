@@ -37,6 +37,7 @@ def artifact(tmp_path):
 
 def test_real_pipeline_through_internal_service_and_api(artifact, monkeypatch, system):
     directory, manifest, row = artifact
+    assert Predictor(directory).model.steps[-1][1].n_jobs == 1
     monkeypatch.setenv("MODEL_DIR", str(directory))
     from ml_model.service import app
     api, factory, _ = system

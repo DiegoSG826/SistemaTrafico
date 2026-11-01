@@ -13,3 +13,6 @@ reports/local/
 *.db
 *.db-*
 *.log
+.chart-data-*/
+.codex-finalizer/
+entrega_academica/*.zip

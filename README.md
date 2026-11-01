@@ -1,5 +1,14 @@
 # Sistema inteligente de gestión de tráfico vehicular para la CDMX
 
+**Entrega académica integrada:** [memoria, manuales, diagramas, presentación y video](entrega_academica/LEEME.md).
+La revisión final documenta los criterios que cumplen y los que siguen abiertos, incluidos los
+resultados negativos de latencia bajo carga.
+
+**Ámbito actualizado: alcaldía Cuauhtémoc.** Cinco cruces sintéticos, sin conexión a semáforos
+reales. Consulta [alcance y revisión de la entrega académica](docs/REVISION_ENTREGA_ACADEMICA.md).
+Para cambiar desde el escenario local anterior, detener servicios y ejecutar
+`python -m scripts.select_cuauhtemoc` antes de volver a iniciar; se conserva la BD anterior.
+
 FASE 2: base funcional de un **prototipo académico exclusivamente simulado**. Incluye FastAPI,
 PostgreSQL, servicio interno de Random Forest, Streamlit, generador de observaciones, trabajador
 de control, pruebas y documentación. No controla infraestructura vial.

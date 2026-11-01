@@ -1,4 +1,5 @@
 """Ejecutar contra BD de laboratorio; crea y elimina solo un esquema UUID propio."""
+
 import os
 from pathlib import Path
 from uuid import uuid4
@@ -23,7 +24,7 @@ def postgres():
     url = os.getenv("TEST_DATABASE_URL")
     if not url:
         pytest.skip("Configurar TEST_DATABASE_URL de laboratorio")
-    schema = "sgt_test_"+uuid4().hex
+    schema = "sgt_test_" + uuid4().hex
     raw_url = url.replace("postgresql+psycopg://", "postgresql://")
     with psycopg.connect(raw_url, autocommit=True) as conn:
         conn.execute(sql.SQL("CREATE SCHEMA {}").format(sql.Identifier(schema)))
@@ -62,23 +63,67 @@ def test_database_rejects_incomplete_active_plan(postgres):
             item = Intersection(name="Incomplete", latitude=19.4, longitude=-99.1, state={})
             db.add(item)
             db.flush()
-            db.add(Plan(intersection_id=item.id, previous_version=0, target_cycle=0,
-                        mode="fixed", reason="Plan sin fases", status="ACTIVE"))
+            db.add(
+                Plan(
+                    intersection_id=item.id,
+                    previous_version=0,
+                    target_cycle=0,
+                    mode="fixed",
+                    reason="Plan sin fases",
+                    status="ACTIVE",
+                )
+            )
 
 
 def test_concurrent_version_reservation(postgres):
     from concurrent.futures import ThreadPoolExecutor
     from threading import Barrier
+
     with postgres.begin() as db:
         item = Intersection(name="Concurrency", latitude=19.4, longitude=-99.1, state={})
         db.add(item)
         db.flush()
         identifier = item.id
     barrier = Barrier(2)
+
     def reserve(_):
         with postgres.begin() as db:
             barrier.wait(timeout=10)
-            return db.execute(update(Intersection).where(Intersection.id == identifier,
-                Intersection.plan_version == 0).values(plan_version=1)).rowcount
+            return db.execute(
+                update(Intersection)
+                .where(Intersection.id == identifier, Intersection.plan_version == 0)
+                .values(plan_version=1)
+            ).rowcount
+
     with ThreadPoolExecutor(max_workers=2) as pool:
         assert sorted(pool.map(reserve, range(2))) == [0, 1]
+
+
+def test_worker_lock_allows_concurrent_plan_foreign_key(postgres):
+    """El trabajador conserva exclusión de escritor sin bloquear INSERT de propuestas."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    with postgres.begin() as db:
+        item = Intersection(
+            name="Cuauhtémoc concurrency", latitude=19.432, longitude=-99.145, state={}
+        )
+        db.add(item)
+        db.flush()
+        add_groups(db, item)
+        identifier = item.id
+    with postgres.begin() as writer:
+        writer.scalar(
+            select(Intersection)
+            .where(Intersection.id == identifier)
+            .with_for_update(key_share=True)
+        )
+
+        def propose_while_worker_holds_lock():
+            with postgres.begin() as reader:
+                item = reader.get(Intersection, identifier)
+                return create_plan(
+                    reader, item, Timing(), "fixed", "Propuesta concurrente", target=0
+                ).id
+
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            assert pool.submit(propose_while_worker_holds_lock).result(timeout=5) > 0

@@ -15,6 +15,7 @@ from .controller import Timing
 from .database import aware, connect
 from .models import Audit, Group, Intersection, Plan, TrafficRecord, User
 from .security import decode, token_for, verify
+from .study_area import STUDY_AREA
 
 bearer = HTTPBearer(auto_error=False)
 
@@ -34,7 +35,7 @@ def create_app(config: Settings | None = None, factory=None, infer=None):
         if engine:
             engine.dispose()
 
-    app = FastAPI(title="SGT-CDMX · simulación", version="0.2.0", lifespan=lifespan)
+    app = FastAPI(title="SGT Cuauhtémoc · simulación", version="0.2.0", lifespan=lifespan)
     app.state.infer = infer or (lambda rows: services.infer_http(config.ml_service_url, rows))
 
     @app.middleware("http")
@@ -76,7 +77,8 @@ def create_app(config: Settings | None = None, factory=None, infer=None):
 
     @app.get("/health")
     def health():
-        return {"status": "ok", "version": "0.2.0", "simulation_only": True}
+        return {"status": "ok", "version": "0.2.0", "simulation_only": True,
+                "study_area": STUDY_AREA}
 
     @app.post("/auth/token")
     def login(body: schemas.Login, db=Depends(session, scope="function")):
@@ -86,20 +88,24 @@ def create_app(config: Settings | None = None, factory=None, infer=None):
         return {"access_token": token_for(current, config.jwt_secret), "token_type": "bearer",
                 "expires_in": 3600}
 
-    def intersection_json(db, item):
+    def intersection_json(db, item, groups=None):
         return {"id": item.id, "name": item.name, "latitude": item.latitude,
                 "longitude": item.longitude, "active": item.active,
                 "config_version": item.config_version, "plan_version": item.plan_version,
                 "state": item.state, "telemetry_current": services.is_live(item),
                 "groups": [{"id": g.id, "code": g.code, "lanes": g.lanes,
                             "discharge_vps": g.discharge_vps}
-                           for g in services.groups_for(db, item.id)]}
+                           for g in (groups if groups is not None else services.groups_for(db, item.id))]}
 
     @app.get("/intersections")
     def intersections(offset: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=100),
                       current=Depends(user), db=Depends(session, scope="function")):
-        items = db.scalars(select(Intersection).order_by(Intersection.id).offset(offset).limit(limit))
-        return {"items": [intersection_json(db, i) for i in items], "offset": offset, "limit": limit}
+        items = list(db.scalars(select(Intersection).order_by(Intersection.id).offset(offset).limit(limit)))
+        grouped = {i.id: [] for i in items}
+        for group in db.scalars(select(Group).where(Group.intersection_id.in_(grouped)).order_by(Group.id)):
+            grouped[group.intersection_id].append(group)
+        return {"items": [intersection_json(db, i, grouped[i.id]) for i in items], "offset": offset, "limit": limit,
+                "study_area": STUDY_AREA}
 
     @app.post("/intersections", status_code=201)
     def create_intersection(body: schemas.IntersectionInput, request: Request,
