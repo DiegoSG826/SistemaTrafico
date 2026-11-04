@@ -256,7 +256,7 @@ def run():
                     if offline:
                         recover_local(db, cache)
                     items = db.scalars(select(Intersection).where(Intersection.active.is_(True))
-                                      .order_by(Intersection.id).with_for_update())
+                                      .order_by(Intersection.id).with_for_update(key_share=True))
                     next_cache = {}
                     for item in items:
                         if not item.state.get("sim_time"):

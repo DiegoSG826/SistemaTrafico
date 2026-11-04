@@ -1,0 +1,115 @@
+1
+00:00:00,000 --> 00:00:11,667
+Presentamos un gestor de semáforos simulados para Cuauhtémoc. La IA anticipa llegadas; el controlador reparte verde y el simulador aplica el plan. No controla semáforos físicos ni usa aforos
+
+2
+00:00:11,667 --> 00:00:16,667
+oficiales.
+
+3
+00:00:16,667 --> 00:00:28,333
+El generador registra observaciones por minuto. La API consulta la IA, valida tiempos y guarda una propuesta. Solo el trabajador aplica al inicio del ciclo. El dashboard presenta estados
+
+4
+00:00:28,333 --> 00:00:33,333
+confirmados. Fuente: memoria DOC_001, COMP_001 a COMP_008.
+
+5
+00:00:33,333 --> 00:00:45,333
+El dataset incluye horario, día, clima, historial y velocidad. La etiqueta es el promedio de llegadas de cinco minutos futuros. El pipeline separa entrenamiento y prueba. Los datos no fueron
+
+6
+00:00:45,333 --> 00:00:50,333
+calibrados con Cuauhtémoc. Fuente: reports/model_evaluation.json y REF_005.
+
+7
+00:00:50,333 --> 00:01:02,667
+Con demanda prevista de treinta vehículos por minuto en norte sur y diez en este oeste, el objetivo proporcional es sesenta veinte. Desde cuarenta cuarenta se limita a cuarenta y cinco
+
+8
+00:01:02,667 --> 00:01:11,500
+treinta y cinco. El rojo se deriva del ciclo. Este es un ejemplo de las reglas, no un resultado medido de calle.
+
+9
+00:01:11,500 --> 00:01:41,500
+Demostración sintética generada con controller.phase: verde 45/35, peatones exclusivos y despejes. No es una grabación de tráfico real.
+
+10
+00:01:41,500 --> 00:01:53,167
+El ciclo conserva exclusión de movimientos y una oportunidad peatonal. Automático limita la variación. Si faltan datos o IA, prevalece un plan fijo cuarenta cuarenta. Manual tiene motivo y
+
+11
+00:01:53,167 --> 00:01:58,167
+caducidad. Los tiempos son didácticos, no reglamentarios.
+
+12
+00:01:58,167 --> 00:02:10,500
+El diagrama UML y las diez especificaciones están en DOC_002 y FIG_003. Los actores tienen identificadores ACT y los casos CU. La nota de identificación de todos los elementos se materializa
+
+13
+00:02:10,500 --> 00:02:15,500
+también en requisitos, tablas y figuras.
+
+14
+00:02:15,500 --> 00:02:26,667
+El esquema SQL contiene intersecciones, grupos, observaciones, predicciones, modelos y planes. Un índice parcial impide dos activos y los triggers comprueban todas las fases de un plan al
+
+15
+00:02:26,667 --> 00:02:31,667
+confirmar. El modelo entidad relación completo está en FIG_004.
+
+16
+00:02:31,667 --> 00:02:43,333
+La línea base estima mil doscientas ochenta horas persona y diez semanas. PERT calcula cuarenta y cinco días hábiles más reserva. Es planificación, no un registro de horas ejecutadas.
+
+17
+00:02:43,333 --> 00:02:48,333
+Fuentes: reports/pert.json y DOC_001 CAL_001.
+
+18
+00:02:48,333 --> 00:02:58,667
+Esta captura procede de una instancia real temporal del dashboard con datos sintéticos y credenciales efímeras. Permite observar demanda, colas y tiempos, y distinguir una solicitud
+
+19
+00:02:58,667 --> 00:03:03,667
+pendiente de un plan activo.
+
+20
+00:03:03,667 --> 00:03:15,333
+En la prueba sintética reservada, el error absoluto medio fue uno punto diecinueve vehículos por minuto, frente a uno punto cuarenta y cinco de persistencia. Esto evalúa predicción; el
+
+21
+00:03:15,333 --> 00:03:20,333
+control requiere otro experimento. Fuente: reports/model_evaluation.json.
+
+22
+00:03:20,333 --> 00:03:32,333
+La evaluación usó cincuenta pares con las mismas llegadas. En escenarios no sobresaturados la reducción media de demora fue veintinueve punto treinta y siete por ciento. El resultado no es
+
+23
+00:03:32,333 --> 00:03:37,333
+uniforme ni representa una medición en calles de Cuauhtémoc. Fuente: reports/experiment.json.
+
+24
+00:03:37,333 --> 00:03:49,000
+La batería actual aprobó cuarenta y dos pruebas, incluyendo PostgreSQL real. Se entregan guiones de trece familias y resultados de carga y restauración. La latencia de predicción aún no
+
+25
+00:03:49,000 --> 00:03:56,667
+cumple la meta y permanece reportada. La evaluación humana no se sustituye por pruebas automáticas. Fuentes: reports/academico y DOC_004/DOC_005.
+
+26
+00:03:56,667 --> 00:04:06,667
+El manual contiene instalación, acceso, interpretación de modos, intervención, exportación y solución de errores. El lanzador requiere permanecer abierto y evita dos ejecuciones sobre los
+
+27
+00:04:06,667 --> 00:04:11,667
+mismos puertos. No se muestran contraseñas en el material audiovisual.
+
+28
+00:04:11,667 --> 00:04:22,500
+La entrega incluye memoria completa, casos de uso, manual, documento de pruebas, figuras, presentación y video. Sigue siendo un prototipo académico de simulación. La aceptación del docente,
+
+29
+00:04:22,500 --> 00:04:27,667
+pruebas con personas, calibración real y despliegue municipal requieren trabajo y decisiones externas.

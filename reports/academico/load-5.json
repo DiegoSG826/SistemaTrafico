@@ -1,0 +1,24 @@
+{
+  "users": 10,
+  "duration_s": 600,
+  "errors": 20,
+  "conflicts": 2,
+  "query": {
+    "requests": 2213,
+    "p95_ms": 43.11098000034693
+  },
+  "prediction": {
+    "requests": 2191,
+    "p95_ms": 3727.137749985559
+  },
+  "intersections": 5,
+  "database": "PostgreSQL 17.4",
+  "simulation_speed": 1,
+  "accepted_test_records": 10,
+  "persisted_test_records": 10,
+  "accepted_records_preserved": true,
+  "synthetic_records": 140,
+  "database_name": "sgt_academic_20261101111346_5",
+  "limitations": "Concurrencia real local; modelos sin calibraci\u00f3n geogr\u00e1fica; carga de cat\u00e1logo y predicci\u00f3n",
+  "latency_targets_passed": false
+}

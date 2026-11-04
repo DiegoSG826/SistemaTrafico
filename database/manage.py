@@ -8,12 +8,8 @@ from backend.app.config import settings
 from backend.app.database import Base, connect
 from backend.app.models import Group, Intersection, Light, User
 from backend.app.security import hasher
+from backend.app.study_area import CATALOG
 
-CATALOG = [("Cruce sintético Reforma 01", 19.427, -99.167),
-           ("Cruce sintético Insurgentes 02", 19.419, -99.163),
-           ("Cruce sintético Eje Central 03", 19.432, -99.141),
-           ("Cruce sintético Universidad 04", 19.361, -99.169),
-           ("Cruce sintético Tlalpan 05", 19.342, -99.143)]
 
 
 def add_groups(db, item, lanes=1, discharge=.5):

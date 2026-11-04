@@ -30,6 +30,10 @@ class Predictor:
         if not candidate_version and manifest["status"] != "promoted":
             raise ValueError("Modelo no promovido")
         self.model = joblib.load(artifact)
+        # Inferencia corta concurrente: evitar un pool de hilos por petición HTTP.
+        # El entrenamiento y la evaluación por lotes conservan su paralelismo original.
+        if candidate_version is None and hasattr(self.model.steps[-1][1], "n_jobs"):
+            self.model.steps[-1][1].n_jobs = 1
 
     def predict(self, rows):
         return self.model.predict(pd.DataFrame(rows)[FEATURES]).clip(min=0).tolist()

@@ -1,0 +1,28 @@
+{
+  "database": "PostgreSQL 17.4",
+  "source": "sgt_academic_20261101111346_5",
+  "restored": "sgt_academic_restore_20261101111346",
+  "backup_s": 0.8901226000161842,
+  "restore_s": 0.8910433999844827,
+  "counts": {
+    "sgt_academic_20261101111346_5": {
+      "intersecciones": 5,
+      "registros_trafico": 150,
+      "planes_semaforicos": 2236,
+      "auditoria": 2267,
+      "predicciones": 4472
+    },
+    "sgt_academic_restore_20261101111346": {
+      "intersecciones": 5,
+      "registros_trafico": 150,
+      "planes_semaforicos": 2236,
+      "auditoria": 2267,
+      "predicciones": 4472
+    }
+  },
+  "counts_match": true,
+  "restore_target_30min_passed": true,
+  "rpo_measured_s": 0,
+  "rpo_scope": "Fuente detenida durante respaldo; no demuestra una pol\u00edtica diaria de respaldos",
+  "limitation": "Restauraci\u00f3n de laboratorio con comparaci\u00f3n de conteos; RTO operativo completo requiere reinicio y aceptaci\u00f3n humana"
+}

@@ -1,0 +1,2 @@
+# Solo para regenerar el MP4. La aplicación usa requirements.lock.
+imageio-ffmpeg==0.6.0

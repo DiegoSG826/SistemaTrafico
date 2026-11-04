@@ -8,8 +8,8 @@ import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="SGT CDMX · simulación", page_icon="🚦", layout="wide")
-st.title("Sistema inteligente de tráfico · CDMX")
-st.caption("Prototipo académico · datos y semáforos sintéticos · tiempos sugeridos por heurística")
+st.title("Sistema inteligente de tráfico · Cuauhtémoc")
+st.caption("Alcaldía Cuauhtémoc, CDMX · prototipo académico con cruces y tráfico sintéticos")
 load_dotenv()
 API = os.getenv("API_URL", "http://127.0.0.1:8000").rstrip("/")
 
@@ -80,6 +80,16 @@ def monitor():
         st.write(f"Reloj simulado: {stamp} · versión {item['plan_version']}")
     st.write("Estado semafórico:", state.get("colors", {}) if live else "DESCONOCIDO")
     st.caption(state.get("reason", "Sin plan aplicado"))
+    greens = state.get("green_s")
+    if greens:
+        st.write("Tiempos del último plan confirmado" if not live else "Tiempos del plan en ejecución")
+        st.dataframe(pd.DataFrame([
+            {"Dirección": code, "Verde (s)": greens[key], "Amarillo (s)": 3,
+             "Rojo (s)": 117-greens[key]}
+            for code, key in (("Norte–Sur", "ns"), ("Este–Oeste", "eo"))
+        ]), hide_index=True, width="stretch")
+        st.caption("Ciclo de 120 s y fase peatonal exclusiva de 20 s. En automático, la demanda "
+                   "pronosticada ajusta los verdes; en degradado se conserva el plan fijo 40/40.")
     traffic = api("GET", "/traffic_data", params={"intersection_id": identifier, "limit": 60})
     if traffic and traffic["items"]:
         table = pd.DataFrame(traffic["items"])
