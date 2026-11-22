@@ -16,6 +16,7 @@ from .database import aware, connect
 from .models import Audit, Group, Intersection, Plan, TrafficRecord, User
 from .security import decode, token_for, verify
 from .study_area import STUDY_AREA
+from .tomtom import LiveTrafficSnapshot, TomTomTraffic
 
 bearer = HTTPBearer(auto_error=False)
 
@@ -37,6 +38,7 @@ def create_app(config: Settings | None = None, factory=None, infer=None):
 
     app = FastAPI(title="SGT Cuauhtémoc · simulación", version="0.2.0", lifespan=lifespan)
     app.state.infer = infer or (lambda rows: services.infer_http(config.ml_service_url, rows))
+    tomtom = TomTomTraffic(config.tomtom_api_key, config.tomtom_refresh_seconds)
 
     @app.middleware("http")
     async def correlate(request, call_next):
@@ -212,6 +214,11 @@ def create_app(config: Settings | None = None, factory=None, infer=None):
                 "quality": row.quality, "age_sim_s": age, "current": 0 <= age <= 120,
                 "synthetic": row.source == "synthetic"})
         return {"items": results, "offset": offset, "limit": limit}
+
+    @app.get("/traffic/live", response_model=LiveTrafficSnapshot)
+    async def live_traffic(current=Depends(user)):
+        """Tramos del piloto de Cuauhtémoc consultados bajo demanda en TomTom."""
+        return await tomtom.snapshot()
 
     @app.post("/predict_light", status_code=201)
     def predict_light(body: schemas.PredictionRequest, request: Request,

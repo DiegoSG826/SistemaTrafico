@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     model_dir: Path = Path("ml_model/artifacts")
     sim_speed: float = Field(default=10, gt=0, le=100)
     sim_seed: int = 20261031
+    tomtom_api_key: SecretStr = SecretStr("")
+    tomtom_refresh_seconds: int = Field(default=300, ge=60, le=3600)
 
 
 def settings() -> Settings:

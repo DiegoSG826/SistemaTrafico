@@ -4,12 +4,13 @@
 La revisión final documenta los criterios que cumplen y los que siguen abiertos, incluidos los
 resultados negativos de latencia bajo carga.
 
-**Ámbito actualizado: alcaldía Cuauhtémoc.** Cinco cruces sintéticos, sin conexión a semáforos
-reales. Consulta [alcance y revisión de la entrega académica](docs/REVISION_ENTREGA_ACADEMICA.md).
+**Ámbito actualizado: alcaldía Cuauhtémoc.** Cinco cruces sintéticos y dos tramos piloto de
+tráfico real cerca de Metro Cuauhtémoc. Consulta el
+[alcance y la revisión de la entrega académica](docs/REVISION_ENTREGA_ACADEMICA.md).
 Para cambiar desde el escenario local anterior, detener servicios y ejecutar
 `python -m scripts.select_cuauhtemoc` antes de volver a iniciar; se conserva la BD anterior.
 
-FASE 2: base funcional de un **prototipo académico exclusivamente simulado**. Incluye FastAPI,
+FASE 2: base funcional de un **prototipo académico de control simulado**. Incluye FastAPI,
 PostgreSQL, servicio interno de Random Forest, Streamlit, generador de observaciones, trabajador
 de control, pruebas y documentación. No controla infraestructura vial.
 
@@ -40,6 +41,36 @@ SQLite permite esta demostración sin instalar PostgreSQL. Para Linux/macOS se u
 Al inicio, sin modelo promovido, se utiliza **modo degradado 40/40**. El simulador funciona,
 registra observaciones, incluye peatones y muestra la causa. El entrenamiento no activa
 silenciosamente un candidato.
+
+## Fuente de tráfico
+
+En la barra lateral del dashboard, **Fuente de tráfico** ofrece **Simulado** y **Real (TomTom)**.
+Ambos modos muestran el mapa interactivo y la animación de coches, colas y semáforos.
+El modo real permite reproducir un aforo medido en el entorno de Metro Cuauhtémoc y comparar
+el plan elegido con el fijo 40/40 usando las mismas llegadas.
+
+1. Selecciona **Real (TomTom)**, adjunta el CSV del cruce piloto y pulsa **Cargar aforo**.
+2. Ajusta el verde Norte–Sur y pulsa **Reproducir aforo**. Volver a pulsarlo inicia un nuevo ensayo.
+
+El CSV debe estar en UTF-8, con una fila por minuto consecutivo y conteos enteros de llegadas
+para los grupos Norte–Sur y Este–Oeste. Usa fechas ISO 8601 con zona horaria. Ejemplo de formato
+con cifras ilustrativas.
+
+```csv
+inicio,llegadas_ns,llegadas_eo
+2026-11-21T08:00:00-06:00,24,13
+2026-11-21T08:01:00-06:00,26,11
+```
+
+La reproducción parte de colas vacías, reparte cada conteo dentro de su minuto y usa
+`SIM_SPEED` (10× por defecto). Los marcadores y las colas corresponden al ensayo. Las líneas
+y la tabla de TomTom muestran lecturas recientes de velocidad, demora, cierres y confianza.
+
+Para activar TomTom, añade `TOMTOM_API_KEY` a `.env` y reinicia la API. En Docker Compose,
+recrea el servicio `api` para cargar el cambio. La clave se usa en FastAPI y el mapa muestra la
+geometría devuelta por el proveedor. `TOMTOM_REFRESH_SECONDS` vale 300 s por defecto. La API
+comparte las lecturas entre sesiones y consulta al proveedor bajo demanda. Si una consulta
+falla, la última lectura se marca como vencida y se descarta al superar tres intervalos.
 
 ## Entrenamiento y evaluación
 

@@ -370,6 +370,30 @@
         }
       }
     },
+    "/traffic/live": {
+      "get": {
+        "summary": "Live Traffic",
+        "description": "Tramos del piloto de Cuauht\u00e9moc consultados bajo demanda en TomTom.",
+        "operationId": "live_traffic_traffic_live_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveTrafficSnapshot"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/predict_light": {
       "post": {
         "summary": "Predict Light",
@@ -667,6 +691,28 @@
         ],
         "title": "ApplyRequest"
       },
+      "Coordinate": {
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Longitude"
+          }
+        },
+        "type": "object",
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "title": "Coordinate"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -779,6 +825,91 @@
         ],
         "title": "IntersectionInput"
       },
+      "LiveSegment": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "point": {
+            "$ref": "#/components/schemas/Coordinate"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "current",
+              "stale",
+              "unavailable"
+            ],
+            "title": "Status"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "flow": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SegmentFlow"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "point",
+          "status"
+        ],
+        "title": "LiveSegment"
+      },
+      "LiveTrafficSnapshot": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "const": "tomtom",
+            "title": "Source",
+            "default": "tomtom"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location"
+          },
+          "center": {
+            "$ref": "#/components/schemas/Coordinate"
+          },
+          "configured": {
+            "type": "boolean",
+            "title": "Configured"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/LiveSegment"
+            },
+            "type": "array",
+            "title": "Segments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "location",
+          "center",
+          "configured",
+          "segments"
+        ],
+        "title": "LiveTrafficSnapshot"
+      },
       "Login": {
         "properties": {
           "email": {
@@ -869,6 +1000,59 @@
           "previous_version"
         ],
         "title": "PredictionRequest"
+      },
+      "SegmentFlow": {
+        "properties": {
+          "speed_kmh": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Speed Kmh"
+          },
+          "free_flow_speed_kmh": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Free Flow Speed Kmh"
+          },
+          "travel_time_s": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Travel Time S"
+          },
+          "free_flow_travel_time_s": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Free Flow Travel Time S"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          },
+          "closed": {
+            "type": "boolean",
+            "title": "Closed"
+          },
+          "geometry": {
+            "items": {
+              "$ref": "#/components/schemas/Coordinate"
+            },
+            "type": "array",
+            "minItems": 2,
+            "title": "Geometry"
+          }
+        },
+        "type": "object",
+        "required": [
+          "speed_kmh",
+          "free_flow_speed_kmh",
+          "travel_time_s",
+          "free_flow_travel_time_s",
+          "confidence",
+          "closed",
+          "geometry"
+        ],
+        "title": "SegmentFlow"
       },
       "ValidationError": {
         "properties": {

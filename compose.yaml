@@ -47,6 +47,8 @@ services:
     environment:
       <<: *common
       JWT_SECRET: ${JWT_SECRET:?Configurar JWT_SECRET}
+      TOMTOM_API_KEY: ${TOMTOM_API_KEY:-}
+      TOMTOM_REFRESH_SECONDS: ${TOMTOM_REFRESH_SECONDS:-300}
     ports: ["127.0.0.1:8000:8000"]
     depends_on:
       init: {condition: service_completed_successfully}
@@ -80,7 +82,8 @@ services:
     build: .
     environment:
       API_URL: http://api:8000
-    command: ["streamlit", "run", "frontend/dashboard.py", "--server.address=0.0.0.0", "--server.port=8501", "--browser.gatherUsageStats=false"]
+      SIM_SPEED: ${SIM_SPEED:-10}
+    command: ["python", "-m", "streamlit", "run", "frontend/dashboard.py", "--server.address=0.0.0.0", "--server.port=8501", "--browser.gatherUsageStats=false"]
     ports: ["127.0.0.1:8501:8501"]
     depends_on:
       api: {condition: service_healthy}
