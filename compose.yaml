@@ -47,6 +47,7 @@ services:
     environment:
       <<: *common
       JWT_SECRET: ${JWT_SECRET:?Configurar JWT_SECRET}
+      TOMTOM_API_KEY: ${TOMTOM_API_KEY:-}
     ports: ["127.0.0.1:8000:8000"]
     depends_on:
       init: {condition: service_completed_successfully}

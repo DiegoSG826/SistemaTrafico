@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SGT Cuauht\u00e9moc \u00b7 simulaci\u00f3n",
+    "title": "SGT Cuauht\u00e9moc \u00b7 monitoreo y simulaci\u00f3n",
     "version": "0.2.0"
   },
   "paths": {
@@ -138,6 +138,63 @@
                 "schema": {}
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/intersections/{identifier}/tomtom-flow": {
+      "get": {
+        "summary": "Tomtom Flow",
+        "description": "Obtiene el tramo cercano al punto del cat\u00e1logo para visualizar tr\u00e1fico actual.",
+        "operationId": "tomtom_flow_intersections__identifier__tomtom_flow_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Identifier"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TomTomFlow"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticaci\u00f3n requerida"
+          },
+          "404": {
+            "description": "Punto de consulta desconocido"
+          },
+          "502": {
+            "description": "Datos de TomTom indisponibles o inv\u00e1lidos"
+          },
+          "503": {
+            "description": "Clave de TomTom indisponible, inv\u00e1lida o con l\u00edmite de consultas"
           },
           "422": {
             "description": "Validation Error",
@@ -667,6 +724,28 @@
         ],
         "title": "ApplyRequest"
       },
+      "Coordinate": {
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Longitude"
+          }
+        },
+        "type": "object",
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "title": "Coordinate"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -869,6 +948,70 @@
           "previous_version"
         ],
         "title": "PredictionRequest"
+      },
+      "TomTomFlow": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "const": "tomtom",
+            "title": "Source",
+            "default": "tomtom"
+          },
+          "fetched_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fetched At"
+          },
+          "current_speed_kmh": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Current Speed Kmh"
+          },
+          "free_flow_speed_kmh": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Free Flow Speed Kmh"
+          },
+          "current_travel_time_s": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Current Travel Time S"
+          },
+          "free_flow_travel_time_s": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Free Flow Travel Time S"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          },
+          "road_closed": {
+            "type": "boolean",
+            "title": "Road Closed"
+          },
+          "geometry": {
+            "items": {
+              "$ref": "#/components/schemas/Coordinate"
+            },
+            "type": "array",
+            "minItems": 2,
+            "title": "Geometry"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_speed_kmh",
+          "free_flow_speed_kmh",
+          "current_travel_time_s",
+          "free_flow_travel_time_s",
+          "confidence",
+          "road_closed",
+          "geometry"
+        ],
+        "title": "TomTomFlow"
       },
       "ValidationError": {
         "properties": {

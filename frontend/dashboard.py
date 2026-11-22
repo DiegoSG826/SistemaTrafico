@@ -9,9 +9,9 @@ import streamlit as st
 import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
-st.set_page_config(page_title="SGT CDMX · simulación", page_icon="🚦", layout="wide")
+st.set_page_config(page_title="SGT CDMX · tráfico", page_icon="🚦", layout="wide")
 st.title("Sistema inteligente de tráfico · Cuauhtémoc")
-st.caption("Alcaldía Cuauhtémoc, CDMX · prototipo académico con cruces y tráfico sintéticos")
+st.caption("Alcaldía Cuauhtémoc, CDMX · prototipo académico")
 st.markdown("""<style>
 .kp-fila{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
 .kp{flex:1 1 130px;min-width:120px;background:rgba(128,128,128,.14);border-radius:10px;padding:8px 12px}
@@ -79,6 +79,9 @@ if st.sidebar.button("Cerrar sesión"):
     st.session_state.clear()
     st.rerun()
 
+vista = st.sidebar.radio("Vista de tráfico", ["Simulación", "Tráfico real (TomTom)"])
+vista_real = vista == "Tráfico real (TomTom)"
+
 # ---------------------------------------------------------------------------
 # Selección de intersección (menú lateral o clic en el mapa)
 # ---------------------------------------------------------------------------
@@ -89,21 +92,27 @@ if not catalog or not catalog["items"]:
 
 ids = [i["id"] for i in catalog["items"]]
 nombres = {i["id"]: f"{i['id']} · {i['name']}" for i in catalog["items"]}
+puntos = {i["id"]: f"Punto {i['id']} · {i['latitude']:.5f}, {i['longitude']:.5f}"
+          for i in catalog["items"]}
 if st.session_state.get("sel_id") not in ids:
     st.session_state.sel_id = ids[0]
-identifier = st.sidebar.selectbox("Intersección simulada", ids, key="sel_id", format_func=nombres.get)
+identifier = st.sidebar.selectbox("Punto de consulta" if vista_real else "Intersección simulada",
+                                  ids, key="sel_id", format_func=(puntos if vista_real else nombres).get)
 estilo = st.sidebar.selectbox("Estilo del mapa", ESTILOS)
-st.sidebar.caption("Las fechas se presentan en America/Mexico_City; persistencia en UTC.")
-st.sidebar.markdown(
-    "**Cómo leer el mapa**\n\n"
-    "- Cada cruce tiene 4 luces: **arriba** Norte–Sur, **derecha** Este–Oeste, "
-    "**abajo** peatón (azul = paso peatonal).\n"
-    "- El anillo indica la congestión: verde fluido, amarillo moderado, rojo congestionado, "
-    "gris sin datos vigentes.\n"
-    "- La letra de la esquina indica el modo: **D** degradado (plan fijo 40/40), "
-    "**A** automático, **M** manual.\n"
-    "- Arrastra para moverte, usa la rueda para acercar y **haz clic en un cruce** para seleccionarlo."
-)
+if vista_real:
+    st.sidebar.caption("Elige un punto en el mapa o en el menú. TomTom devuelve el tramo vial cercano.")
+else:
+    st.sidebar.caption("Las fechas se presentan en America/Mexico_City; persistencia en UTC.")
+    st.sidebar.markdown(
+        "**Cómo leer el mapa**\n\n"
+        "- Cada cruce tiene 4 luces: **arriba** Norte–Sur, **derecha** Este–Oeste, "
+        "**abajo** peatón (azul = paso peatonal).\n"
+        "- El anillo indica la congestión: verde fluido, amarillo moderado, rojo congestionado, "
+        "gris sin datos vigentes.\n"
+        "- La letra de la esquina indica el modo: **D** degradado (plan fijo 40/40), "
+        "**A** automático, **M** manual.\n"
+        "- Arrastra para moverte, usa la rueda para acercar y **haz clic en un cruce** para seleccionarlo."
+    )
 
 
 def _elegir(identificador):
@@ -175,7 +184,7 @@ body.dark .lb{color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
 </style></head><body><div id="map"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-const D=__DATA__, SEL=__SEL__, SPEED=__SPEED__, BASE=__BASE__;
+const D=__DATA__, SEL=__SEL__, SPEED=__SPEED__, BASE=__BASE__, FLOW=__FLOW__, REAL=__REAL__;
 const DARK=(BASE===2||BASE===3);
 if(DARK) document.body.classList.add('dark');
 const COL={GREEN:'#00e676',YELLOW:'#ffd600',RED:'#ff1744'}, OFF='#8a93a3';
@@ -196,6 +205,7 @@ function phase(G,s){
 }
 
 const map=L.map('map',{preferCanvas:true});
+const flowCoords=FLOW?FLOW.geometry.map(c=>[c.latitude,c.longitude]):null;
 
 // Mosaicos sin API key. Si el proveedor elegido falla, se pasa al siguiente automáticamente.
 const ESRI='https://server.arcgisonline.com/ArcGIS/rest/services/';
@@ -218,18 +228,28 @@ usaMosaicos(0);
 // Vista: se conserva entre sincronizaciones (localStorage) para que el mapa no "salte".
 const bounds=L.latLngBounds(D.map(c=>[c.lat,c.lon]));
 function ajusta(){ map.invalidateSize(); map.fitBounds(bounds.pad(0.25),{maxZoom:18,animate:false}); }
+const viewKey=REAL?'sgt_tomtom_view':'sgt_view2', selectionKey=REAL?'sgt_tomtom_sel':'sgt_sel';
 let saved=null, prevSel=null;
-try{ saved=JSON.parse(localStorage.getItem('sgt_view2')||'null'); prevSel=localStorage.getItem('sgt_sel'); }catch(e){}
+try{ saved=JSON.parse(localStorage.getItem(viewKey)||'null'); prevSel=localStorage.getItem(selectionKey); }catch(e){}
 if(saved && isFinite(saved.lat) && isFinite(saved.lng) && isFinite(saved.z))
   map.setView([saved.lat,saved.lng],saved.z,{animate:false});
 else ajusta();
 const selC=D.find(c=>c.id===SEL);
+function encuadraSeleccion(){
+  if(!selC) return;
+  const point=[selC.lat,selC.lon];
+  if(flowCoords) map.fitBounds(L.latLngBounds([...flowCoords,point]).pad(0.15),{maxZoom:18});
+  else map.setView(point,18);
+}
 if(String(SEL)!==prevSel){
-  try{ localStorage.setItem('sgt_sel',String(SEL)); }catch(e){}
-  if(selC && prevSel!==null) map.setView([selC.lat,selC.lon],Math.max(map.getZoom(),17),{animate:false});
+  try{ localStorage.setItem(selectionKey,String(SEL)); }catch(e){}
+  if(prevSel!==null){
+    if(REAL) encuadraSeleccion();
+    else if(selC) map.setView([selC.lat,selC.lon],Math.max(map.getZoom(),17),{animate:false});
+  }
 }
 map.on('moveend',()=>{ try{ const p=map.getCenter();
-  localStorage.setItem('sgt_view2',JSON.stringify({lat:p.lat,lng:p.lng,z:map.getZoom()})); }catch(e){} });
+  localStorage.setItem(viewKey,JSON.stringify({lat:p.lat,lng:p.lng,z:map.getZoom()})); }catch(e){} });
 function escala(){ const z=map.getZoom(); const s=Math.min(2.2,Math.max(.45,.25+(z-13)*.22));
   document.getElementById('map').style.setProperty('--s',s); }
 map.on('zoomend',escala); escala();
@@ -243,6 +263,45 @@ function pick(id){
   }catch(e){}
 }
 
+const Ctl=L.Control.extend({options:{position:'topright'},onAdd:function(){
+  const d=L.DomUtil.create('div'); L.DomEvent.disableClickPropagation(d);
+  const b1=L.DomUtil.create('div','btn',d); b1.textContent='Ver todos';
+  b1.onclick=()=>map.fitBounds(bounds.pad(0.25),{maxZoom:18});
+  const b2=L.DomUtil.create('div','btn',d); b2.textContent=REAL?'Ir al punto elegido':'Ir al cruce elegido';
+  b2.onclick=encuadraSeleccion;
+  return d; }});
+map.addControl(new Ctl());
+
+function dibujarTraficoReal(){
+  if(FLOW){
+    map.attributionControl.addAttribution('Datos de tráfico &copy; TomTom');
+    const ratio=FLOW.free_flow_speed_kmh>0?FLOW.current_speed_kmh/FLOW.free_flow_speed_kmh:null;
+    const color=FLOW.road_closed?'#7041b8':ratio===null?'#747b86':
+      ratio<0.5?'#c9233c':ratio<0.8?'#d97706':'#00845b';
+    L.polyline(flowCoords,{color:'#fff',weight:9,opacity:.9,interactive:false}).addTo(map);
+    L.polyline(flowCoords,{color,weight:6,opacity:1}).addTo(map)
+      .bindTooltip(FLOW.road_closed?'Cierre reportado por TomTom':`TomTom · ${FLOW.current_speed_kmh} km/h`);
+  }
+  D.forEach(c=>{
+    const selected=c.id===SEL;
+    L.circleMarker([c.lat,c.lon],{radius:selected?8:5,color:'#fff',weight:2,
+      fillColor:selected?'#1976d2':'#546473',fillOpacity:1}).addTo(map)
+      .bindTooltip(esc(c.name)).on('click',()=>pick(c.id));
+  });
+  if(!FLOW) return;
+  const legend=L.Control.extend({options:{position:'bottomleft'},onAdd:function(){
+    const d=L.DomUtil.create('div','leg');
+    d.innerHTML='<b>Velocidad frente a flujo libre</b><br><i style="background:#00845b"></i>80 % o más<br>'+
+      '<i style="background:#d97706"></i>50 a menos de 80 %<br><i style="background:#c9233c"></i>Menos de 50 %<br>'+
+      '<i style="background:#7041b8"></i>Cierre reportado<br><i style="background:#747b86"></i>Sin velocidad de referencia';
+    return d;
+  }});
+  map.addControl(new legend());
+}
+
+if(REAL){
+  dibujarTraficoReal();
+}else{
 const S=D.map(c=>({c,sec:c.sec,q:[c.q[0],c.q[1]],credit:[0,0],G:{ns:c.gns,eo:c.geo}}));
 function tip(s){
   const ph=phase(s.G,s.sec), m=MODO[s.c.mode];
@@ -264,14 +323,6 @@ S.forEach(s=>{
   s.dpe=el.querySelector('.pe');
 });
 
-const Ctl=L.Control.extend({options:{position:'topright'},onAdd:function(){
-  const d=L.DomUtil.create('div'); L.DomEvent.disableClickPropagation(d);
-  const b1=L.DomUtil.create('div','btn',d); b1.textContent='Ver todos';
-  b1.onclick=()=>map.fitBounds(bounds.pad(0.25),{maxZoom:18});
-  const b2=L.DomUtil.create('div','btn',d); b2.textContent='Ir al cruce elegido';
-  b2.onclick=()=>{ if(selC) map.setView([selC.lat,selC.lon],18); };
-  return d; }});
-map.addControl(new Ctl());
 const Leg=L.Control.extend({options:{position:'bottomleft'},onAdd:function(){
   const d=L.DomUtil.create('div','leg');
   d.innerHTML='<b>Congestión</b><br><i style="background:#00c878"></i>Fluido<br>'+
@@ -312,6 +363,7 @@ setInterval(()=>{
   S.forEach(pinta);
 },200);
 S.forEach(pinta);
+}
 </script></body></html>"""
 
 
@@ -328,6 +380,12 @@ def datos_cruce(item, vpm):
             "live": bool(item.get("telemetry_current")), "mode": estado.get("mode") or ""}
 
 
+def mapa_html(datos, *, real=False, flujo=None):
+    return (MAPA_HTML.replace("__SEL__", str(int(identifier))).replace("__SPEED__", str(SIM_SPEED))
+            .replace("__BASE__", str(ESTILOS.index(estilo))).replace("__REAL__", seguro_json(real))
+            .replace("__FLOW__", seguro_json(flujo)).replace("__DATA__", seguro_json(datos)))
+
+
 def construir_mapa(items):
     trafico = api("GET", "/traffic_data", params={"limit": 100})
     vpm = {}  # observación más reciente por (cruce, grupo), en veh/min
@@ -336,8 +394,40 @@ def construir_mapa(items):
         if clave not in vpm and fila["arrivals_vpm"] is not None:
             vpm[clave] = fila["arrivals_vpm"]
     datos = [datos_cruce(i, vpm) for i in items]
-    return (MAPA_HTML.replace("__DATA__", seguro_json(datos)).replace("__SEL__", str(int(identifier)))
-            .replace("__SPEED__", str(SIM_SPEED)).replace("__BASE__", str(ESTILOS.index(estilo))))
+    return mapa_html(datos)
+
+
+@st.fragment(run_every="60s")
+def panel_tomtom():
+    st.subheader("Tráfico real · TomTom")
+    st.button("Actualizar ahora")
+    flujo = api("GET", f"/intersections/{identifier}/tomtom-flow")
+    referencias = [{"id": i["id"], "name": puntos[i["id"]], "lat": i["latitude"], "lon": i["longitude"]}
+                   for i in catalog["items"]]
+    mapa, detalle = st.columns([3, 2])
+    with mapa:
+        components.html(mapa_html(referencias, real=True, flujo=flujo), height=560)
+    with detalle:
+        st.markdown(f"**{puntos[identifier]}**")
+        st.caption("El tramo de TomTom se ubica cerca de este punto de referencia. "
+                   "Los estados y tiempos de los semáforos están en la vista Simulación.")
+        if flujo is None:
+            return
+        if flujo["road_closed"]:
+            st.warning("Cierre vial reportado por TomTom")
+        izquierda, derecha = st.columns(2)
+        izquierda.metric("Velocidad actual", f"{flujo['current_speed_kmh']} km/h")
+        derecha.metric("Velocidad en flujo libre", f"{flujo['free_flow_speed_kmh']} km/h")
+        izquierda.metric("Tiempo de recorrido", f"{flujo['current_travel_time_s']} s")
+        derecha.metric("Tiempo en flujo libre", f"{flujo['free_flow_travel_time_s']} s")
+        consulta = pd.Timestamp(flujo["fetched_at"]).tz_convert("America/Mexico_City")
+        st.caption(f"Confianza de TomTom {flujo['confidence']:.0%} · Consulta {consulta:%d/%m/%Y %H:%M:%S} "
+                   "hora CDMX · Actualización cada minuto")
+
+
+if vista_real:
+    panel_tomtom()
+    st.stop()
 
 
 @st.fragment(run_every="5s")

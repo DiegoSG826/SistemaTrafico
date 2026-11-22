@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from uuid import uuid4
 
+import httpx
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -9,7 +10,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from database.manage import add_groups
-from . import schemas, services
+from . import schemas, services, tomtom
 from .config import Settings, settings
 from .controller import Timing
 from .database import aware, connect
@@ -35,7 +36,7 @@ def create_app(config: Settings | None = None, factory=None, infer=None):
         if engine:
             engine.dispose()
 
-    app = FastAPI(title="SGT Cuauhtémoc · simulación", version="0.2.0", lifespan=lifespan)
+    app = FastAPI(title="SGT Cuauhtémoc · monitoreo y simulación", version="0.2.0", lifespan=lifespan)
     app.state.infer = infer or (lambda rows: services.infer_http(config.ml_service_url, rows))
 
     @app.middleware("http")
@@ -106,6 +107,34 @@ def create_app(config: Settings | None = None, factory=None, infer=None):
             grouped[group.intersection_id].append(group)
         return {"items": [intersection_json(db, i, grouped[i.id]) for i in items], "offset": offset, "limit": limit,
                 "study_area": STUDY_AREA}
+
+    @app.get("/intersections/{identifier}/tomtom-flow", response_model=tomtom.TomTomFlow, responses={
+        401: {"description": "Autenticación requerida"},
+        404: {"description": "Punto de consulta desconocido"},
+        502: {"description": "Datos de TomTom indisponibles o inválidos"},
+        503: {"description": "Clave de TomTom indisponible, inválida o con límite de consultas"},
+    })
+    def tomtom_flow(identifier: int, current=Depends(user), db=Depends(session, scope="function")):
+        """Obtiene el tramo cercano al punto del catálogo para visualizar tráfico actual."""
+        item = services.get_intersection(db, identifier)
+        key = config.tomtom_api_key.get_secret_value().strip()
+        if not key:
+            raise HTTPException(503, "TomTom no está configurado. Agrega TOMTOM_API_KEY al backend.")
+        try:
+            return tomtom.fetch_flow(key, item.latitude, item.longitude)
+        except httpx.HTTPStatusError as exc:
+            status = exc.response.status_code
+            if status in (401, 403):
+                raise HTTPException(503, "TomTom rechazó la clave. Verifica el acceso a Traffic API.") from None
+            if status == 429:
+                raise HTTPException(503, "TomTom alcanzó el límite de consultas. Intenta más tarde.") from None
+            if status == 404:
+                raise HTTPException(502, "TomTom no encontró un tramo con datos cerca de este punto.") from None
+            raise HTTPException(502, "TomTom no pudo entregar datos para este punto.") from None
+        except httpx.RequestError:
+            raise HTTPException(502, "Sin comunicación con TomTom. Intenta más tarde.") from None
+        except (ValueError, KeyError, TypeError):
+            raise HTTPException(502, "TomTom devolvió datos incompletos o inválidos para este punto.") from None
 
     @app.post("/intersections", status_code=201)
     def create_intersection(body: schemas.IntersectionInput, request: Request,
