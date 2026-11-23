@@ -1,7 +1,7 @@
 {
   "schemaVersion": "presentation-finalization.v1",
-  "finalSha256": "ecad84cc882ae0097242b5ebe8f6d5407cf02b0c841639586a53def36c7ef676",
-  "byteCount": 686733,
+  "finalSha256": "6c2bc710fbf25c6d6a88c196dd0ef8a1b49fe10058e972b031e8277828a02eea",
+  "byteCount": 2066220,
   "packageIntegrity": {
     "chart_count": 2,
     "claim_boundary": "Structural package checks only; no slide text, notes, formulas, chart values, or native PowerPoint execution were inspected.",
@@ -19,15 +19,13 @@
     "finding_count": 0,
     "findings": [],
     "font_policy": {
-      "checked_text_script_count": 111,
+      "checked_text_script_count": 105,
       "native_font_rendering_verified": false,
       "observed_font_families": [
-        "Aptos",
         "Arial"
       ],
       "observed_font_use_counts": {
-        "Aptos": 4,
-        "Arial": 107
+        "Arial": 105
       },
       "passed": true,
       "performed": true
@@ -42,15 +40,13 @@
     "exitCode": 0,
     "findingCount": 0,
     "fontPolicy": {
-      "checked_text_script_count": 111,
+      "checked_text_script_count": 105,
       "native_font_rendering_verified": false,
       "observed_font_families": [
-        "Aptos",
         "Arial"
       ],
       "observed_font_use_counts": {
-        "Aptos": 4,
-        "Arial": 107
+        "Arial": 105
       },
       "passed": true,
       "performed": true
@@ -65,15 +61,13 @@
     "scriptFonts": {},
     "referenceSha256": null,
     "referenceFontsVerifiedInEncodedText": false,
-    "checked_text_script_count": 111,
+    "checked_text_script_count": 105,
     "native_font_rendering_verified": false,
     "observed_font_families": [
-      "Aptos",
       "Arial"
     ],
     "observed_font_use_counts": {
-      "Aptos": 4,
-      "Arial": 107
+      "Arial": 105
     },
     "passed": true,
     "performed": true
@@ -82,9 +76,9 @@
     "performed": true,
     "passed": true,
     "slideCount": 14,
-    "sha256": "ecad84cc882ae0097242b5ebe8f6d5407cf02b0c841639586a53def36c7ef676",
-    "runtimeNodeModules": "C:/Users/diego/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules",
-    "nodeExecutable": "C:\\Users\\diego\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe"
+    "sha256": "6c2bc710fbf25c6d6a88c196dd0ef8a1b49fe10058e972b031e8277828a02eea",
+    "runtimeNodeModules": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1119-907-0_26.1119.907.0_x64__3k8sg7r9htsxt\\dependencies\\node\\node_modules",
+    "nodeExecutable": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1119-907-0_26.1119.907.0_x64__3k8sg7r9htsxt\\dependencies\\node\\bin\\node.exe"
   },
   "nativeTableArithmetic": {
     "performed": true,
@@ -121,7 +115,7 @@
     "native_chart_count": 2,
     "native_powerpoint_verified": false,
     "passed": true,
-    "presentation_sha256": "ecad84cc882ae0097242b5ebe8f6d5407cf02b0c841639586a53def36c7ef676",
+    "presentation_sha256": "6c2bc710fbf25c6d6a88c196dd0ef8a1b49fe10058e972b031e8277828a02eea",
     "schema_version": "presentation-native-chart-titles.v1",
     "slide_count": 14,
     "source_text_emitted": false,
@@ -133,6 +127,8 @@
     "--validate-heading-fit",
     "--cover-role",
     "none",
+    "--expected-slide-count",
+    "14",
     "--approved-font-family",
     "Arial",
     "--approved-font-family",
@@ -160,7 +156,7 @@
       "failed_slides": [],
       "formal_human_reviewed": false,
       "native_application_open_verified": false,
-      "package_sha256": "ecad84cc882ae0097242b5ebe8f6d5407cf02b0c841639586a53def36c7ef676",
+      "package_sha256": "6c2bc710fbf25c6d6a88c196dd0ef8a1b49fe10058e972b031e8277828a02eea",
       "passed": true,
       "results": [
         {
@@ -245,10 +241,10 @@
       11
     ],
     "experimental": true,
-    "input_sha256": "8cae3549702666f8e40bd50492aab3043a492b2cfcd2fc3ab2c5f116f5b6e0ab",
+    "input_sha256": "61d9c3d6c553f54eb3f03bf47ca95ebd51b4567e13de1b709648c32e994c2baf",
     "new_formulas_describe_snapshot_only": true,
-    "output_bytes": 686733,
-    "output_sha256": "ecad84cc882ae0097242b5ebe8f6d5407cf02b0c841639586a53def36c7ef676",
+    "output_bytes": 2066220,
+    "output_sha256": "6c2bc710fbf25c6d6a88c196dd0ef8a1b49fe10058e972b031e8277828a02eea",
     "portable_chart_validation_passed": true,
     "portable_validated_owner_slides": [
       10,

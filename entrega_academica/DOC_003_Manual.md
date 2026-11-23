@@ -1,7 +1,8 @@
 # DOC_003 Manual de instalación y usuario
 
-Versión 1.0 · Cuauhtémoc · ENT_003 · 1 de noviembre de 2026.
-Para el administrador y equipo de desarrollo. Todos los cruces, colas y semáforos son simulados.
+Versión 1.2 · Cuauhtémoc · ENT_003 · 22 de noviembre de 2026.
+Para usuarios autenticados, administradores y equipo de desarrollo. El manual cubre el control
+simulado y la consulta de tráfico real con TomTom.
 
 ## MAN_001 Requisitos previos
 
@@ -29,7 +30,8 @@ comprueba puertos 8000, 8001 y 8501. No iniciar Uvicorn por separado al usar el 
 
 El selector usa una BD nueva data/cuauhtemoc.db y conserva data/traffic.db. Si hay URL
 personalizada, preparar una base nueva explícitamente en lugar de sobrescribir configuración.
-Las capturas de este manual proceden de una instancia temporal con credenciales efímeras.
+Las capturas proceden de una instancia temporal de la revisión 1e48f7e con cuenta de
+demostración. FIG_011 contiene la respuesta de TomTom visible al momento de la consulta.
 
 ## MAN_003 Acceso
 
@@ -44,13 +46,14 @@ un procedimiento administrativo controlado, sin borrar la BD.
 
 ## MAN_004 Consultar circulación y tiempos
 
-Elegir CUA_001 a CUA_005 en el menú lateral. Revisar reloj simulado, ciclo, modo confirmado,
+En Vista de tráfico, elegir Simulación y seleccionar CUA_001 a CUA_005 en el menú lateral.
+Revisar reloj simulado, ciclo, modo confirmado,
 colas NS/EO y colores con texto. La tabla indica verde, amarillo y rojo en segundos; el gráfico
 presenta llegadas veh/min. La fecha de observación y la procedencia acompañan cada fila.
 El reloj simulado puede avanzar más rápido que el real según SIM_SPEED. No comparar su
 antigüedad con la hora del navegador para decidir si la fuente está vigente.
 
-![FIG_008 Monitor y tabla de tiempos](figuras/FIG_008_monitor.png)
+![FIG_008 Mapa, monitor y simulación del cruce](figuras/FIG_008_monitor.png)
 
 ## MAN_005 Interpretar los modos
 
@@ -82,7 +85,8 @@ la intervención desde el siguiente ciclo; la solicitud no cambia una fase a mit
 
 Exportar observaciones JSON descarga datos con fechas, unidades y procedencia. No hay CSV
 arbitrario que permita fórmulas de hoja de cálculo. Abrir Auditoría reciente y pulsar Consultar
-auditoría para ver actor, acción, antes/después, motivo y correlación. Viewer no puede escribir.
+auditoría para ver actor, acción, antes/después, motivo y correlación. La API de auditoría
+requiere rol administrador. Un usuario lector puede consultar y exportar observaciones.
 
 ![FIG_010 Auditoría de la instancia de demostración](figuras/FIG_010_auditoria.png)
 
@@ -102,6 +106,8 @@ auditoría para ver actor, acción, antes/después, motivo y correlación. Viewe
 | ERR_008 | IA 503 / loaded=false | Revisar modelo promovido, hash, versión y reiniciar IA; fijo sigue disponible |
 | ERR_009 | forrtl tras Ctrl+C | El mensaje corresponde al cierre de librerías numéricas; comprobar que los puertos queden libres antes de reiniciar |
 | ERR_010 | Trabajador sin telemetría | Revisar worker.log y lease; reiniciar desde despeje, no asumir color anterior |
+| ERR_011 | TomTom sin configurar o clave rechazada | Revisar TOMTOM_API_KEY, acceso a Traffic API y reiniciar FastAPI |
+| ERR_012 | TomTom sin comunicación, datos inválidos o cuota agotada | Verificar salida HTTPS y vigencia de la cuota. Reintentar o elegir otro punto |
 
 Para diagnosticar un puerto usar netstat -ano, sin cerrar procesos desconocidos. Los registros
 no deben contener contraseñas/tokens. Los servicios de prueba usan otros puertos y credenciales.
@@ -137,3 +143,18 @@ comparar conteos/hashes y medir tiempo antes de cambiar URL. Ver DOC_004 PRU_009
 El ensayo de laboratorio no sustituye una política diaria de respaldos ni RTO integral de operación.
 Detener con Ctrl+C. docker compose down conserva volumen; no borrar datos sin decisión explícita.
 Reiniciar trabajador desde diez segundos de despeje. Revocar credenciales al retirar el prototipo.
+
+## MAN_013 Consultar tráfico real con TomTom
+
+1. En el archivo .env local, agregar TOMTOM_API_KEY con una clave habilitada para Traffic API. El backend necesita salida HTTPS hacia api.tomtom.com. Mantener el valor de la clave en el servidor.
+2. Reiniciar el lanzador local. En Compose, usar docker compose up -d --build api dashboard para desplegar la actualización. Para recargar solo la clave, usar docker compose up -d api.
+3. Iniciar sesión. En Vista de tráfico, elegir Tráfico real (TomTom). Seleccionar un punto de consulta en el menú lateral o en el mapa.
+4. Revisar el tramo resaltado y su velocidad actual, velocidad en flujo libre, tiempos de recorrido, confianza y cierre si TomTom lo reporta. La hora de consulta se presenta en CDMX.
+5. Esperar la actualización del minuto o pulsar Actualizar ahora. Elegir Simulación para volver a colas, fases y control semafórico.
+
+Los puntos son referencias del catálogo académico. Cada respuesta corresponde al tramo cercano
+que selecciona TomTom. La consulta ofrece velocidades y tiempos por tramo. Los planes semafóricos
+del prototipo usan conteos por acceso del simulador. Para incidencias del visor, revisar ERR_011
+y ERR_012.
+
+![FIG_011 Visor actual con respuesta en vivo de TomTom](figuras/FIG_011_tomtom.png)

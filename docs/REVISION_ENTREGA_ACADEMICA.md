@@ -2,9 +2,31 @@
 
 **Actualización de entrega:** esta auditoría inicial se conserva como historial. Los apartados
 documentales faltantes se desarrollaron en [la entrega académica integrada](../entrega_academica/LEEME.md),
-con memoria, marco teórico, diagramas, diez CU, manual ilustrado, guiones, resultados, presentación
+con memoria, marco teórico, diagramas, casos de uso, manual ilustrado, guiones, resultados, presentación
 y video. La matriz MAT_002 y DOC_005 indican el estado actual; aceptación humana y metas de
 latencia pendientes no se presentan como aprobadas.
+
+**Adenda del 22 de noviembre de 2026.** El visor TomTom incorpora tráfico real por tramo cerca
+de los cinco puntos académicos de Cuauhtémoc. La prueba de integración confirmó respuestas
+para esos cinco puntos y el cambio de vista en Edge. El control, las colas y las pruebas de
+demora siguen siendo de simulación. Ver [Fase 2](FASE_2_Desarrollo_Implementacion.md#11-vista-de-tráfico-real-con-tomtom)
+y [verificación](PRUEBAS_TRAZABILIDAD.md#verificación-de-la-vista-tomtom).
+
+## REV_ACT_001 Verificación de la entrega vigente
+
+| Elementos | Evidencia |
+|---|---|
+| Gantt y PERT | FIG_001, FIG_002 y reports/pert.json reflejan el plan base, la ampliación y los hitos de Git |
+| Casos de uso | FIG_003 y DOC_002 muestran once casos y distinguen al lector, al administrador y a TomTom |
+| Datos, arquitectura y despliegue | FIG_004 usa los nombres de columnas del esquema. FIG_005 y FIG_006 muestran la consulta HTTPS del backend |
+| Capturas | FIG_007 a FIG_011 proceden de la rama actual. CAPTURAS.json registra versión, fecha y origen |
+| Manual, pruebas y resultados | DOC_003 a DOC_005 incluyen el flujo visible y su evidencia en la instancia temporal |
+| Presentación, video y paquete | PRE_001, VID_001 y MANIFIESTO.json acompañan la edición revisada |
+
+La auditoría inicial se conserva abajo como antecedente. El estado vigente se consulta en
+[la entrega académica](../entrega_academica/LEEME.md).
+
+## REV_HIST_001 Antecedente
 
 Fecha: 1 de noviembre de 2026. Dictamen: **cumplimiento parcial** de la lista solicitada.
 El código funcional de simulación y los documentos de Fases 1/2 existen; no equivalen todavía
@@ -63,7 +85,7 @@ dashboard y controlador aprobadas. Se detectó un manifiesto local `active.json`
 del servicio IA, vigencia de datos ni revisión humana. El reporte anterior de 38 pruebas se
 conserva fechado como evidencia de la línea base; no se presenta como una nueva ejecución completa.
 
-## MAT_001 — Comprobación elemento por elemento
+## MAT_001 Comprobación histórica del 1 de noviembre
 
 «Existe» significa contenido o artefacto localizado, no aprobación del docente. «Parcial» implica
 completar forma, profundidad, integración o evidencia. Los identificadores REV_* son los de

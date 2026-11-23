@@ -37,6 +37,25 @@ error del modelo. Las métricas predictivas proceden del entrenamiento real y el
 reservado. La prueba de servicio usa un pipeline real pequeño para evitar reentrenar 90 días
 en cada ejecución de CI.
 
+### Verificación de la vista TomTom
+
+| Verificación | Evidencia |
+|---|---|
+| Contrato de consulta | `tests/test_tomtom.py`: coordenadas del catálogo, autenticación, respuesta normalizada y observaciones intactas |
+| Manejo de errores | `tests/test_tomtom.py`: clave ausente o rechazada, cuota y respuesta incompleta sin exponer el detalle del proveedor |
+| Cambio de vista | `tests/test_dashboard.py`: simulación sin solicitudes TomTom, métricas de tráfico, cierre reportado y cambio de punto |
+| Consulta en vivo | Respuestas de TomTom para los cinco puntos y comprobación en Edge del tramo, métricas y retorno a Simulación |
+
+La verificación de la integración registró 44 pruebas aprobadas y 4 de PostgreSQL omitidas
+por falta de `TEST_DATABASE_URL`. La prueba con TomTom confirma disponibilidad para los
+puntos consultados en ese momento. Los resultados de PostgreSQL y carga de Fase 2 corresponden
+a la línea base académica y se documentan por separado en [DOC_005](../entrega_academica/DOC_005_Resultados.md).
+
+La demostración de la edición 1.2 volvió a recorrer en Edge el acceso, simulación, intervención,
+auditoría y el visor en vivo. Las cinco pantallas y su fecha se registran en
+[CAPTURAS.json](../entrega_academica/figuras/CAPTURAS.json). El recorrido usa SQLite temporal
+y una cuenta de demostración.
+
 ## 2. Familias de prueba de Fase 1
 
 | ID | Evidencia implementada | Ejecución/pendiente |

@@ -1,0 +1,13 @@
+{
+  "version_app": "1e48f7e",
+  "fecha_cdmx": "2026-11-22T18:30:49-06:00",
+  "ambiente": "Instancia temporal con SQLite y cuenta de demostración",
+  "fuente_tomtom": "Consulta en vivo al tramo cercano al primer punto del catálogo",
+  "archivos": [
+    "FIG_007_acceso.png",
+    "FIG_008_monitor.png",
+    "FIG_009_intervencion.png",
+    "FIG_010_auditoria.png",
+    "FIG_011_tomtom.png"
+  ]
+}

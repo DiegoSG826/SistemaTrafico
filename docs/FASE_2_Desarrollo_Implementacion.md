@@ -5,6 +5,7 @@
 | Identificador | SGT-CDMX-IMP-002 |
 | Versión | 0.2.0 |
 | Fecha | 31 de octubre de 2026, America/Mexico_City |
+| Revisión documental | 22 de noviembre de 2026, integración TomTom |
 | Línea base | FASE_1_Documento_Tecnico_Trafico_CDMX.md, versión 1.0 |
 | Entrega | Código base funcional, esquema, entrenamiento, simulación, dashboard y verificación |
 | Entorno | Académico; cinco cruces sintéticos independientes NS/EO/PEATON |
@@ -17,7 +18,8 @@ restringida → aplicación en simulador**. El Random Forest estima el promedio 
 minuto de las siguientes cinco ventanas. La asignación proporcional de verde es una heurística;
 no constituye una optimización demostrada ni un parámetro vial reglamentario.
 
-El MVP usa datos sintéticos y no necesita credenciales Waze. Waze documenta un feed GeoRSS
+El control y el entrenamiento usan datos sintéticos. El dashboard ofrece además una vista de
+observación de tráfico real con TomTom. Waze documenta un feed GeoRSS
 para socios y áreas autorizadas; su disponibilidad depende del acuerdo correspondiente.
 El puerto offline `waze_adapter.py` conserva conteos y clima ausentes y no transforma una
 velocidad en aforo. [Especificación oficial del feed Waze](https://support.google.com/waze/partners/answer/13458165?hl=en).
@@ -37,6 +39,33 @@ transitivas usadas. SQLite es un perfil auxiliar de demostración y pruebas ráp
 restricciones diferidas específicas y la concurrencia se verifican adicionalmente con PostgreSQL.
 No se incorporan React, TensorFlow ni PyTorch al MVP: no son necesarios para esta línea base.
 
+### 1.1 Vista de tráfico real con TomTom
+
+1. Un usuario autenticado selecciona **Tráfico real (TomTom)** y un punto de referencia del
+   catálogo. Streamlit llama a `GET /intersections/{identifier}/tomtom-flow` y vuelve a consultar
+   cada 60 s o al pulsar **Actualizar ahora**.
+2. FastAPI resuelve las coordenadas guardadas y consulta Flow Segment Data v4, estilo
+   `absolute`, zoom 17 y unidades `kmph`. La clave `TOMTOM_API_KEY` se configura en el backend.
+3. El backend valida y devuelve la geometría, velocidades, tiempos de recorrido actuales y en
+   flujo libre, confianza, cierre y hora UTC de consulta. La interfaz muestra esa hora en CDMX.
+   El mapa resalta el tramo devuelto y lo colorea según la relación entre velocidades.
+
+Cada consulta muestra un tramo cercano al punto elegido. Los puntos son referencias académicas
+y el tramo lo selecciona TomTom. La hora indica cuándo el backend obtuvo la respuesta. Las
+consultas son de lectura y quedan fuera de `traffic_records`, del Random Forest y del trabajador.
+El cálculo semafórico requiere conteos de llegadas por acceso y se ejecuta en **Simulación**.
+
+| Respuesta | Causa visible |
+|---|---|
+| 200 | Tramo validado para visualizar |
+| 401 | Sesión ausente o vencida |
+| 404 | Identificador de punto desconocido |
+| 502 | Fallo de red, datos no disponibles para el punto o respuesta inválida |
+| 503 | Clave ausente, rechazada o límite de consultas |
+
+Ver [operación y diagnóstico](OPERACION.md#vista-de-tráfico-real-con-tomtom),
+[OpenAPI](openapi.json) y [TomTom Flow Segment Data](https://docs.tomtom.com/traffic-api/documentation/tomtom-maps/v1/traffic-flow/flow-segment-data).
+
 ## 2. Estructura del proyecto
 
 ```text
@@ -52,6 +81,7 @@ SistemaTrafico/
 │   │   ├── security.py        # Argon2 y JWT con expiración
 │   │   ├── services.py        # ingesta, predicción, propuestas, auditoría
 │   │   ├── simulation.py      # conservación de vehículos y esperas
+│   │   ├── tomtom.py          # consulta y validación de tráfico por tramo
 │   │   └── waze_adapter.py    # normalización offline de feed autorizado
 │   └── worker.py             # reloj, aplicación, fuente sintética y fallback
 ├── frontend/dashboard.py
@@ -72,7 +102,7 @@ SistemaTrafico/
 │   ├── configure.py          # secretos aleatorios; no sobrescribe .env
 │   ├── run_local.py          # lanza cuatro procesos locales
 │   ├── simulate_waze.py      # cliente del generador canónico
-│   ├── pert.py               # ruta crítica reproducible
+│   ├── pert.py               # plan base, ampliación TomTom e hitos de Git
 │   ├── load_test.py          # perfil de carga parametrizado
 │   ├── backup.py             # pg_dump sin contraseña en argumentos
 │   └── build_metadata.py     # SQL, OpenAPI y bloqueo de dependencias
@@ -92,10 +122,11 @@ SistemaTrafico/
 
 ```mermaid
 flowchart LR
-  D[Dashboard Streamlit] -->|JWT / REST| A[Backend FastAPI]
+  D[Dashboard Streamlit con Simulación y TomTom] -->|JWT / REST| A[Backend FastAPI]
   S[Cliente sintético opcional] -->|lote canónico| A
   A --> P[(PostgreSQL)]
   A -->|timeout 2 s| M[Servicio interno IA]
+  A -->|HTTPS / Flow Segment Data| TT[TomTom Traffic API]
   W[Trabajador único] --> P
   W -->|una decisión por ciclo| M
   G[Generador reproducible] --> W
@@ -286,12 +317,14 @@ de enviar la respuesta exitosa, para evitar confirmar cambios que luego fallen a
 
 ## 8. Dashboard
 
-`frontend/dashboard.py` incluye sesión, selección de cruce, actualización cada dos segundos,
-modo confirmado, colas, ciclo, reloj simulado, colores con texto, tabla de observaciones y gráfico
-de demanda. Muestra origen y vigencia. Permite pedir una propuesta, intervenir con motivo y
-vigencia, volver al automático y consultar auditoría. Las solicitudes pendientes no se presentan
-como aplicadas. La exportación académica usa JSON con unidades y metadatos; no genera CSV
-desde contenido arbitrario. No contiene credenciales de BD ni modifica el modelo.
+`frontend/dashboard.py` permite alternar entre **Simulación** y **Tráfico real (TomTom)**.
+En Simulación, el mapa permite elegir el cruce y cambiar el estilo de mapa. La interfaz muestra
+demanda, colas, fases, ciclo, tiempos del plan y la animación del cruce. Las métricas se
+actualizan cada 2 s. El mapa, el detalle y las observaciones consultan el backend cada 5 s.
+La animación evoluciona en el navegador entre sincronizaciones. El administrador puede
+pedir una propuesta, intervenir, volver al automático y consultar auditoría. Las observaciones
+se exportan en JSON. La vista TomTom consulta un tramo por punto cada 60 s o a demanda.
+Ver [el manual ilustrado](../entrega_academica/DOC_003_Manual.md).
 
 ## 9. Experimento y promoción
 
@@ -356,6 +389,29 @@ de generar código. `scripts/pert.py` recalcula TE=(To+4Tn+Tp)/6, varianzas, rec
 tardío y holguras. Conserva la ruta A–B–C–E–H–J–K–L–N–O, **45 días hábiles**, varianza
 2.7778 días² y cinco días de reserva. `reports/pert.json` contiene cada actividad. No se divide
 la duración crítica entre cuatro desarrolladores ni se suman UCP y horas presupuestadas.
+
+### 10.1 Calendarización de la ampliación TomTom
+
+El Gantt FIG_001 y la red PERT FIG_002 muestran dos estimaciones con su propio origen temporal.
+El plan base conserva sus 45 días hábiles más 5 de reserva. La ampliación usa las
+actividades ACTIV_016 a ACTIV_020 y estima **8 días hábiles** por la ruta **P–Q–S–T**.
+
+| Actividad | Dependencias | Optimista / probable / pesimista (días) | Duración esperada |
+|---|---|---|---|
+| P · Diseño y contrato | Inicio del incremento | 1 / 2 / 3 | 2 días |
+| Q · Backend y consulta TomTom | P | 2 / 3 / 4 | 3 días |
+| R · Integración del dashboard | P | 1 / 2 / 3 | 2 días |
+| S · Pruebas con el proveedor | Q y R | 1 / 1 / 1 | 1 día |
+| T · Documentación y capturas | S | 1 / 2 / 3 | 2 días |
+
+Los hitos verificables en Git son la entrega inicial del 1 de noviembre (`ecf0b0a`),
+la actualización del mapa y la simulación del 16 de noviembre (`e4da62b`) y la integración
+TomTom del 22 de noviembre de 2026 (`1e48f7e`), en hora de CDMX. Git registra esas entregas.
+Las duraciones estimadas se calcularon para documentar el incremento, y las horas ejecutadas
+por actividad carecen de registro. Ver [el cálculo reproducible](../reports/pert.json)
+y [la memoria académica](../entrega_academica/DOC_001_Memoria.md#cal_001-calendarización-gantt-y-pert).
+
+### 10.2 Riesgos y seguimiento
 
 | Riesgo de Fase 1 | Tratamiento implementado | Evidencia / cierre pendiente |
 |---|---|---|
