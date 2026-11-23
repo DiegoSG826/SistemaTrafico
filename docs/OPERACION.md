@@ -81,7 +81,26 @@ cercano al punto seleccionado. La vista presenta la respuesta reciente del prove
 de consulta. Para diagnosticar, registrar el código HTTP y el identificador de correlación del
 backend. La simulación puede operar aunque TomTom no esté disponible. Ver [OpenAPI](openapi.json).
 
-Para reconocer la interfaz vigente, consulta las [capturas de la entrega](../entrega_academica/LEEME.md#ent_010-archivos-para-revisar).
+### Comparador de demoras y cuota
+
+En la vista TomTom, pulsa **Comparar puntos**. El comparador llama a
+`GET /tomtom/comparison` para los primeros cinco puntos del catálogo. Ordena los tramos
+disponibles por demora adicional, muestra el aumento porcentual respecto al flujo libre y
+permite abrir un tramo en el mapa seleccionando su fila. Los cierres y los tramos sin
+referencia se indican por separado. La hora de cada fila corresponde a la lectura que se usó.
+
+El mapa y el comparador comparten un registro en memoria de **120 s por coordenada**.
+Las solicitudes válidas reutilizan esa lectura, incluso al pulsar **Actualizar ahora**.
+Ante un `429` del proveedor, el servidor pausa las consultas nuevas durante el intervalo
+`Retry-After` o cinco minutos si el encabezado no está disponible. El comparador sigue
+mostrando las lecturas recientes que tenga y señala los puntos indisponibles.
+
+`TOMTOM_DAILY_REQUEST_BUDGET` limita las llamadas salientes en 24 horas móviles y tiene
+un valor predeterminado de 1,000. El presupuesto y las lecturas se mantienen en el proceso
+FastAPI y se reinician con él. Para compartir una clave con otras aplicaciones, reserva
+margen en el presupuesto local.
+
+La [entrega académica](../entrega_academica/LEEME.md#ent_010-archivos-para-revisar) incluye capturas de Simulación y del visor TomTom.
 La captura de TomTom corresponde a una consulta en vivo y conserva la hora visible de respuesta.
 
 ## Modelos y reversión

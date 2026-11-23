@@ -194,7 +194,70 @@
             "description": "Datos de TomTom indisponibles o inv\u00e1lidos"
           },
           "503": {
-            "description": "Clave de TomTom indisponible, inv\u00e1lida o con l\u00edmite de consultas"
+            "description": "Clave de TomTom indisponible, inv\u00e1lida o presupuesto de consultas alcanzado"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tomtom/comparison": {
+      "get": {
+        "summary": "Tomtom Comparison",
+        "description": "Compara demoras actuales y conserva resultados parciales.",
+        "operationId": "tomtom_comparison_tomtom_comparison_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "point_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "minItems": 2,
+              "maxItems": 5,
+              "title": "Point Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PointDelay"
+                  },
+                  "title": "Response Tomtom Comparison Tomtom Comparison Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticaci\u00f3n requerida"
+          },
+          "404": {
+            "description": "Alg\u00fan punto de consulta no existe"
+          },
+          "503": {
+            "description": "Clave de TomTom sin configurar"
           },
           "422": {
             "description": "Validation Error",
@@ -927,6 +990,86 @@
           "duration_cycles"
         ],
         "title": "ManualRequest"
+      },
+      "PointDelay": {
+        "properties": {
+          "intersection_id": {
+            "type": "integer",
+            "title": "Intersection Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "closed",
+              "no_reference",
+              "unavailable"
+            ],
+            "title": "Status"
+          },
+          "delay_s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delay S"
+          },
+          "increase_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Increase Pct"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "fetched_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fetched At"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "intersection_id",
+          "status"
+        ],
+        "title": "PointDelay"
       },
       "PredictionRequest": {
         "properties": {

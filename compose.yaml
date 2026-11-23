@@ -48,6 +48,7 @@ services:
       <<: *common
       JWT_SECRET: ${JWT_SECRET:?Configurar JWT_SECRET}
       TOMTOM_API_KEY: ${TOMTOM_API_KEY:-}
+      TOMTOM_DAILY_REQUEST_BUDGET: ${TOMTOM_DAILY_REQUEST_BUDGET:-1000}
     ports: ["127.0.0.1:8000:8000"]
     depends_on:
       init: {condition: service_completed_successfully}

@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
+from typing import Annotated
 from uuid import uuid4
 
-import httpx
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -38,6 +38,12 @@ def create_app(config: Settings | None = None, factory=None, infer=None):
 
     app = FastAPI(title="SGT Cuauhtémoc · monitoreo y simulación", version="0.2.0", lifespan=lifespan)
     app.state.infer = infer or (lambda rows: services.infer_http(config.ml_service_url, rows))
+    tomtom_key = config.tomtom_api_key.get_secret_value().strip()
+    traffic_reader = tomtom.TomTomReader(tomtom_key, config.tomtom_daily_request_budget)
+
+    def require_tomtom_key():
+        if not tomtom_key:
+            raise HTTPException(503, "TomTom no está configurado. Agrega TOMTOM_API_KEY al backend.")
 
     @app.middleware("http")
     async def correlate(request, call_next):
@@ -112,29 +118,41 @@ def create_app(config: Settings | None = None, factory=None, infer=None):
         401: {"description": "Autenticación requerida"},
         404: {"description": "Punto de consulta desconocido"},
         502: {"description": "Datos de TomTom indisponibles o inválidos"},
-        503: {"description": "Clave de TomTom indisponible, inválida o con límite de consultas"},
+        503: {"description": "Clave de TomTom indisponible, inválida o presupuesto de consultas alcanzado"},
     })
     def tomtom_flow(identifier: int, current=Depends(user), db=Depends(session, scope="function")):
         """Obtiene el tramo cercano al punto del catálogo para visualizar tráfico actual."""
         item = services.get_intersection(db, identifier)
-        key = config.tomtom_api_key.get_secret_value().strip()
-        if not key:
-            raise HTTPException(503, "TomTom no está configurado. Agrega TOMTOM_API_KEY al backend.")
-        try:
-            return tomtom.fetch_flow(key, item.latitude, item.longitude)
-        except httpx.HTTPStatusError as exc:
-            status = exc.response.status_code
-            if status in (401, 403):
-                raise HTTPException(503, "TomTom rechazó la clave. Verifica el acceso a Traffic API.") from None
-            if status == 429:
-                raise HTTPException(503, "TomTom alcanzó el límite de consultas. Intenta más tarde.") from None
-            if status == 404:
-                raise HTTPException(502, "TomTom no encontró un tramo con datos cerca de este punto.") from None
-            raise HTTPException(502, "TomTom no pudo entregar datos para este punto.") from None
-        except httpx.RequestError:
-            raise HTTPException(502, "Sin comunicación con TomTom. Intenta más tarde.") from None
-        except (ValueError, KeyError, TypeError):
-            raise HTTPException(502, "TomTom devolvió datos incompletos o inválidos para este punto.") from None
+        require_tomtom_key()
+        reading = traffic_reader.get(item.latitude, item.longitude)
+        if isinstance(reading, tomtom.FlowFailure):
+            headers = {"Retry-After": str(reading.retry_after)} if reading.retry_after else None
+            raise HTTPException(reading.status_code, reading.detail, headers=headers)
+        return reading
+
+    @app.get("/tomtom/comparison", response_model=list[tomtom.PointDelay], responses={
+        401: {"description": "Autenticación requerida"},
+        404: {"description": "Algún punto de consulta no existe"},
+        503: {"description": "Clave de TomTom sin configurar"},
+    })
+    def tomtom_comparison(point_id: Annotated[list[int], Query(min_length=2, max_length=5)],
+                          current=Depends(user), db=Depends(session, scope="function")):
+        """Compara demoras actuales y conserva resultados parciales."""
+        ids = list(dict.fromkeys(point_id))
+        if len(ids) < 2:
+            raise HTTPException(422, "Selecciona al menos dos puntos distintos.")
+        points = {item.id: item for item in db.scalars(
+            select(Intersection).where(Intersection.id.in_(ids)))}
+        if len(points) != len(ids):
+            raise HTTPException(404, "Algún punto de consulta no existe.")
+        require_tomtom_key()
+        delays = [
+            tomtom.PointDelay.from_reading(
+                identifier, traffic_reader.get(points[identifier].latitude, points[identifier].longitude)
+            )
+            for identifier in ids
+        ]
+        return sorted(delays, key=lambda row: (row.delay_s is None, -(row.delay_s or 0)))
 
     @app.post("/intersections", status_code=201)
     def create_intersection(body: schemas.IntersectionInput, request: Request,

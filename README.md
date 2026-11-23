@@ -44,8 +44,9 @@ silenciosamente un candidato.
 ## Vista de tráfico real con TomTom
 
 1. Agrega `TOMTOM_API_KEY=<tu_clave>` al archivo `.env` con una clave habilitada para Traffic API.
-2. Reinicia el lanzador local. Si usas Docker Compose, ejecuta `docker compose up -d api`
-   para que el contenedor reciba la variable.
+2. Reinicia el lanzador local. En Docker Compose, ejecuta `docker compose up -d --build api dashboard`
+   para desplegar los cambios. Si solo cambias la configuración de TomTom, basta con
+   `docker compose up -d api`.
 3. Inicia sesión en el dashboard y selecciona **Vista de tráfico → Tráfico real (TomTom)**.
    Elige un punto en el mapa o en el menú lateral para consultar el tramo vial cercano.
 
@@ -53,6 +54,16 @@ La vista muestra la geometría del tramo, las velocidades y tiempos de recorrido
 flujo libre, el nivel de confianza y los cierres que reporte TomTom. Se actualiza cada minuto
 y también permite actualizar a demanda. El backend realiza la consulta de forma autenticada
 y conserva la clave en el servidor. Los puntos del catálogo son referencias académicas.
+
+Pulsa **Comparar puntos** para ordenar hasta cinco tramos por segundos adicionales de
+recorrido y ver el aumento porcentual. Selecciona una fila para inspeccionar su tramo en el
+mapa. El comparador se ejecuta a demanda y comparte con el mapa las lecturas de los últimos
+dos minutos. Si falta una lectura o hay un cierre, la tabla identifica el estado del punto.
+
+El backend permite hasta 1,000 llamadas a TomTom en 24 horas móviles por proceso. Ajusta
+`TOMTOM_DAILY_REQUEST_BUDGET` en `.env` según el margen disponible de tu cuenta.
+Si TomTom responde `429`, el backend pausa las llamadas nuevas y conserva las lecturas
+recientes. El contador está en memoria y cubre las llamadas de este proceso.
 
 La vista **Simulación** conserva su flujo de observaciones, predicciones y planes de semáforos.
 Flow Segment Data aporta velocidades y tiempos por tramo. El controlador requiere conteos de

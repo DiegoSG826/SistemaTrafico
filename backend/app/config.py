@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     jwt_secret: str = ""
     ml_service_url: str = "http://127.0.0.1:8001"
     tomtom_api_key: SecretStr = SecretStr("")
+    tomtom_daily_request_budget: int = Field(default=1000, ge=1)
     model_dir: Path = Path("ml_model/artifacts")
     sim_speed: float = Field(default=10, gt=0, le=100)
     sim_seed: int = 20261031

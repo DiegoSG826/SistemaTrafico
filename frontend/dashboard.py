@@ -40,11 +40,11 @@ MODOS = {"degraded": "Degradado (fijo 40/40)", "automatic": "Automático", "manu
 # ---------------------------------------------------------------------------
 # Comunicación con la API
 # ---------------------------------------------------------------------------
-def api(method, path, **kwargs):
+def api(method, path, *, timeout=5, **kwargs):
     token = st.session_state.get("token")
     headers = {"Authorization": f"Bearer {token}"} if token else {}
     try:
-        result = httpx.request(method, f"{API}{path}", headers=headers, timeout=5,
+        result = httpx.request(method, f"{API}{path}", headers=headers, timeout=timeout,
                                trust_env=False, **kwargs)
         if result.status_code == 401:
             st.session_state.pop("token", None)
@@ -425,8 +425,64 @@ def panel_tomtom():
                    "hora CDMX · Actualización cada minuto")
 
 
+def seleccionar_tramo_comparado():
+    filas = st.session_state.tomtom_comparison_table.selection.rows
+    if filas:
+        _elegir(st.session_state.tomtom_comparison_ids[filas[0]])
+
+
+def panel_comparacion_tomtom():
+    st.subheader("Comparador de demoras")
+    referencias = tuple((i["id"], i["latitude"], i["longitude"]) for i in catalog["items"][:5])
+    if len(referencias) < 2:
+        st.info("Se necesitan al menos dos puntos en el catálogo para comparar demoras.")
+        return
+    if st.button("Comparar puntos", type="primary"):
+        comparacion = api("GET", "/tomtom/comparison", timeout=30,
+                          params={"point_id": [point[0] for point in referencias]})
+        st.session_state.tomtom_comparison = (referencias, comparacion)
+
+    puntos_consultados, datos = st.session_state.get("tomtom_comparison", (None, None))
+    if puntos_consultados != referencias or not datos:
+        return
+    st.caption("Selecciona una fila para mostrar el tramo en el mapa. "
+               "Pulsa Comparar puntos para obtener una comparación reciente.")
+    estados = {"available": "Disponible", "closed": "Cierre reportado",
+               "no_reference": "Sin tiempo de referencia", "unavailable": "Sin datos"}
+    filas = []
+    cierres = []
+    for tramo in datos:
+        nombre = puntos[tramo["intersection_id"]]
+        if tramo["status"] == "closed":
+            cierres.append(nombre)
+        hora = tramo["fetched_at"]
+        confianza = tramo["confidence"]
+        filas.append({
+            "Punto": nombre,
+            "Demora adicional": tramo["delay_s"],
+            "Aumento del tiempo": tramo["increase_pct"],
+            "Confianza TomTom": confianza * 100 if confianza is not None else None,
+            "Consulta (CDMX)": pd.Timestamp(hora).tz_convert("America/Mexico_City").strftime("%d/%m/%Y %H:%M:%S")
+            if hora else None,
+            "Estado": estados[tramo["status"]],
+        })
+    if cierres:
+        st.warning("Cierres reportados por TomTom · " + ", ".join(cierres))
+    problemas = list(dict.fromkeys(tramo["detail"] for tramo in datos if tramo["detail"]))
+    if problemas:
+        st.warning(" ".join(problemas))
+    st.session_state.tomtom_comparison_ids = [tramo["intersection_id"] for tramo in datos]
+    st.dataframe(pd.DataFrame(filas), hide_index=True, width="stretch", key="tomtom_comparison_table",
+                 on_select=seleccionar_tramo_comparado, selection_mode="single-row", column_config={
+                     "Demora adicional": st.column_config.NumberColumn(format="%d s"),
+                     "Aumento del tiempo": st.column_config.NumberColumn(format="%.1f %%"),
+                     "Confianza TomTom": st.column_config.NumberColumn(format="%.0f %%"),
+                 })
+
+
 if vista_real:
     panel_tomtom()
+    panel_comparacion_tomtom()
     st.stop()
 
 

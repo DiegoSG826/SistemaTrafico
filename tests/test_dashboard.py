@@ -49,6 +49,14 @@ def test_switching_to_tomtom_shows_traffic_for_the_selected_point(monkeypatch):
             return httpx.Response(200, json=catalog, request=req)
         if req.url.path == "/traffic_data":
             return httpx.Response(200, json={"items": []}, request=req)
+        if req.url.path == "/tomtom/comparison":
+            assert kwargs["params"] == {"point_id": [1, 2]}
+            return httpx.Response(200, request=req, json=[
+                {"intersection_id": 1, "status": "available", "delay_s": 44, "increase_pct": 102.3,
+                 "confidence": 0.84, "fetched_at": traffic["fetched_at"], "detail": None},
+                {"intersection_id": 2, "status": "closed", "delay_s": None, "increase_pct": None,
+                 "confidence": 0.84, "fetched_at": traffic["fetched_at"], "detail": None},
+            ])
         assert req.url.path in ("/intersections/1/tomtom-flow", "/intersections/2/tomtom-flow")
         return httpx.Response(200, json=traffic, request=req)
 
@@ -71,3 +79,18 @@ def test_switching_to_tomtom_shows_traffic_for_the_selected_point(monkeypatch):
     app.selectbox(key="sel_id").set_value(2).run(timeout=20)
     assert not app.exception
     assert requests == ["/intersections", "/intersections/2/tomtom-flow"]
+
+    requests.clear()
+    next(button for button in app.button if button.label == "Comparar puntos").click().run(timeout=20)
+    assert not app.exception
+    assert requests.count("/tomtom/comparison") == 1
+    table = app.dataframe[0].value
+    assert table.loc[0, "Demora adicional"] == 44
+    assert table.loc[0, "Aumento del tiempo"] == 102.3
+    assert table.loc[1, "Estado"] == "Cierre reportado"
+
+    requests.clear()
+    app.selectbox(key="sel_id").set_value(1).run(timeout=20)
+    assert not app.exception
+    assert requests == ["/intersections", "/intersections/1/tomtom-flow"]
+    assert app.dataframe[0].value.loc[0, "Demora adicional"] == 44

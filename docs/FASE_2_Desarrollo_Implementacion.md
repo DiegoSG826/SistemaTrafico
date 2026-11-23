@@ -66,6 +66,14 @@ El cálculo semafórico requiere conteos de llegadas por acceso y se ejecuta en 
 Ver [operación y diagnóstico](OPERACION.md#vista-de-tráfico-real-con-tomtom),
 [OpenAPI](openapi.json) y [TomTom Flow Segment Data](https://docs.tomtom.com/traffic-api/documentation/tomtom-maps/v1/traffic-flow/flow-segment-data).
 
+El comparador usa `GET /tomtom/comparison` con dos a cinco identificadores `point_id`
+y se ejecuta al solicitarlo. Calcula la demora adicional como la diferencia positiva
+entre el tiempo actual y el tiempo en flujo libre. El aumento porcentual se calcula sobre
+el tiempo en flujo libre. Cada fila conserva la confianza y la hora de su lectura.
+Las filas con cierre reportado, sin referencia o sin datos quedan fuera del orden de demora.
+Ambos endpoints comparten las lecturas en memoria durante 120 s y un presupuesto diario
+configurable. Ver [comparador y cuota](OPERACION.md#comparador-de-demoras-y-cuota).
+
 ## 2. Estructura del proyecto
 
 ```text
