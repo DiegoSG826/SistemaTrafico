@@ -13,6 +13,14 @@
 | Equipo | Cuatro integrantes: Líder/Backend, Frontend, IA/Data Science y QA/Soporte |
 | Entrega posterior | Fase 2: implementación; no se incluye código en este documento |
 
+**Nota de vigencia del 23 de noviembre de 2026.** Esta fase conserva la especificación
+original. La implementación posterior incorpora la vista TomTom y su comparador de demoras.
+El alcance de actuación semafórica sigue siendo simulado. Consulta la
+[integración implementada en Fase 2](FASE_2_Desarrollo_Implementacion.md#11-vista-de-tráfico-real-con-tomtom).
+El plan de 45 días y sus cinco días de reserva pertenecen a esta línea base. La calendarización
+de la ampliación y los hitos del repositorio se exponen en la
+[Fase 2](FASE_2_Desarrollo_Implementacion.md#101-calendarización-de-la-ampliación-tomtom).
+
 **Resumen ejecutivo.** Se propone desarrollar un prototipo que genere o ingiera observaciones de tráfico, pronostique la demanda vehicular y adapte los tiempos de verde mediante una política con restricciones explícitas. Un simulador permitirá comparar el control adaptativo con un plan fijo bajo las mismas llegadas de vehículos. El administrador podrá supervisar los resultados, configurar límites, intervenir y revisar la auditoría.
 
 La planificación comprende **10 semanas, 1,280 horas-persona y un presupuesto de referencia de $331,080 MXN**, incluidas reservas. La ruta crítica calculada con las duraciones esperadas PERT es de **45 días hábiles**; se añaden cinco días de reserva de calendario. Todas las cantidades económicas son hipótesis de planeación, no cotizaciones. Los beneficios de movilidad son objetivos experimentales, todavía sin resultados de implementación.

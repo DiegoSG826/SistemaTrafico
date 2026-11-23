@@ -1,8 +1,8 @@
 # DOC_005 Resultados de verificación y límites de aceptación
 
-ENT_005 · 1 de noviembre de 2026. Se consolidan archivos reales; no se inventan resultados ausentes.
+Versión 1.3 · ENT_005 · 23 de noviembre de 2026. Incluye la línea base académica y las verificaciones del visor y el comparador TomTom.
 
-## RES_001 Batería automatizada actual
+## RES_001 Batería automatizada de la línea base
 
 tests: **42**; failures: **0**; errors: **0**; skipped: **0**. Fuente: reports/academico/tests.xml.
 
@@ -47,3 +47,19 @@ Modelo rf-v1-90d-s42-ba0ba6390f; MAE 1.1914 frente a persistencia 1.4475 veh/min
 ## RES_005 Estado de cierre
 
 Los documentos, diagramas y guiones están entregados. Permanecen sujetos a revisión humana: Alpha/Beta, identidad/aprobación de revisores de modelos, revisión de dependencias/TLS, reversión operativa y aceptación del docente. Docker no estaba instalado: su perfil está preparado, sin afirmar ejecución. Los criterios de rendimiento/recuperación se juzgan con los resultados anteriores, no por existencia de scripts. Si hay fallas de meta, el prototipo sigue siendo demostrable pero no se declara RNF aceptado.
+
+## RES_007 Verificación del visor TomTom
+
+La verificación de la integración 1e48f7e registró 44 pruebas aprobadas y 4 de PostgreSQL omitidas por falta de TEST_DATABASE_URL. Las pruebas específicas cubren autenticación, coordenadas del catálogo, datos inválidos, clave ausente o rechazada, límite de consultas y selector del dashboard. Referencias de reproducción: tests/test_tomtom.py y tests/test_dashboard.py.
+
+La consulta en vivo recibió datos de TomTom para los cinco puntos del catálogo. La comprobación de extremo a extremo en Edge mostró el tramo, sus métricas y el regreso a Simulación. Esta evidencia confirma la visualización de tráfico por tramo. Las cifras de demora de RES_004 provienen del experimento sintético. Los ensayos de PostgreSQL, carga y restauración son de la línea base y mantienen sus condiciones y resultados originales.
+
+## RES_008 Capturas de la versión actual
+
+Edge recorrió acceso, monitor, intervención, auditoría, TomTom y el comparador en una instancia temporal de la revisión 4f377b2. FIG_011 y FIG_012 muestran datos en vivo. Las figuras FIG_007 a FIG_012 y figuras/CAPTURAS.json registran esta demostración y su fecha.
+
+## RES_009 Verificación del comparador de demoras
+
+La suite de 4f377b2 registró 47 pruebas aprobadas y 4 de PostgreSQL omitidas por falta de TEST_DATABASE_URL. Las pruebas del comparador verifican el cálculo, orden, resultados parciales, reutilización por coordenada, vencimiento, presupuesto diario y recuperación tras 429. Fuentes de reproducción: tests/test_tomtom.py y tests/test_dashboard.py.
+
+La prueba de navegador con proveedor simulado registró cinco llamadas en total al abrir el mapa, comparar los cinco puntos, repetir la comparación y seleccionar una fila. FIG_012 corresponde a una prueba separada con la API en vivo. Sus resultados describen el instante de la consulta.

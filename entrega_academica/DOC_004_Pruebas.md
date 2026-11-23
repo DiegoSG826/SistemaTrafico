@@ -1,6 +1,6 @@
 # DOC_004 Documento y guiones de pruebas
 
-Versión 1.0 · ENT_004 · 1 de noviembre de 2026. Estrategia: unidad → integración → sistema
+Versión 1.3 · ENT_004 · 23 de noviembre de 2026. Estrategia: unidad → integración → sistema
 → validación/aceptación. QA prepara datos y consolida evidencia; otro integrante revisa cambios
 de control, seguridad y ML. No usar datos productivos ni secretos de usuario en pruebas.
 
@@ -17,6 +17,7 @@ responsable y prueba de regresión. No clasificar automáticamente un criterio f
 
 ```text
 python -m pytest --cov=backend.app.controller --cov=backend.app.schemas --cov-branch
+python -m pytest tests/test_tomtom.py tests/test_dashboard.py
 python -m scripts.smoke_test
 python -m ml_model.evaluate VERSION
 python -m scripts.academic_validation
@@ -26,6 +27,9 @@ TEST_DATABASE_URL debe apuntar a PostgreSQL aislado para las pruebas específica
 crea/elimina únicamente esquemas UUID propios. academic_validation utiliza bases nuevas,
 puertos 28000/28100 y 600 s con diez usuarios para cada escala; no toca la BD Cuauhtémoc.
 No confundir la verificación del contrato con mocks con la evaluación del modelo entrenado.
+Las capturas de verificación se reproducen con scripts.capture_academic_demo. El recorrido
+usa SQLite en una instancia efímera y requiere una clave TomTom configurada para FIG_011
+y FIG_012. La instancia de captura tiene un presupuesto de hasta cinco llamadas.
 
 ## PRU_001 Contratos y permisos
 
@@ -39,7 +43,7 @@ No confundir la verificación del contrato con mocks con la evaluación del mode
 2. Solicitar propuesta.
 3. Repetir sin token.
 4. Repetir como viewer.
-5. Enviar id negativo y atributo extra.
+5. Enviar ID negativo y atributo extra.
 
 **Resultado esperado y criterio:** 201 con propuesta válida; 401/403 para accesos no autorizados; 422 contrato.
 
@@ -78,7 +82,7 @@ No confundir la verificación del contrato con mocks con la evaluación del mode
 2. Reenviar.
 3. Consultar conteo.
 4. Cambiar zona de la misma ventana.
-5. Provocar rollback postgresql.
+5. Provocar rollback PostgreSQL.
 
 **Resultado esperado y criterio:** Una observación por clave; UTC preservado; ninguna confirmación de transacción fallida.
 
@@ -113,9 +117,9 @@ No confundir la verificación del contrato con mocks con la evaluación del mode
 ### GUI_005 Pasos
 
 1. Inspeccionar cortes/purga.
-2. Comparar mae/rmse contra persistencia.
+2. Comparar MAE/RMSE contra persistencia.
 3. Ejecutar 50 pares.
-4. Calcular ic por corridas.
+4. Calcular IC por corridas.
 5. Revisar cada escenario.
 
 **Resultado esperado y criterio:** Sin fuga; meta predictiva −10% MAE; control −10% demora con IC inferior >0 y cola p95 ≤+10%; conservar negativos.
@@ -133,7 +137,7 @@ No confundir la verificación del contrato con mocks con la evaluación del mode
 ### GUI_006 Pasos
 
 1. Vencer observación 121 s.
-2. Simular timeout/nan.
+2. Simular timeout/NaN.
 3. Aplicar manual.
 4. Hacerlo caducar.
 5. Competir por versión.
@@ -158,7 +162,7 @@ No confundir la verificación del contrato con mocks con la evaluación del mode
 3. Consultar cinco cruces.
 4. Proponer.
 5. Solicitar aplicación.
-6. Esperar active.
+6. Esperar ACTIVE.
 7. Consultar auditoría.
 8. Cerrar procesos.
 
@@ -237,7 +241,7 @@ No confundir la verificación del contrato con mocks con la evaluación del mode
 ### GUI_011 Pasos
 
 1. Promover con autor/revisor reales.
-2. Reiniciar ia.
+2. Reiniciar IA.
 3. Obtener inferencia versionada.
 4. Volver a modelo previo.
 5. Comprobar auditabilidad.
@@ -260,7 +264,7 @@ No confundir la verificación del contrato con mocks con la evaluación del mode
 2. Recorrer catálogo completo en round-robin.
 3. Medir consultas/propuestas.
 4. Conservar conflictos/errores.
-5. Comparar aceptados con bd.
+5. Comparar aceptados con BD.
 
 **Resultado esperado y criterio:** p95 consulta≤500 ms y predicción≤1000 ms; sin pérdida de entradas aceptadas; resultados negativos se reportan.
 
@@ -277,13 +281,54 @@ No confundir la verificación del contrato con mocks con la evaluación del mode
 ### GUI_013 Pasos
 
 1. Sustituir inferencia por fixture.
-2. Modificar carriles/capacidad mediante api.
+2. Modificar carriles/capacidad mediante API.
 3. Repetir propiedades sin editar máquina de fases.
 4. Revisar cobertura de ramas.
 
 **Resultado esperado y criterio:** Contrato estable; fases seguras; ramas ≥80% en controlador y esquemas; límites semafóricos requieren cambio revisado.
 
 **Evidencia a conservar:** `tests/test_model_service.py; tests/test_controller.py; cobertura`; versión, fecha, semilla/configuración y resultado obtenido.
+
+**Resultado obtenido:** consultar DOC_005 y el archivo indicado; si no hay ejecución registrada, marcar PENDIENTE, no APROBADO.
+
+## PRU_014 Consulta de tráfico real
+
+**Tipo:** Integración y verificación en navegador. **Requisitos:** RF_017, CU_011. **Responsable:** QA y Frontend.
+
+**Precondición y datos:** Catálogo de prueba, usuario autenticado, respuestas de proveedor controladas y clave de laboratorio para la comprobación en vivo.
+
+### GUI_014 Pasos
+
+1. Consultar el punto del catálogo con sesión válida.
+2. Repetir sin token, con punto desconocido y con clave ausente.
+3. Simular clave rechazada, cuota agotada y respuesta incompleta.
+4. Abrir Tráfico real (TomTom), revisar métricas y seleccionar otro punto.
+5. Con acceso al servicio real, comprobar tramo y métricas en navegador y volver a Simulación.
+
+**Resultado esperado y criterio:** La consulta es de lectura, muestra información del punto y conserva la separación del control. Los fallos se informan sin devolver la clave ni el mensaje interno del proveedor.
+
+**Evidencia a conservar:** `tests/test_tomtom.py, tests/test_dashboard.py y DOC_005 RES_007`; versión, fecha, semilla/configuración y resultado obtenido.
+
+**Resultado obtenido:** consultar DOC_005 y el archivo indicado; si no hay ejecución registrada, marcar PENDIENTE, no APROBADO.
+
+## PRU_015 Comparación de demoras y cuota
+
+**Tipo:** Integración, regresión y verificación en navegador. **Requisitos:** RF_018, CU_012. **Responsable:** QA y Frontend.
+
+**Precondición y datos:** Catálogo de prueba, reloj controlado y respuestas de TomTom simuladas.
+
+### GUI_015 Pasos
+
+1. Abrir un punto del mapa.
+2. Comparar puntos y comprobar el orden de demoras.
+3. Repetir dentro de los 120 s y elegir una fila para comprobar reutilización.
+4. Vencer una lectura y comprobar una sola consulta.
+5. Provocar un 429 con Retry-After y comprobar que el lote conserva los datos disponibles.
+6. Agotar un presupuesto reducido y verificar que se repone al salir la llamada de la ventana de 24 horas.
+
+**Resultado esperado y criterio:** Cálculo correcto de segundos y porcentaje. Se identifican cierres y referencias en cero. Las lecturas recientes evitan solicitudes duplicadas y el límite conserva resultados parciales.
+
+**Evidencia a conservar:** `tests/test_tomtom.py, tests/test_dashboard.py y DOC_005 RES_009`; versión, fecha, semilla/configuración y resultado obtenido.
 
 **Resultado obtenido:** consultar DOC_005 y el archivo indicado; si no hay ejecución registrada, marcar PENDIENTE, no APROBADO.
 

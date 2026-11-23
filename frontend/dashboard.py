@@ -1,24 +1,50 @@
 """Ejecutar: streamlit run frontend/dashboard.py"""
 import json
 import os
+import time
 
 import httpx
-from dotenv import load_dotenv
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
+from dotenv import load_dotenv
 
-st.set_page_config(page_title="SGT CDMX · simulación", page_icon="🚦", layout="wide")
+st.set_page_config(page_title="SGT CDMX · tráfico", page_icon="🚦", layout="wide")
 st.title("Sistema inteligente de tráfico · Cuauhtémoc")
-st.caption("Alcaldía Cuauhtémoc, CDMX · prototipo académico con cruces y tráfico sintéticos")
+st.caption("Alcaldía Cuauhtémoc, CDMX · prototipo académico")
+st.markdown("""<style>
+.kp-fila{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
+.kp{flex:1 1 130px;min-width:120px;background:rgba(128,128,128,.14);border-radius:10px;padding:8px 12px}
+.kp span{display:block;font-size:.78rem;opacity:.75}
+.kp b{font-size:1.1rem}
+</style>""", unsafe_allow_html=True)
 load_dotenv()
+# Dirección de la API del backend. Se puede cambiar en .env o con la variable API_URL.
 API = os.getenv("API_URL", "http://127.0.0.1:8000").rstrip("/")
+SIM_SPEED = float(os.getenv("SIM_SPEED", "10"))
+
+# Cada cuántos segundos reales se vuelve a sincronizar el mapa/animación con el backend.
+# Entre sincronizaciones, las luces corren solas en el navegador (sin parpadeo).
+RESYNC_S = 30
+
+ESTILOS = ["Calles", "Claro", "Oscuro", "Satélite"]
+FASES = {
+    "NS_GREEN": "Verde Norte–Sur", "NS_YELLOW": "Amarillo Norte–Sur", "NS_CLEAR": "Despeje Norte–Sur",
+    "EO_GREEN": "Verde Este–Oeste", "EO_YELLOW": "Amarillo Este–Oeste", "EO_CLEAR": "Despeje Este–Oeste",
+    "PEDESTRIAN": "Fase peatonal", "PEDESTRIAN_CLEAR": "Despeje peatonal",
+}
+NOMBRE_LUZ = {"GREEN": "🟢 Verde", "YELLOW": "🟡 Amarillo", "RED": "🔴 Rojo"}
+MODOS = {"degraded": "Degradado (fijo 40/40)", "automatic": "Automático", "manual": "Manual"}
 
 
-def api(method, path, **kwargs):
+# ---------------------------------------------------------------------------
+# Comunicación con la API
+# ---------------------------------------------------------------------------
+def api(method, path, *, timeout=5, **kwargs):
     token = st.session_state.get("token")
     headers = {"Authorization": f"Bearer {token}"} if token else {}
     try:
-        result = httpx.request(method, f"{API}{path}", headers=headers, timeout=5,
+        result = httpx.request(method, f"{API}{path}", headers=headers, timeout=timeout,
                                trust_env=False, **kwargs)
         if result.status_code == 401:
             st.session_state.pop("token", None)
@@ -34,6 +60,9 @@ def api(method, path, **kwargs):
     return None
 
 
+# ---------------------------------------------------------------------------
+# Login
+# ---------------------------------------------------------------------------
 if "token" not in st.session_state:
     with st.form("login"):
         email = st.text_input("Correo", value="admin@example.test")
@@ -50,59 +79,717 @@ if st.sidebar.button("Cerrar sesión"):
     st.session_state.clear()
     st.rerun()
 
+vista = st.sidebar.radio("Vista de tráfico", ["Simulación", "Tráfico real (TomTom)"])
+vista_real = vista == "Tráfico real (TomTom)"
+
+# ---------------------------------------------------------------------------
+# Selección de intersección (menú lateral o clic en el mapa)
+# ---------------------------------------------------------------------------
 catalog = api("GET", "/intersections")
 if not catalog or not catalog["items"]:
+    st.info("No hay intersecciones disponibles. Comprueba que el backend y el simulador estén iniciados.")
     st.stop()
-options = {f"{i['id']} · {i['name']}": i for i in catalog["items"]}
-selection = st.sidebar.selectbox("Intersección simulada", options)
-identifier = options[selection]["id"]
-st.sidebar.caption("Las fechas se presentan en America/Mexico_City; persistencia en UTC.")
+
+ids = [i["id"] for i in catalog["items"]]
+nombres = {i["id"]: f"{i['id']} · {i['name']}" for i in catalog["items"]}
+puntos = {i["id"]: f"Punto {i['id']} · {i['latitude']:.5f}, {i['longitude']:.5f}"
+          for i in catalog["items"]}
+if st.session_state.get("sel_id") not in ids:
+    st.session_state.sel_id = ids[0]
+identifier = st.sidebar.selectbox("Punto de consulta" if vista_real else "Intersección simulada",
+                                  ids, key="sel_id", format_func=(puntos if vista_real else nombres).get)
+estilo = st.sidebar.selectbox("Estilo del mapa", ESTILOS)
+if vista_real:
+    st.sidebar.caption("Elige un punto en el mapa o en el menú. TomTom devuelve el tramo vial cercano.")
+else:
+    st.sidebar.caption("Las fechas se presentan en America/Mexico_City; persistencia en UTC.")
+    st.sidebar.markdown(
+        "**Cómo leer el mapa**\n\n"
+        "- Cada cruce tiene 4 luces: **arriba** Norte–Sur, **derecha** Este–Oeste, "
+        "**abajo** peatón (azul = paso peatonal).\n"
+        "- El anillo indica la congestión: verde fluido, amarillo moderado, rojo congestionado, "
+        "gris sin datos vigentes.\n"
+        "- La letra de la esquina indica el modo: **D** degradado (plan fijo 40/40), "
+        "**A** automático, **M** manual.\n"
+        "- Arrastra para moverte, usa la rueda para acercar y **haz clic en un cruce** para seleccionarlo."
+    )
+
+
+def _elegir(identificador):
+    st.session_state.sel_id = identificador
+
+
+# Botones ocultos: el mapa (JavaScript) los pulsa cuando haces clic en un cruce.
+with st.container(key="selbtns"):
+    for _id in ids:
+        st.button(f"sel-{_id}", key=f"selbtn_{_id}", on_click=_elegir, args=(_id,))
+st.markdown("<style>.st-key-selbtns{display:none}</style>", unsafe_allow_html=True)
+
+
+def item_actual(items):
+    return next((i for i in items if i["id"] == identifier), None)
+
+
+def html_cacheado(clave, firma, construir, vigencia):
+    """Reutiliza el mismo HTML mientras no cambie la firma ni venza la vigencia.
+
+    Si el texto del HTML no cambia, Streamlit no recarga el iframe: el mapa se queda quieto
+    y su animación sigue corriendo en el navegador.
+    """
+    ahora = time.time()
+    previo = st.session_state.get(clave)
+    if previo and previo["firma"] == firma and ahora - previo["t"] < vigencia:
+        return previo["html"]
+    html = construir()
+    st.session_state[clave] = {"firma": firma, "t": ahora, "html": html}
+    return html
+
+
+def seguro_json(datos):
+    return json.dumps(datos, ensure_ascii=False).replace("</", "<\\/")
+
+
+def verdes_de(estado):
+    verdes = (estado or {}).get("green_s") or {"ns": 40, "eo": 40}
+    return int(verdes["ns"]), int(verdes["eo"])
+
+
+# ---------------------------------------------------------------------------
+# Mapa (Leaflet dentro de un iframe; las luces se animan en el navegador)
+# ---------------------------------------------------------------------------
+MAPA_HTML = """<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+html,body{margin:0;height:100%;background:#1b1f27;font-family:system-ui,Segoe UI,sans-serif}
+#map{height:100%;width:100%;border-radius:12px;--s:1;background:#cfd6e2}
+.mkwrap{background:none;border:none}
+.mk{position:relative;width:46px;height:46px;transform:scale(var(--s));transform-origin:50% 50%;cursor:pointer}
+.ring{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;box-sizing:border-box;
+ transition:background .4s,border-color .2s}
+.d{position:absolute;width:13px;height:13px;border-radius:50%;border:1.5px solid rgba(0,0,0,.55);
+ box-sizing:border-box;transition:background .15s,box-shadow .15s}
+.ns{left:16.5px;top:2px}.eo{right:2px;top:16.5px}.pe{left:16.5px;bottom:2px}
+.tag{position:absolute;left:-5px;top:-5px;width:15px;height:15px;border-radius:50%;color:#fff;
+ font:700 9px/15px system-ui,sans-serif;text-align:center;border:1.5px solid #fff}
+.lb{position:absolute;left:0;right:0;top:15px;text-align:center;font:700 12px system-ui,sans-serif;
+ color:#111;text-shadow:0 0 3px #fff,0 0 3px #fff}
+body.dark .lb{color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
+.leg{background:rgba(255,255,255,.92);padding:7px 10px;border-radius:8px;font:12px system-ui,sans-serif;color:#222;line-height:1.5}
+.leg i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.btn{background:#fff;color:#222;padding:5px 9px;border-radius:6px;font:12px system-ui,sans-serif;cursor:pointer;
+ box-shadow:0 1px 4px rgba(0,0,0,.4);margin-bottom:6px}
+.btn:hover{background:#eef}
+.leaflet-tooltip{font:12px system-ui,sans-serif}
+</style></head><body><div id="map"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const D=__DATA__, SEL=__SEL__, SPEED=__SPEED__, BASE=__BASE__, FLOW=__FLOW__, REAL=__REAL__;
+const DARK=(BASE===2||BASE===3);
+if(DARK) document.body.classList.add('dark');
+const COL={GREEN:'#00e676',YELLOW:'#ffd600',RED:'#ff1744'}, OFF='#8a93a3';
+const FASES={NS_GREEN:'Verde Norte–Sur',NS_YELLOW:'Amarillo Norte–Sur',NS_CLEAR:'Despeje Norte–Sur',
+ EO_GREEN:'Verde Este–Oeste',EO_YELLOW:'Amarillo Este–Oeste',EO_CLEAR:'Despeje Este–Oeste',
+ PEDESTRIAN:'Fase peatonal',PEDESTRIAN_CLEAR:'Despeje peatonal'};
+const MODO={degraded:['D','#607d8b','Degradado (plan fijo 40/40)'],automatic:['A','#2e7d32','Automático'],
+ manual:['M','#6a1b9a','Manual']};
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function phase(G,s){
+  const t=[["NS_GREEN",G.ns,"GREEN","RED","RED"],["NS_YELLOW",3,"YELLOW","RED","RED"],
+   ["NS_CLEAR",2,"RED","RED","RED"],["EO_GREEN",G.eo,"RED","GREEN","RED"],
+   ["EO_YELLOW",3,"RED","YELLOW","RED"],["EO_CLEAR",2,"RED","RED","RED"],
+   ["PEDESTRIAN",20,"RED","RED","GREEN"],["PEDESTRIAN_CLEAR",10,"RED","RED","RED"]];
+  for(const [n,d,a,b,p] of t){ if(s<d) return {n,ns:a,eo:b,ped:p,left:d-s}; s-=d; }
+  return {n:"?",ns:"RED",eo:"RED",ped:"RED",left:0};
+}
+
+const map=L.map('map',{preferCanvas:true});
+const flowCoords=FLOW?FLOW.geometry.map(c=>[c.latitude,c.longitude]):null;
+
+// Mosaicos sin API key. Si el proveedor elegido falla, se pasa al siguiente automáticamente.
+const ESRI='https://server.arcgisonline.com/ArcGIS/rest/services/';
+const TILES=[
+ {u:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxZoom:19,attribution:'&copy; OpenStreetMap'}},
+ {u:ESRI+'Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',o:{maxNativeZoom:16,maxZoom:19,attribution:'Tiles &copy; Esri'}},
+ {u:ESRI+'Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',o:{maxNativeZoom:16,maxZoom:19,attribution:'Tiles &copy; Esri'}},
+ {u:ESRI+'World_Imagery/MapServer/tile/{z}/{y}/{x}',o:{maxZoom:19,attribution:'Tiles &copy; Esri'}},
+ {u:ESRI+'World_Street_Map/MapServer/tile/{z}/{y}/{x}',o:{maxZoom:19,attribution:'Tiles &copy; Esri'}}];
+const ORDER=[BASE,4,0,1].filter((v,i,a)=>a.indexOf(v)===i);
+let ti=0, capa=null, errs=0;
+function usaMosaicos(i){
+  if(capa) map.removeLayer(capa);
+  const t=TILES[ORDER[i]]; errs=0;
+  capa=L.tileLayer(t.u,t.o).addTo(map);
+  capa.on('tileerror',()=>{ errs++; if(errs===8 && ti<ORDER.length-1){ ti++; usaMosaicos(ti); } });
+}
+usaMosaicos(0);
+
+// Vista: se conserva entre sincronizaciones (localStorage) para que el mapa no "salte".
+const bounds=L.latLngBounds(D.map(c=>[c.lat,c.lon]));
+function ajusta(){ map.invalidateSize(); map.fitBounds(bounds.pad(0.25),{maxZoom:18,animate:false}); }
+const viewKey=REAL?'sgt_tomtom_view':'sgt_view2', selectionKey=REAL?'sgt_tomtom_sel':'sgt_sel';
+let saved=null, prevSel=null;
+try{ saved=JSON.parse(localStorage.getItem(viewKey)||'null'); prevSel=localStorage.getItem(selectionKey); }catch(e){}
+if(saved && isFinite(saved.lat) && isFinite(saved.lng) && isFinite(saved.z))
+  map.setView([saved.lat,saved.lng],saved.z,{animate:false});
+else ajusta();
+const selC=D.find(c=>c.id===SEL);
+function encuadraSeleccion(){
+  if(!selC) return;
+  const point=[selC.lat,selC.lon];
+  if(flowCoords) map.fitBounds(L.latLngBounds([...flowCoords,point]).pad(0.15),{maxZoom:18});
+  else map.setView(point,18);
+}
+if(String(SEL)!==prevSel){
+  try{ localStorage.setItem(selectionKey,String(SEL)); }catch(e){}
+  if(prevSel!==null){
+    if(REAL) encuadraSeleccion();
+    else if(selC) map.setView([selC.lat,selC.lon],Math.max(map.getZoom(),17),{animate:false});
+  }
+}
+map.on('moveend',()=>{ try{ const p=map.getCenter();
+  localStorage.setItem(viewKey,JSON.stringify({lat:p.lat,lng:p.lng,z:map.getZoom()})); }catch(e){} });
+function escala(){ const z=map.getZoom(); const s=Math.min(2.2,Math.max(.45,.25+(z-13)*.22));
+  document.getElementById('map').style.setProperty('--s',s); }
+map.on('zoomend',escala); escala();
+setTimeout(()=>{ map.invalidateSize(); if(!saved) ajusta(); },300);
+
+function pick(id){
+  try{
+    const b=[...window.parent.document.querySelectorAll('.st-key-selbtns button')]
+      .find(e=>e.textContent.trim()==='sel-'+id);
+    if(b) b.click();
+  }catch(e){}
+}
+
+const Ctl=L.Control.extend({options:{position:'topright'},onAdd:function(){
+  const d=L.DomUtil.create('div'); L.DomEvent.disableClickPropagation(d);
+  const b1=L.DomUtil.create('div','btn',d); b1.textContent='Ver todos';
+  b1.onclick=()=>map.fitBounds(bounds.pad(0.25),{maxZoom:18});
+  const b2=L.DomUtil.create('div','btn',d); b2.textContent=REAL?'Ir al punto elegido':'Ir al cruce elegido';
+  b2.onclick=encuadraSeleccion;
+  return d; }});
+map.addControl(new Ctl());
+
+function dibujarTraficoReal(){
+  if(FLOW){
+    map.attributionControl.addAttribution('Datos de tráfico &copy; TomTom');
+    const ratio=FLOW.free_flow_speed_kmh>0?FLOW.current_speed_kmh/FLOW.free_flow_speed_kmh:null;
+    const color=FLOW.road_closed?'#7041b8':ratio===null?'#747b86':
+      ratio<0.5?'#c9233c':ratio<0.8?'#d97706':'#00845b';
+    L.polyline(flowCoords,{color:'#fff',weight:9,opacity:.9,interactive:false}).addTo(map);
+    L.polyline(flowCoords,{color,weight:6,opacity:1}).addTo(map)
+      .bindTooltip(FLOW.road_closed?'Cierre reportado por TomTom':`TomTom · ${FLOW.current_speed_kmh} km/h`);
+  }
+  D.forEach(c=>{
+    const selected=c.id===SEL;
+    L.circleMarker([c.lat,c.lon],{radius:selected?8:5,color:'#fff',weight:2,
+      fillColor:selected?'#1976d2':'#546473',fillOpacity:1}).addTo(map)
+      .bindTooltip(esc(c.name)).on('click',()=>pick(c.id));
+  });
+  if(!FLOW) return;
+  const legend=L.Control.extend({options:{position:'bottomleft'},onAdd:function(){
+    const d=L.DomUtil.create('div','leg');
+    d.innerHTML='<b>Velocidad frente a flujo libre</b><br><i style="background:#00845b"></i>80 % o más<br>'+
+      '<i style="background:#d97706"></i>50 a menos de 80 %<br><i style="background:#c9233c"></i>Menos de 50 %<br>'+
+      '<i style="background:#7041b8"></i>Cierre reportado<br><i style="background:#747b86"></i>Sin velocidad de referencia';
+    return d;
+  }});
+  map.addControl(new legend());
+}
+
+if(REAL){
+  dibujarTraficoReal();
+}else{
+const S=D.map(c=>({c,sec:c.sec,q:[c.q[0],c.q[1]],credit:[0,0],G:{ns:c.gns,eo:c.geo}}));
+function tip(s){
+  const ph=phase(s.G,s.sec), m=MODO[s.c.mode];
+  const estado=s.c.live?esc(FASES[ph.n]||ph.n)+' · '+ph.left+' s':'Telemetría desactualizada';
+  return '<b>'+esc(s.c.name)+'</b><br>'+estado+'<br>Cola NS '+s.q[0]+' · EO '+s.q[1]+' veh<br>'+
+    'Modo: '+(m?m[2]:'—')+'<br>Verde N–S '+s.G.ns+' s · E–O '+s.G.eo+' s';
+}
+S.forEach(s=>{
+  const m=MODO[s.c.mode]||['?','#999',''];
+  const icon=L.divIcon({className:'mkwrap',iconSize:[46,46],iconAnchor:[23,23],
+    html:'<div class="mk"><div class="ring"></div><div class="d ns"></div><div class="d eo"></div>'+
+         '<div class="d pe"></div><div class="lb">'+s.c.id+'</div>'+
+         '<div class="tag" style="background:'+m[1]+'">'+m[0]+'</div></div>'});
+  s.m=L.marker([s.c.lat,s.c.lon],{icon}).addTo(map);
+  s.m.bindTooltip(()=>tip(s),{direction:'top',offset:[0,-24]});
+  s.m.on('click',()=>pick(s.c.id));
+  const el=s.m.getElement();
+  s.ring=el.querySelector('.ring'); s.dns=el.querySelector('.ns'); s.deo=el.querySelector('.eo');
+  s.dpe=el.querySelector('.pe');
+});
+
+const Leg=L.Control.extend({options:{position:'bottomleft'},onAdd:function(){
+  const d=L.DomUtil.create('div','leg');
+  d.innerHTML='<b>Congestión</b><br><i style="background:#00c878"></i>Fluido<br>'+
+   '<i style="background:#ffbe00"></i>Moderado<br><i style="background:#eb3232"></i>Congestionado<br>'+
+   '<i style="background:#969696"></i>Sin datos vigentes<br>'+
+   '<small>Luces: ↑ N–S · → E–O · ↓ peatón<br>Modo: D degradado · A automático · M manual</small>';
+  return d; }});
+map.addControl(new Leg());
+
+function step(s){
+  const ph=phase(s.G,s.sec), colors=[ph.ns,ph.eo];
+  for(let i=0;i<2;i++){
+    const r=s.c.rate[i];
+    s.q[i]+=Math.floor(r)+(Math.random()<(r%1)?1:0);
+    if(colors[i]==='GREEN'){
+      s.credit[i]+=s.c.dis[i]; const cap=Math.floor(s.credit[i]); s.credit[i]-=cap;
+      s.q[i]-=Math.min(s.q[i],cap);
+    } else s.credit[i]=0;
+  }
+  s.sec=(s.sec+1)%120;
+}
+function pinta(s){
+  const live=s.c.live, ph=phase(s.G,s.sec), tot=s.q[0]+s.q[1];
+  let ring='rgba(150,150,150,.30)';
+  if(live){ ring=tot<10?'rgba(0,200,120,.35)':tot<25?'rgba(255,190,0,.40)':'rgba(235,50,50,.42)'; }
+  s.ring.style.background=ring;
+  s.ring.style.borderColor=s.c.id===SEL?'#fff':'transparent';
+  s.ring.style.boxShadow=s.c.id===SEL?'0 0 0 3px #1976d2, 0 0 14px #1976d2':'none';
+  const set=(el,col)=>{ el.style.background=col; el.style.boxShadow=col===OFF?'none':'0 0 9px '+col; };
+  set(s.dns,live?COL[ph.ns]:OFF); set(s.deo,live?COL[ph.eo]:OFF);
+  set(s.dpe,live&&ph.ped==='GREEN'?'#50a0ff':OFF);
+  if(s.m.isTooltipOpen()) s.m.setTooltipContent(tip(s));
+}
+let acc=0, last=performance.now();
+setInterval(()=>{
+  const now=performance.now(); acc+=SPEED*(now-last)/1000; last=now; if(acc>240) acc=240;
+  while(acc>=1){ S.forEach(s=>{ if(s.c.live) step(s); }); acc-=1; }
+  S.forEach(pinta);
+},200);
+S.forEach(pinta);
+}
+</script></body></html>"""
+
+
+def datos_cruce(item, vpm):
+    estado = item.get("state") or {}
+    gns, geo = verdes_de(estado)
+    colas = estado.get("queues") or [0, 0]
+    grupos = {g["code"]: g for g in item.get("groups", [])}
+    descarga = [grupos[c]["lanes"] * grupos[c]["discharge_vps"] if c in grupos else 0.5 for c in ("NS", "EO")]
+    tasa = [vpm.get((item["id"], c), 10) / 60 for c in ("NS", "EO")]
+    return {"id": item["id"], "name": item["name"], "lat": item["latitude"], "lon": item["longitude"],
+            "gns": gns, "geo": geo, "sec": int(estado.get("second", 0)),
+            "q": [int(colas[0]), int(colas[1])], "rate": tasa, "dis": descarga,
+            "live": bool(item.get("telemetry_current")), "mode": estado.get("mode") or ""}
+
+
+def mapa_html(datos, *, real=False, flujo=None):
+    return (MAPA_HTML.replace("__SEL__", str(int(identifier))).replace("__SPEED__", str(SIM_SPEED))
+            .replace("__BASE__", str(ESTILOS.index(estilo))).replace("__REAL__", seguro_json(real))
+            .replace("__FLOW__", seguro_json(flujo)).replace("__DATA__", seguro_json(datos)))
+
+
+def construir_mapa(items):
+    trafico = api("GET", "/traffic_data", params={"limit": 100})
+    vpm = {}  # observación más reciente por (cruce, grupo), en veh/min
+    for fila in (trafico or {}).get("items", []):
+        clave = (fila["intersection_id"], fila["group"])
+        if clave not in vpm and fila["arrivals_vpm"] is not None:
+            vpm[clave] = fila["arrivals_vpm"]
+    datos = [datos_cruce(i, vpm) for i in items]
+    return mapa_html(datos)
+
+
+@st.fragment(run_every="60s")
+def panel_tomtom():
+    st.subheader("Tráfico real · TomTom")
+    st.button("Actualizar ahora")
+    flujo = api("GET", f"/intersections/{identifier}/tomtom-flow")
+    referencias = [{"id": i["id"], "name": puntos[i["id"]], "lat": i["latitude"], "lon": i["longitude"]}
+                   for i in catalog["items"]]
+    mapa, detalle = st.columns([3, 2])
+    with mapa:
+        components.html(mapa_html(referencias, real=True, flujo=flujo), height=560)
+    with detalle:
+        st.markdown(f"**{puntos[identifier]}**")
+        st.caption("El tramo de TomTom se ubica cerca de este punto de referencia. "
+                   "Los estados y tiempos de los semáforos están en la vista Simulación.")
+        if flujo is None:
+            return
+        if flujo["road_closed"]:
+            st.warning("Cierre vial reportado por TomTom")
+        izquierda, derecha = st.columns(2)
+        izquierda.metric("Velocidad actual", f"{flujo['current_speed_kmh']} km/h")
+        derecha.metric("Velocidad en flujo libre", f"{flujo['free_flow_speed_kmh']} km/h")
+        izquierda.metric("Tiempo de recorrido", f"{flujo['current_travel_time_s']} s")
+        derecha.metric("Tiempo en flujo libre", f"{flujo['free_flow_travel_time_s']} s")
+        consulta = pd.Timestamp(flujo["fetched_at"]).tz_convert("America/Mexico_City")
+        st.caption(f"Confianza de TomTom {flujo['confidence']:.0%} · Consulta {consulta:%d/%m/%Y %H:%M:%S} "
+                   "hora CDMX · Actualización cada minuto")
+
+
+def seleccionar_tramo_comparado():
+    filas = st.session_state.tomtom_comparison_table.selection.rows
+    if filas:
+        _elegir(st.session_state.tomtom_comparison_ids[filas[0]])
+
+
+def panel_comparacion_tomtom():
+    st.subheader("Comparador de demoras")
+    referencias = tuple((i["id"], i["latitude"], i["longitude"]) for i in catalog["items"][:5])
+    if len(referencias) < 2:
+        st.info("Se necesitan al menos dos puntos en el catálogo para comparar demoras.")
+        return
+    if st.button("Comparar puntos", type="primary"):
+        comparacion = api("GET", "/tomtom/comparison", timeout=30,
+                          params={"point_id": [point[0] for point in referencias]})
+        st.session_state.tomtom_comparison = (referencias, comparacion)
+
+    puntos_consultados, datos = st.session_state.get("tomtom_comparison", (None, None))
+    if puntos_consultados != referencias or not datos:
+        return
+    st.caption("Selecciona una fila para mostrar el tramo en el mapa. "
+               "Pulsa Comparar puntos para obtener una comparación reciente.")
+    estados = {"available": "Disponible", "closed": "Cierre reportado",
+               "no_reference": "Sin tiempo de referencia", "unavailable": "Sin datos"}
+    filas = []
+    cierres = []
+    for tramo in datos:
+        nombre = puntos[tramo["intersection_id"]]
+        if tramo["status"] == "closed":
+            cierres.append(nombre)
+        hora = tramo["fetched_at"]
+        confianza = tramo["confidence"]
+        filas.append({
+            "Punto": nombre,
+            "Demora adicional": tramo["delay_s"],
+            "Aumento del tiempo": tramo["increase_pct"],
+            "Confianza TomTom": confianza * 100 if confianza is not None else None,
+            "Consulta (CDMX)": pd.Timestamp(hora).tz_convert("America/Mexico_City").strftime("%d/%m/%Y %H:%M:%S")
+            if hora else None,
+            "Estado": estados[tramo["status"]],
+        })
+    if cierres:
+        st.warning("Cierres reportados por TomTom · " + ", ".join(cierres))
+    problemas = list(dict.fromkeys(tramo["detail"] for tramo in datos if tramo["detail"]))
+    if problemas:
+        st.warning(" ".join(problemas))
+    st.session_state.tomtom_comparison_ids = [tramo["intersection_id"] for tramo in datos]
+    st.dataframe(pd.DataFrame(filas), hide_index=True, width="stretch", key="tomtom_comparison_table",
+                 on_select=seleccionar_tramo_comparado, selection_mode="single-row", column_config={
+                     "Demora adicional": st.column_config.NumberColumn(format="%d s"),
+                     "Aumento del tiempo": st.column_config.NumberColumn(format="%.1f %%"),
+                     "Confianza TomTom": st.column_config.NumberColumn(format="%.0f %%"),
+                 })
+
+
+if vista_real:
+    panel_tomtom()
+    panel_comparacion_tomtom()
+    st.stop()
+
+
+@st.fragment(run_every="5s")
+def panel_mapa():
+    datos = api("GET", "/intersections")
+    if not datos:
+        st.warning("Telemetría DESCONOCIDA. No hay confirmación actual del simulador.")
+        return
+    items = datos["items"]
+    firma = (identifier, estilo,
+             tuple((i["id"], bool(i["telemetry_current"]), verdes_de(i.get("state")),
+                    (i.get("state") or {}).get("mode")) for i in items))
+    html = html_cacheado("html_mapa", firma, lambda: construir_mapa(items), RESYNC_S)
+    components.html(html, height=560)
 
 
 @st.fragment(run_every="2s")
-def monitor():
-    latest = api("GET", "/intersections")
-    if not latest:
-        st.warning("Telemetría DESCONOCIDA. No hay confirmación actual del simulador.")
+def panel_metricas():
+    datos = api("GET", "/intersections")
+    if not datos:
         return
-    item = next(i for i in latest["items"] if i["id"] == identifier)
-    state = item["state"]
-    live = item["telemetry_current"]
-    if not live:
+    item = item_actual(datos["items"])
+    if item is None:
+        return
+    estado = item.get("state") or {}
+    vigente = item["telemetry_current"]
+    if not vigente:
         st.warning("Telemetría DESACTUALIZADA. Los últimos colores no representan el estado actual.")
-    cols = st.columns(4)
-    cols[0].metric("Modo confirmado" if live else "Último modo", state.get("mode", "desconocido"))
-    cols[1].metric("Ciclo simulado", state.get("cycle", "—"))
-    cols[2].metric("Cola NS (veh)", state.get("queues", [0, 0])[0])
-    cols[3].metric("Cola EO (veh)", state.get("queues", [0, 0])[1])
-    if state.get("sim_time"):
-        stamp = pd.Timestamp(state["sim_time"]).tz_convert("America/Mexico_City")
-        st.write(f"Reloj simulado: {stamp} · versión {item['plan_version']}")
-    st.write("Estado semafórico:", state.get("colors", {}) if live else "DESCONOCIDO")
-    st.caption(state.get("reason", "Sin plan aplicado"))
-    greens = state.get("green_s")
-    if greens:
-        st.write("Tiempos del último plan confirmado" if not live else "Tiempos del plan en ejecución")
+    colores = estado.get("colors") or {}
+    colas = estado.get("queues") or [0, 0]
+    gns, geo = verdes_de(estado)
+    tarjetas = [
+        ("Fase", FASES.get(colores.get("phase"), "—") if vigente else "Desconocida"),
+        ("Norte–Sur", NOMBRE_LUZ.get(colores.get("NS"), "—") if vigente else "—"),
+        ("Este–Oeste", NOMBRE_LUZ.get(colores.get("EO"), "—") if vigente else "—"),
+        ("Cola Norte–Sur", f"{colas[0]} veh"),
+        ("Cola Este–Oeste", f"{colas[1]} veh"),
+        ("Modo", MODOS.get(estado.get("mode"), "—")),
+        ("Verde N–S / E–O", f"{gns} s / {geo} s"),
+    ]
+    st.markdown('<div class="kp-fila">' + "".join(
+        f'<div class="kp"><span>{t}</span><b>{v}</b></div>' for t, v in tarjetas) + "</div>",
+        unsafe_allow_html=True)
+    st.caption(f"Cruce {nombres[identifier]} · segundo {estado.get('second', '—')} de 120 del ciclo "
+               f"{estado.get('cycle', '—')}. El reloj simulado corre más rápido que el real (SIM_SPEED).")
+    modos = {(i.get("state") or {}).get("mode") for i in datos["items"] if i["telemetry_current"]}
+    if modos == {"degraded"}:
+        st.info("Todos los cruces están en **modo degradado** (plan fijo 40/40 s) porque todavía no hay un "
+                "modelo promovido. Por eso los semáforos de todos los cruces se ven iguales. Para ver el "
+                "control adaptativo hay que entrenar, evaluar y promover el modelo (sección «Entrenamiento "
+                "y evaluación» del README) y reiniciar el servicio de IA.")
+
+
+# ---------------------------------------------------------------------------
+# Simulación del cruce seleccionado (coches y peatones dibujados en canvas)
+# ---------------------------------------------------------------------------
+SIM_HTML = """
+<canvas id="c" width="420" height="420"
+ style="background:#1d222c;border-radius:12px;display:block;width:100%;max-width:420px;height:auto"></canvas>
+<div id="cmp" style="font:12px system-ui,sans-serif;color:#cfd6e2;margin-top:8px;line-height:1.5"></div>
+<script>
+const LIVE=__LIVE__, SPEED=__SPEED__;
+const G={ns:__GNS__, eo:__GEO__};
+const G0={ns:40, eo:40};            // plan fijo de referencia
+const RATE=[__RNS__, __REO__];
+const DIS=[__DNS__, __DEO__];
+let second=__SEC__, q=[__QNS__, __QEO__], credit=[0,0];
+let qF=[q[0],q[1]], creditF=[0,0];  // misma demanda, pero con el plan fijo 40/40
+const cv=document.getElementById('c'), x=cv.getContext('2d');
+const W=420, LINE=144, GAP=28, MAXVIS=5;
+const COL={GREEN:'#00e676',YELLOW:'#ffd600',RED:'#ff1744'};
+const FASES={NS_GREEN:'Verde N–S',NS_YELLOW:'Amarillo N–S',NS_CLEAR:'Despeje N–S',EO_GREEN:'Verde E–O',
+ EO_YELLOW:'Amarillo E–O',EO_CLEAR:'Despeje E–O',PEDESTRIAN:'Fase peatonal',PEDESTRIAN_CLEAR:'Despeje peatonal'};
+const PAL=['#e53935','#1e88e5','#fdd835','#43a047','#fb8c00','#8e24aa','#eceff1','#26c6da','#90a4ae'];
+const PEDC=['#ffcc80','#80cbc4','#ce93d8','#fff59d','#ef9a9a'];
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+
+function phase(s,g){
+  g=g||G;
+  const t=[["NS_GREEN",g.ns,"GREEN","RED","RED"],["NS_YELLOW",3,"YELLOW","RED","RED"],
+   ["NS_CLEAR",2,"RED","RED","RED"],["EO_GREEN",g.eo,"RED","GREEN","RED"],
+   ["EO_YELLOW",3,"RED","YELLOW","RED"],["EO_CLEAR",2,"RED","RED","RED"],
+   ["PEDESTRIAN",20,"RED","RED","GREEN"],["PEDESTRIAN_CLEAR",10,"RED","RED","RED"]];
+  for(const [n,d,a,b,p] of t){ if(s<d) return {n,ns:a,eo:b,ped:p,left:d-s}; s-=d; }
+  return {n:"?",ns:"RED",eo:"RED",ped:"RED",left:0};
+}
+function rr(a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);
+  x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();}
+
+const vis=[[],[]];   // coches esperando (0 = Norte–Sur, 1 = Este–Oeste)
+let go=[];           // coches cruzando
+let walkers=[];
+const CW=[{x0:172,y0:156,x1:228,y1:156,ox:0,oy:1},{x0:172,y0:244,x1:228,y1:244,ox:0,oy:1},
+          {x0:156,y0:172,x1:156,y1:228,ox:1,oy:0},{x0:244,y0:172,x1:244,y1:228,ox:1,oy:0}];
+function newCar(d,p){return {d,p,v:0,color:rnd(PAL),brake:false};}
+for(let i=0;i<2;i++){ const n=Math.min(q[i],MAXVIS); for(let k=0;k<n;k++) vis[i].push(newCar(i,LINE-14-GAP*k)); }
+
+function simStep(){
+  const ph=phase(second), colors=[ph.ns,ph.eo];
+  const phF=phase(second,G0), colorsF=[phF.ns,phF.eo];
+  for(let i=0;i<2;i++){
+    const arr=Math.floor(RATE[i])+(Math.random()<(RATE[i]%1)?1:0);   // mismas llegadas para ambos planes
+    q[i]+=arr; qF[i]+=arr;
+    if(colors[i]==='GREEN'){
+      credit[i]+=DIS[i]; const cap=Math.floor(credit[i]); credit[i]-=cap;
+      const served=Math.min(q[i],cap); q[i]-=served;
+      for(let k=0;k<served && vis[i].length;k++){
+        const car=vis[i].shift();
+        const first=go.filter(g=>g.d===i).reduce((m,g)=>Math.min(m,g.p),9999);
+        if(first-car.p>=GAP){ car.v=Math.max(car.v,1.5); go.push(car); }
+      }
+    } else credit[i]=0;
+    if(colorsF[i]==='GREEN'){
+      creditF[i]+=DIS[i]; const capF=Math.floor(creditF[i]); creditF[i]-=capF;
+      qF[i]-=Math.min(qF[i],capF);
+    } else creditF[i]=0;
+    while(vis[i].length<Math.min(q[i],MAXVIS)) vis[i].push(newCar(i,-30));
+  }
+  second=(second+1)%120;
+}
+
+function drawCar(cx,cy,ang,color,brake){
+  x.save(); x.translate(cx,cy); x.rotate(ang);
+  x.fillStyle='rgba(0,0,0,.35)'; rr(-12,-4,25,13,4); x.fill();                 // sombra
+  x.fillStyle='#0b0b0d';                                                         // llantas
+  x.fillRect(-9,-8,6,3); x.fillRect(5,-8,6,3); x.fillRect(-9,5,6,3); x.fillRect(5,5,6,3);
+  x.fillStyle=color; rr(-12,-6,24,12,4); x.fill();                               // carrocería
+  x.fillStyle='rgba(255,255,255,.18)'; rr(-12,-6,24,5,3); x.fill();              // brillo
+  x.fillStyle='rgba(18,28,42,.92)'; rr(-5,-4.5,11,9,2); x.fill();                // cristales
+  x.fillStyle=color; rr(-3.5,-3,7,6,2); x.fill();                                // techo
+  x.fillStyle='#fff7b0'; x.fillRect(10,-5,2,3); x.fillRect(10,2,2,3);            // faros
+  if(brake){ x.shadowColor='#ff2020'; x.shadowBlur=8; }
+  x.fillStyle=brake?'#ff3030':'#7a1010'; x.fillRect(-12,-5,2,3); x.fillRect(-12,2,2,3);  // luces traseras
+  x.restore();
+}
+function housing(cx,cy,vertical,state){
+  x.save(); x.fillStyle='#0d0f14'; x.strokeStyle='#555b66'; x.lineWidth=1;
+  if(vertical) rr(cx-9,cy-23,18,46,5); else rr(cx-23,cy-9,46,18,5);
+  x.fill(); x.stroke();
+  const names=['RED','YELLOW','GREEN'], dim={RED:'#3a1a1a',YELLOW:'#3a3515',GREEN:'#153a22'};
+  names.forEach((n,k)=>{
+    const px=vertical?cx:cx+(k-1)*14, py=vertical?cy+(k-1)*14:cy, on=(state===n);
+    x.beginPath(); x.arc(px,py,5.5,0,7);
+    if(on){ x.shadowColor=COL[n]; x.shadowBlur=14; x.fillStyle=COL[n]; } else { x.shadowBlur=0; x.fillStyle=dim[n]; }
+    x.fill(); x.shadowBlur=0;
+  });
+  x.restore();
+}
+
+function scene(ph){
+  x.fillStyle='#1d222c'; x.fillRect(0,0,W,W);
+  x.fillStyle='#272e3b';
+  [[10,10],[250,10],[10,250],[250,250]].forEach(([a,b])=>{ rr(a,b,150,150,12); x.fill(); });
+  x.fillStyle='rgba(255,255,255,.05)';                                           // ventanas
+  [[10,10],[250,10],[10,250],[250,250]].forEach(([a,b])=>{
+    for(let i=0;i<5;i++)for(let j=0;j<5;j++) x.fillRect(a+14+i*27,b+14+j*27,14,14); });
+  x.fillStyle='#3a4150'; x.fillRect(160,0,80,W); x.fillRect(0,160,W,80);          // aceras
+  x.fillStyle='#2b2f3a'; x.fillRect(170,0,60,W); x.fillRect(0,170,W,60);          // calzada
+  x.strokeStyle='#e0b400'; x.lineWidth=2; x.setLineDash([10,8]); x.beginPath();
+  x.moveTo(200,0); x.lineTo(200,144); x.moveTo(200,256); x.lineTo(200,W);
+  x.moveTo(0,200); x.lineTo(144,200); x.moveTo(256,200); x.lineTo(W,200); x.stroke(); x.setLineDash([]);
+  x.fillStyle='#f2f2f2';                                                         // líneas de alto
+  x.fillRect(170,LINE,30,3); x.fillRect(LINE,200,3,30); x.fillRect(200,254,30,3); x.fillRect(254,170,3,30);
+  x.fillStyle=ph.ped==='GREEN'?'rgba(255,255,255,.75)':'rgba(255,255,255,.30)';  // cebras
+  for(let i=0;i<6;i++){ x.fillRect(172+i*10,150,6,12); x.fillRect(172+i*10,238,6,12);
+                        x.fillRect(150,172+i*10,12,6); x.fillRect(238,172+i*10,12,6); }
+}
+
+const cmp=document.getElementById('cmp');
+function pintaCmp(){
+  const a=q[0]+q[1], b=qF[0]+qF[1];
+  let t='Cola total con las <b>mismas llegadas</b>: plan en ejecución (N–S '+G.ns+' s / E–O '+G.eo+' s) <b>'+a+
+        '</b> veh · plan fijo 40/40 <b>'+b+'</b> veh.<br>';
+  if(G.ns===G0.ns && G.eo===G0.eo) t+='Es el mismo plan, por eso no hay diferencia.';
+  else { const d=b-a;
+    t+=d>0?'El plan en ejecución tiene '+d+' veh menos en cola.':d<0?'El plan fijo tendría '+(-d)+' veh menos en cola.':'Sin diferencia por ahora.'; }
+  t+=' <span style="opacity:.6">(se reinicia en cada sincronización)</span>';
+  cmp.innerHTML=t;
+}
+
+let acc=0, n=0;
+function frame(){
+  const ph=phase(second), colors=[ph.ns,ph.eo];
+  if(LIVE){
+    acc+=SPEED*0.033; if(acc>200) acc=200;
+    while(acc>=1){ simStep(); acc-=1; }
+    for(let i=0;i<2;i++) vis[i].forEach((car,k)=>{
+      const tp=LINE-14-GAP*k, dx=tp-car.p;
+      car.p+=Math.max(-4,Math.min(4,dx*0.2));
+      car.brake=(colors[i]!=='GREEN' && dx<10) || dx>1.5;
+    });
+    go.forEach(g=>{ g.v=Math.min(g.v+0.3,5.5); g.p+=g.v; g.brake=false; });
+    go=go.filter(g=>g.p<W+40);
+    if(ph.ped==='GREEN' && Math.random()<0.10){
+      walkers.push({w:rnd(CW),t:0,dir:Math.random()<.5,sp:0.012+Math.random()*0.006,off:(Math.random()-.5)*8,color:rnd(PEDC)});
+    }
+    walkers.forEach(p=>p.t+=p.sp); walkers=walkers.filter(p=>p.t<1);
+  }
+  scene(ph);
+  housing(240,112,true,ph.ns); housing(112,238,false,ph.eo);
+  x.fillStyle='#9aa4b2'; x.font='10px system-ui,sans-serif'; x.textAlign='center';
+  x.fillText('N–S',240,82); x.fillText('E–O',112,262); x.textAlign='left';
+  for(let i=0;i<2;i++){
+    vis[i].forEach(c=>{ if(i===0) drawCar(185,c.p,Math.PI/2,c.color,c.brake); else drawCar(c.p,215,0,c.color,c.brake); });
+    if(q[i]>MAXVIS){ x.fillStyle='#fff'; x.font='bold 12px system-ui,sans-serif';
+      if(i===0) x.fillText('+'+(q[i]-MAXVIS),150,12); else x.fillText('+'+(q[i]-MAXVIS),4,168); }
+  }
+  go.forEach(c=>{ if(c.d===0) drawCar(185,c.p,Math.PI/2,c.color,false); else drawCar(c.p,215,0,c.color,false); });
+  walkers.forEach(p=>{
+    const f=p.dir?p.t:1-p.t, px=p.w.x0+(p.w.x1-p.w.x0)*f+p.w.ox*p.off, py=p.w.y0+(p.w.y1-p.w.y0)*f+p.w.oy*p.off;
+    x.fillStyle='rgba(0,0,0,.4)'; x.beginPath(); x.arc(px+1,py+1,4,0,7); x.fill();
+    x.fillStyle=p.color; x.beginPath(); x.arc(px,py,3.6,0,7); x.fill();
+  });
+  x.fillStyle='rgba(0,0,0,.55)'; rr(8,W-34,W-16,26,8); x.fill();
+  x.fillStyle=ph.ped==='GREEN'?'#50a0ff':(ph.ns!=='RED'?COL[ph.ns]:(ph.eo!=='RED'?COL[ph.eo]:'#ff1744'));
+  x.beginPath(); x.arc(24,W-21,6,0,7); x.fill();
+  x.fillStyle='#fff'; x.font='13px system-ui,sans-serif';
+  x.fillText((FASES[ph.n]||ph.n)+' · '+ph.left+' s · seg '+second+'/120',38,W-16);
+  if(!LIVE){ x.fillStyle='rgba(0,0,0,.6)'; x.fillRect(0,0,W,W); x.fillStyle='#fff';
+    x.font='16px system-ui,sans-serif'; x.textAlign='center'; x.fillText('Telemetría desactualizada',210,210); x.textAlign='left'; }
+  if(++n%10===0) pintaCmp();
+}
+pintaCmp();
+setInterval(frame,33);
+</script>
+"""
+
+
+def construir_sim(item):
+    estado = item.get("state") or {}
+    gns, geo = verdes_de(estado)
+    colas = estado.get("queues") or [0, 0]
+    grupos = {g["code"]: g for g in item.get("groups", [])}
+    trafico = api("GET", "/traffic_data", params={"intersection_id": identifier, "limit": 60})
+    vpm = {}
+    for fila in (trafico or {}).get("items", []):
+        if fila["group"] in ("NS", "EO") and fila["group"] not in vpm and fila["arrivals_vpm"] is not None:
+            vpm[fila["group"]] = fila["arrivals_vpm"]
+    descarga = [grupos[c]["lanes"] * grupos[c]["discharge_vps"] if c in grupos else 0.5 for c in ("NS", "EO")]
+    return (SIM_HTML
+            .replace("__LIVE__", "true" if item["telemetry_current"] else "false")
+            .replace("__SPEED__", str(SIM_SPEED))
+            .replace("__GNS__", str(gns)).replace("__GEO__", str(geo))
+            .replace("__RNS__", str(vpm.get("NS", 10) / 60)).replace("__REO__", str(vpm.get("EO", 10) / 60))
+            .replace("__DNS__", str(descarga[0])).replace("__DEO__", str(descarga[1]))
+            .replace("__SEC__", str(int(estado.get("second", 0))))
+            .replace("__QNS__", str(int(colas[0]))).replace("__QEO__", str(int(colas[1]))))
+
+
+@st.fragment(run_every="5s")
+def panel_detalle():
+    datos = api("GET", "/intersections")
+    if not datos:
+        return
+    item = item_actual(datos["items"])
+    if item is None:
+        return
+    st.markdown(f"**Simulación del cruce {nombres[identifier]}**")
+    firma = (identifier, bool(item["telemetry_current"]), verdes_de(item.get("state")))
+    components.html(html_cacheado("html_sim", firma, lambda: construir_sim(item), RESYNC_S), height=490)
+    estado = item.get("state") or {}
+    verdes = estado.get("green_s")
+    if verdes:
+        st.write("Tiempos del plan en ejecución" if item["telemetry_current"]
+                 else "Tiempos del último plan confirmado")
         st.dataframe(pd.DataFrame([
-            {"Dirección": code, "Verde (s)": greens[key], "Amarillo (s)": 3,
-             "Rojo (s)": 117-greens[key]}
-            for code, key in (("Norte–Sur", "ns"), ("Este–Oeste", "eo"))
+            {"Dirección": nombre, "Verde (s)": verdes[clave], "Amarillo (s)": 3, "Rojo (s)": 117 - verdes[clave]}
+            for nombre, clave in (("Norte–Sur", "ns"), ("Este–Oeste", "eo"))
         ]), hide_index=True, width="stretch")
+        st.caption(estado.get("reason", "Sin plan aplicado"))
         st.caption("Ciclo de 120 s y fase peatonal exclusiva de 20 s. En automático, la demanda "
                    "pronosticada ajusta los verdes; en degradado se conserva el plan fijo 40/40.")
-    traffic = api("GET", "/traffic_data", params={"intersection_id": identifier, "limit": 60})
-    if traffic and traffic["items"]:
-        table = pd.DataFrame(traffic["items"])
-        table["window_end"] = pd.to_datetime(table.window_end, utc=True).dt.tz_convert("America/Mexico_City")
-        st.dataframe(table[["group", "window_end", "arrivals_vpm", "speed_kmh", "weather",
-                            "source", "quality", "current"]], width="stretch", hide_index=True)
-        chart = table.pivot_table(index="window_end", columns="group", values="arrivals_vpm", aggfunc="first")
-        st.line_chart(chart, y_label="Llegadas (veh/min)")
-        st.download_button("Exportar observaciones JSON", json.dumps(traffic, ensure_ascii=False, indent=2),
-                           file_name=f"trafico-sintetico-{identifier}.json", mime="application/json")
 
 
-monitor()
+# ---------------------------------------------------------------------------
+# Datos de tráfico (tabla, gráfica, exportación)
+# ---------------------------------------------------------------------------
+@st.fragment(run_every="5s")
+def panel_datos():
+    trafico = api("GET", "/traffic_data", params={"intersection_id": identifier, "limit": 60})
+    if not (trafico and trafico["items"]):
+        st.info("Aún no hay observaciones de tráfico para este cruce.")
+        return
+    tabla = pd.DataFrame(trafico["items"])
+    tabla["window_end"] = pd.to_datetime(tabla.window_end, utc=True).dt.tz_convert("America/Mexico_City")
+    grafica = tabla.pivot_table(index="window_end", columns="group", values="arrivals_vpm", aggfunc="first")
+    st.line_chart(grafica, y_label="Llegadas (veh/min)")
+    st.dataframe(tabla[["group", "window_end", "arrivals_vpm", "speed_kmh", "weather",
+                        "source", "quality", "current"]], width="stretch", hide_index=True)
+    st.download_button("Exportar observaciones JSON", json.dumps(trafico, ensure_ascii=False, indent=2),
+                       file_name=f"trafico-sintetico-{identifier}.json", mime="application/json")
+
+
+# ---------------------------------------------------------------------------
+# Distribución de la página
+# ---------------------------------------------------------------------------
+col_mapa, col_detalle = st.columns([3, 2])
+with col_mapa:
+    panel_mapa()
+    panel_metricas()
+with col_detalle:
+    panel_detalle()
+
+st.subheader("Observaciones de tráfico")
+panel_datos()
+
 st.subheader("Intervención del administrador")
 with st.form("manual"):
     green_ns = st.slider("Verde NS (s)", 20, 60, 40)
@@ -111,22 +798,24 @@ with st.form("manual"):
     cycles = st.number_input("Vigencia en ciclos", min_value=1, max_value=10, value=1)
     submit = st.form_submit_button("Solicitar intervención al siguiente ciclo")
 if submit:
-    # Consultar versión en el momento del envío para reducir conflictos evitables.
+    # Consultar la versión en el momento del envío para reducir conflictos evitables.
     current = api("GET", "/intersections")
     if current:
-        item = next(i for i in current["items"] if i["id"] == identifier)
-        result = api("POST", "/manual_override", json={"intersection_id": identifier,
-            "previous_version": item["plan_version"], "green_ns": green_ns, "green_eo": 80-green_ns,
+        item = item_actual(current["items"])
+        result = api("POST", "/manual_override", json={
+            "intersection_id": identifier, "previous_version": item["plan_version"],
+            "green_ns": green_ns, "green_eo": 80 - green_ns,
             "reason": reason, "duration_cycles": int(cycles)})
         if result:
-            st.success(f"Solicitud {result['id']}: {result['status']}. La aplicación requiere confirmación del trabajador.")
+            st.success(f"Solicitud {result['id']}: {result['status']}. "
+                       "La aplicación requiere confirmación del trabajador.")
             st.json(result)
 
 left, right = st.columns(2)
 if left.button("Obtener propuesta del modelo"):
     current = api("GET", "/intersections")
     if current:
-        item = next(i for i in current["items"] if i["id"] == identifier)
+        item = item_actual(current["items"])
         result = api("POST", "/predict_light", json={"intersection_id": identifier,
                                                     "previous_version": item["plan_version"]})
         if result:
@@ -134,7 +823,7 @@ if left.button("Obtener propuesta del modelo"):
 if right.button("Volver al automático al siguiente ciclo"):
     current = api("GET", "/intersections")
     if current:
-        item = next(i for i in current["items"] if i["id"] == identifier)
+        item = item_actual(current["items"])
         result = api("POST", "/automatic", json={"intersection_id": identifier,
                                                 "previous_version": item["plan_version"]})
         if result:

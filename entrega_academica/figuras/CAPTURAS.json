@@ -1,0 +1,15 @@
+{
+  "version_app": "4f377b2",
+  "fecha_cdmx": "2026-11-23T04:25:11-06:00",
+  "ambiente": "Instancia temporal con SQLite y cuenta de demostración",
+  "fuente_tomtom": "Consultas en vivo del mapa y del comparador de cinco puntos del catálogo",
+  "presupuesto_captura": 5,
+  "archivos": [
+    "FIG_007_acceso.png",
+    "FIG_008_monitor.png",
+    "FIG_009_intervencion.png",
+    "FIG_010_auditoria.png",
+    "FIG_011_tomtom.png",
+    "FIG_012_comparador.png"
+  ]
+}

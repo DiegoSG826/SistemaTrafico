@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import Annotated
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
@@ -9,7 +10,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from database.manage import add_groups
-from . import schemas, services
+from . import schemas, services, tomtom
 from .config import Settings, settings
 from .controller import Timing
 from .database import aware, connect
@@ -35,8 +36,14 @@ def create_app(config: Settings | None = None, factory=None, infer=None):
         if engine:
             engine.dispose()
 
-    app = FastAPI(title="SGT Cuauhtémoc · simulación", version="0.2.0", lifespan=lifespan)
+    app = FastAPI(title="SGT Cuauhtémoc · monitoreo y simulación", version="0.2.0", lifespan=lifespan)
     app.state.infer = infer or (lambda rows: services.infer_http(config.ml_service_url, rows))
+    tomtom_key = config.tomtom_api_key.get_secret_value().strip()
+    traffic_reader = tomtom.TomTomReader(tomtom_key, config.tomtom_daily_request_budget)
+
+    def require_tomtom_key():
+        if not tomtom_key:
+            raise HTTPException(503, "TomTom no está configurado. Agrega TOMTOM_API_KEY al backend.")
 
     @app.middleware("http")
     async def correlate(request, call_next):
@@ -106,6 +113,46 @@ def create_app(config: Settings | None = None, factory=None, infer=None):
             grouped[group.intersection_id].append(group)
         return {"items": [intersection_json(db, i, grouped[i.id]) for i in items], "offset": offset, "limit": limit,
                 "study_area": STUDY_AREA}
+
+    @app.get("/intersections/{identifier}/tomtom-flow", response_model=tomtom.TomTomFlow, responses={
+        401: {"description": "Autenticación requerida"},
+        404: {"description": "Punto de consulta desconocido"},
+        502: {"description": "Datos de TomTom indisponibles o inválidos"},
+        503: {"description": "Clave de TomTom indisponible, inválida o presupuesto de consultas alcanzado"},
+    })
+    def tomtom_flow(identifier: int, current=Depends(user), db=Depends(session, scope="function")):
+        """Obtiene el tramo cercano al punto del catálogo para visualizar tráfico actual."""
+        item = services.get_intersection(db, identifier)
+        require_tomtom_key()
+        reading = traffic_reader.get(item.latitude, item.longitude)
+        if isinstance(reading, tomtom.FlowFailure):
+            headers = {"Retry-After": str(reading.retry_after)} if reading.retry_after else None
+            raise HTTPException(reading.status_code, reading.detail, headers=headers)
+        return reading
+
+    @app.get("/tomtom/comparison", response_model=list[tomtom.PointDelay], responses={
+        401: {"description": "Autenticación requerida"},
+        404: {"description": "Algún punto de consulta no existe"},
+        503: {"description": "Clave de TomTom sin configurar"},
+    })
+    def tomtom_comparison(point_id: Annotated[list[int], Query(min_length=2, max_length=5)],
+                          current=Depends(user), db=Depends(session, scope="function")):
+        """Compara demoras actuales y conserva resultados parciales."""
+        ids = list(dict.fromkeys(point_id))
+        if len(ids) < 2:
+            raise HTTPException(422, "Selecciona al menos dos puntos distintos.")
+        points = {item.id: item for item in db.scalars(
+            select(Intersection).where(Intersection.id.in_(ids)))}
+        if len(points) != len(ids):
+            raise HTTPException(404, "Algún punto de consulta no existe.")
+        require_tomtom_key()
+        delays = [
+            tomtom.PointDelay.from_reading(
+                identifier, traffic_reader.get(points[identifier].latitude, points[identifier].longitude)
+            )
+            for identifier in ids
+        ]
+        return sorted(delays, key=lambda row: (row.delay_s is None, -(row.delay_s or 0)))
 
     @app.post("/intersections", status_code=201)
     def create_intersection(body: schemas.IntersectionInput, request: Request,

@@ -197,5 +197,210 @@
       "LS": 42.0,
       "slack": 0.0
     }
-  }
+  },
+  "tomtom_extension": {
+    "duration_workdays": 13.0,
+    "calendar_reserve_workdays": 0,
+    "critical_path": [
+      "P",
+      "Q",
+      "S",
+      "T",
+      "U",
+      "V",
+      "X"
+    ],
+    "critical_variance_days2": 0.5555555555555556,
+    "tasks": {
+      "P": {
+        "predecessors": [],
+        "TE": 2.0,
+        "ES": 0,
+        "EF": 2.0,
+        "variance": 0.1111111111111111,
+        "LF": 2.0,
+        "LS": 0.0,
+        "slack": 0.0
+      },
+      "Q": {
+        "predecessors": [
+          "P"
+        ],
+        "TE": 3.0,
+        "ES": 2.0,
+        "EF": 5.0,
+        "variance": 0.1111111111111111,
+        "LF": 5.0,
+        "LS": 2.0,
+        "slack": 0.0
+      },
+      "R": {
+        "predecessors": [
+          "P"
+        ],
+        "TE": 2.0,
+        "ES": 2.0,
+        "EF": 4.0,
+        "variance": 0.1111111111111111,
+        "LF": 5.0,
+        "LS": 3.0,
+        "slack": 1.0
+      },
+      "S": {
+        "predecessors": [
+          "Q",
+          "R"
+        ],
+        "TE": 1.0,
+        "ES": 5.0,
+        "EF": 6.0,
+        "variance": 0.0,
+        "LF": 6.0,
+        "LS": 5.0,
+        "slack": 0.0
+      },
+      "T": {
+        "predecessors": [
+          "S"
+        ],
+        "TE": 2.0,
+        "ES": 6.0,
+        "EF": 8.0,
+        "variance": 0.1111111111111111,
+        "LF": 8.0,
+        "LS": 6.0,
+        "slack": 0.0
+      },
+      "U": {
+        "predecessors": [
+          "T"
+        ],
+        "TE": 1.0,
+        "ES": 8.0,
+        "EF": 9.0,
+        "variance": 0.0,
+        "LF": 9.0,
+        "LS": 8.0,
+        "slack": 0.0
+      },
+      "V": {
+        "predecessors": [
+          "U"
+        ],
+        "TE": 2.0,
+        "ES": 9.0,
+        "EF": 11.0,
+        "variance": 0.1111111111111111,
+        "LF": 11.0,
+        "LS": 9.0,
+        "slack": 0.0
+      },
+      "W": {
+        "predecessors": [
+          "U"
+        ],
+        "TE": 1.0,
+        "ES": 9.0,
+        "EF": 10.0,
+        "variance": 0.0,
+        "LF": 11.0,
+        "LS": 10.0,
+        "slack": 1.0
+      },
+      "X": {
+        "predecessors": [
+          "V",
+          "W"
+        ],
+        "TE": 2.0,
+        "ES": 11.0,
+        "EF": 13.0,
+        "variance": 0.1111111111111111,
+        "LF": 13.0,
+        "LS": 11.0,
+        "slack": 0.0
+      }
+    },
+    "basis": "Estimaci\u00f3n acad\u00e9mica para reproducir la ampliaci\u00f3n. Duraciones ejecutadas sin registrar.",
+    "duration_inputs": {
+      "P": [
+        1,
+        2,
+        3
+      ],
+      "Q": [
+        2,
+        3,
+        4
+      ],
+      "R": [
+        1,
+        2,
+        3
+      ],
+      "S": [
+        1,
+        1,
+        1
+      ],
+      "T": [
+        1,
+        2,
+        3
+      ],
+      "U": [
+        1,
+        1,
+        1
+      ],
+      "V": [
+        1,
+        2,
+        3
+      ],
+      "W": [
+        1,
+        1,
+        1
+      ],
+      "X": [
+        1,
+        2,
+        3
+      ]
+    },
+    "labels": {
+      "P": "Dise\u00f1o y contrato",
+      "Q": "Backend y consulta TomTom",
+      "R": "Integraci\u00f3n del dashboard",
+      "S": "Pruebas con el proveedor",
+      "T": "Documentaci\u00f3n y capturas",
+      "U": "Dise\u00f1o del comparador",
+      "V": "Lecturas y cuota del backend",
+      "W": "Tabla y selecci\u00f3n del tramo",
+      "X": "Pruebas y documentaci\u00f3n"
+    }
+  },
+  "git_milestones": [
+    {
+      "date_cdmx": "2026-11-01",
+      "commit": "ecf0b0a",
+      "description": "Entrega acad\u00e9mica inicial"
+    },
+    {
+      "date_cdmx": "2026-11-16",
+      "commit": "e4da62b",
+      "description": "Mapa y simulaci\u00f3n en el dashboard"
+    },
+    {
+      "date_cdmx": "2026-11-22",
+      "commit": "1e48f7e",
+      "description": "Vista TomTom integrada"
+    },
+    {
+      "date_cdmx": "2026-11-23",
+      "commit": "4f377b2",
+      "description": "Comparador integrado"
+    }
+  ]
 }

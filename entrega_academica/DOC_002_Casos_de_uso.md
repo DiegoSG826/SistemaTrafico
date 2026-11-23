@@ -1,12 +1,12 @@
 # DOC_002 Especificación de casos de uso
 
-Versión 1.0 · Cuauhtémoc · 1 de noviembre de 2026.
+Versión 1.3 · Cuauhtémoc · 23 de noviembre de 2026.
 
-Todos los casos operan sobre semáforos simulados. ACT_001: administrador; ACT_002: proveedor de datos; ACT_003: evaluador académico que ejecuta herramientas de evaluación. El trabajador y la IA son componentes internos, no actores de interfaz.
+El sistema combina control semafórico simulado y monitoreo vial. El administrador (ACT_001) gestiona y consulta. El proveedor de observaciones (ACT_002) y el evaluador académico (ACT_003) aportan datos o evidencia. TomTom (ACT_004) aporta lecturas para CU_011 y CU_012. Un usuario lector (ACT_005) puede iniciar sesión, consultar, comparar demoras y exportar observaciones. El trabajador y la IA son componentes internos.
 
 ## CU_001 Acceder
 
-**Actor:** ACT_001. **Requisitos:** RF_001.
+**Actor:** ACT_001, ACT_005. **Requisitos:** RF_001.
 
 **Disparador:** el actor solicita acceder. **Precondiciones:** Credenciales y API disponibles.
 
@@ -17,7 +17,7 @@ Todos los casos operan sobre semáforos simulados. ACT_001: administrador; ACT_0
 1. Ingresar correo y contraseña.
 2. Enviar formulario.
 3. Verificar hash y usuario activo.
-4. Emitir jwt.
+4. Emitir JWT.
 5. Abrir monitor.
 
 ### ALT_001 Alternativas y excepciones
@@ -41,7 +41,7 @@ Credenciales inválidas: 401 sin sesión; API ausente: mensaje de conexión; tok
 1. Consultar versión.
 2. Enviar alta/edición.
 3. Validar coordenadas/capacidad.
-4. Crear grupos ns/eo/peaton o editar.
+4. Crear grupos NS/EO/PEATON o editar.
 5. Auditar y confirmar transacción.
 
 ### ALT_002 Alternativas y excepciones
@@ -56,14 +56,14 @@ Versión obsoleta: 409; valores inválidos: 422; fallo de BD: 503 sin éxito; ca
 
 **Actor:** ACT_002. **Requisitos:** RF_003, RF_004, RF_005.
 
-**Disparador:** el actor solicita registrar observaciones. **Precondiciones:** Fuente identificada, grupo existente y lote de 1 a 1000 objetos.
+**Disparador:** el actor solicita registrar observaciones. **Precondiciones:** Fuente identificada, grupo existente y lote de 1 a 1000 objetos. La API de ingesta exige sesión administrativa.
 
 **Entradas:** datos del contrato OpenAPI o parámetros CLI del caso. **Resultado:** Resultados aceptado/duplicado/rechazado por elemento.
 
 ### FLU_003 Flujo principal
 
 1. Enviar ventanas de 60 s.
-2. Validar estructura/unidades/utc.
+2. Validar estructura/unidades/UTC.
 3. Identificar faltantes y retraso.
 4. Deduplicar por fuente/grupo/ventana.
 5. Guardar elementos válidos.
@@ -79,7 +79,7 @@ Duplicado: no crear otra fila; negativo/futuro/ventana inválida: rechazo indivi
 
 ## CU_004 Consultar tráfico
 
-**Actor:** ACT_001. **Requisitos:** RF_006.
+**Actor:** ACT_001, ACT_005. **Requisitos:** RF_006.
 
 **Disparador:** el actor solicita consultar tráfico. **Precondiciones:** Usuario autenticado.
 
@@ -114,10 +114,10 @@ Fecha sin zona: 422; cruce desconocido: 404; falta de comunicación: estado desc
 1. Solicitar propuesta.
 2. Verificar versión.
 3. Construir atributos de cinco ventanas.
-4. Consultar ia con timeout.
+4. Consultar IA con timeout.
 5. Calcular verdes/restricciones.
 6. Persistir modelo/predicciones/plan.
-7. Devolver proposed.
+7. Devolver PROPOSED.
 
 ### ALT_005 Alternativas y excepciones
 
@@ -139,7 +139,7 @@ Versión obsoleta: 409; IA o datos inválidos: 40/40 con modo degradado y causa;
 
 1. Solicitar aplicación al siguiente ciclo.
 2. Reservar versión atómicamente.
-3. Marcar pending.
+3. Marcar PENDING.
 4. Al límite volver a validar prioridad/datos.
 5. Sustituir activo y confirmar aplicado_en.
 6. Publicar estado.
@@ -194,7 +194,7 @@ Verdes incompatibles o 11 ciclos: 422; versión antigua: 409; fuente/IA ausente:
 4. Medir tras calentamiento.
 5. Agregar por escenario.
 6. Remuestrear corridas.
-7. Exportar json.
+7. Exportar JSON.
 8. Decidir elegibilidad sin promover automáticamente.
 
 ### ALT_008 Alternativas y excepciones
@@ -207,7 +207,7 @@ Artefacto alterado: rechazo; criterio no superado: conservar fijo; sobresaturaci
 
 ## CU_009 Supervisar y exportar
 
-**Actor:** ACT_001. **Requisitos:** RF_012, RF_016.
+**Actor:** ACT_001, ACT_005. **Requisitos:** RF_012, RF_016.
 
 **Disparador:** el actor solicita supervisar y exportar. **Precondiciones:** Sesión válida y dashboard disponible.
 
@@ -219,7 +219,7 @@ Artefacto alterado: rechazo; criterio no superado: conservar fijo; sobresaturaci
 2. Actualizar cada 2 s.
 3. Leer modo, colas y tiempos.
 4. Revisar frescura.
-5. Exportar json.
+5. Exportar JSON.
 6. Distinguir solicitud pendiente de plan activo.
 
 ### ALT_009 Alternativas y excepciones
@@ -252,3 +252,51 @@ Viewer: 403; API/BD caída: no mostrar éxito; no permitir editar/borrar desde r
 **Postcondición y criterio de aceptación:** No registrar contraseñas ni tokens.
 
 **Evidencia asociada:** `test_permissions, reports/smoke.json`. La existencia de una prueba no equivale a la aceptación humana del caso.
+
+## CU_011 Visualizar tráfico real
+
+**Actor:** ACT_001 o ACT_005. ACT_004 provee los datos. **Requisitos:** RF_017.
+
+**Disparador:** el actor solicita visualizar tráfico real. **Precondiciones:** Sesión válida, punto del catálogo y clave TomTom configurada en el servidor.
+
+**Entradas:** datos del contrato OpenAPI o parámetros CLI del caso. **Resultado:** Tramo y métricas actuales disponibles para consulta.
+
+### FLU_011 Flujo principal
+
+1. Elegir Tráfico real (TomTom) y un punto del catálogo.
+2. Consultar el tramo cercano por medio de FastAPI.
+3. Mostrar geometría, velocidades, tiempos, confianza, cierre y hora de consulta.
+4. Actualizar al minuto o a demanda.
+5. Volver a Simulación desde el selector.
+
+### ALT_011 Alternativas y excepciones
+
+Punto desconocido: 404. Clave ausente, rechazada o cuota agotada: 503. Fallo de red o datos inválidos: 502. La vista permite regresar a la simulación.
+
+**Postcondición y criterio de aceptación:** La clave permanece en el servidor y la consulta no registra observaciones ni interviene en planes.
+
+**Evidencia asociada:** `tests/test_tomtom.py, tests/test_dashboard.py, DOC_005 RES_007`. La existencia de una prueba no equivale a la aceptación humana del caso.
+
+## CU_012 Comparar demoras por tramo
+
+**Actor:** ACT_001 o ACT_005. ACT_004 aporta lecturas que falten o hayan vencido. **Requisitos:** RF_018.
+
+**Disparador:** el actor solicita comparar demoras por tramo. **Precondiciones:** Vista TomTom abierta, sesión válida y al menos dos puntos de catálogo.
+
+**Entradas:** datos del contrato OpenAPI o parámetros CLI del caso. **Resultado:** Comparación bajo demanda con demora, aumento, confianza, hora de lectura y estado.
+
+### FLU_012 Flujo principal
+
+1. Pulsar Comparar puntos.
+2. Consultar GET /tomtom/comparison para hasta cinco puntos.
+3. Reutilizar lecturas recientes o consultar TomTom dentro del presupuesto.
+4. Ordenar los tramos disponibles por demora adicional e indicar cierres o datos ausentes.
+5. Seleccionar una fila para abrir su tramo en el mapa.
+
+### ALT_012 Alternativas y excepciones
+
+Lista inválida o punto desconocido reciben 422 o 404. Falta de clave recibe 503. Ante un cierre, una referencia nula o una lectura indisponible, la fila conserva el estado correspondiente. Un 429 activa la pausa del proveedor.
+
+**Postcondición y criterio de aceptación:** Los resultados parciales permanecen visibles. El mapa y la tabla comparten lecturas por 120 s.
+
+**Evidencia asociada:** `tests/test_tomtom.py, tests/test_dashboard.py, DOC_004 PRU_015 y DOC_005 RES_009`. La existencia de una prueba no equivale a la aceptación humana del caso.

@@ -4,9 +4,9 @@
 
 Presentamos un gestor de semáforos simulados para Cuauhtémoc. La IA anticipa llegadas; el controlador reparte verde y el simulador aplica el plan. No controla semáforos físicos ni usa aforos oficiales.
 
-## DIA_002 Del dato al plan confirmado
+## DIA_002 Control simulado y tráfico real
 
-El generador registra observaciones por minuto. La API consulta la IA, valida tiempos y guarda una propuesta. Solo el trabajador aplica al inicio del ciclo. El dashboard presenta estados confirmados. Fuente: memoria DOC_001, COMP_001 a COMP_008.
+El generador aporta observaciones al controlador simulado. FastAPI comparte las lecturas de TomTom entre el mapa y el comparador por ciento veinte segundos. El presupuesto de llamadas se aplica en el backend. Fuente: DOC_001 DEV_005 y DEV_006, FIG_005.
 
 ## DIA_003 Datos sintéticos y evaluación temporal
 
@@ -22,19 +22,19 @@ El ciclo conserva exclusión de movimientos y una oportunidad peatonal. Automát
 
 ## DIA_006 Casos de uso y trazabilidad
 
-El diagrama UML y las diez especificaciones están en DOC_002 y FIG_003. Los actores tienen identificadores ACT y los casos CU. La nota de identificación de todos los elementos se materializa también en requisitos, tablas y figuras.
+DOC_002 y FIG_003 describen doce casos y cinco actores. CU_012 extiende la vista TomTom cuando el usuario pulsa Comparar puntos. Seleccionar una fila abre el tramo correspondiente en el mapa.
 
 ## DIA_007 Persistencia que protege la decisión
 
 El esquema SQL contiene intersecciones, grupos, observaciones, predicciones, modelos y planes. Un índice parcial impide dos activos y los triggers comprueban todas las fases de un plan al confirmar. El modelo entidad relación completo está en FIG_004.
 
-## DIA_008 Plan de trabajo con cuatro integrantes
+## DIA_008 Plan base y ampliación TomTom
 
-La línea base estima mil doscientas ochenta horas persona y diez semanas. PERT calcula cuarenta y cinco días hábiles más reserva. Es planificación, no un registro de horas ejecutadas. Fuentes: reports/pert.json y DOC_001 CAL_001.
+El Gantt y PERT estiman ocho días para el visor y cinco para el comparador. La ruta crítica de la ampliación es P–Q–S–T–U–V–X. Git registra el comparador el veintitrés de noviembre. Fuentes: reports/pert.json y DOC_001 CAL_002.
 
-## DIA_009 El monitor muestra lo confirmado
+## DIA_009 El monitor de simulación
 
-Esta captura procede de una instancia real temporal del dashboard con datos sintéticos y credenciales efímeras. Permite observar demanda, colas y tiempos, y distinguir una solicitud pendiente de un plan activo.
+La captura FIG_008 muestra la versión actual del dashboard en una instancia temporal. El mapa permite seleccionar un cruce y el monitor muestra la animación, las fases y los tiempos del plan.
 
 ## DIA_010 El modelo supera la persistencia
 
@@ -44,14 +44,14 @@ En la prueba sintética reservada, el error absoluto medio fue uno punto diecinu
 
 La evaluación usó cincuenta pares con las mismas llegadas. En escenarios no sobresaturados la reducción media de demora fue veintinueve punto treinta y siete por ciento. El resultado no es uniforme ni representa una medición en calles de Cuauhtémoc. Fuente: reports/experiment.json.
 
-## DIA_012 Pruebas y resultados reproducibles
+## DIA_012 Pruebas del comparador
 
-La batería actual aprobó cuarenta y dos pruebas, incluyendo PostgreSQL real. Se entregan guiones de trece familias y resultados de carga y restauración. La latencia de predicción aún no cumple la meta y permanece reportada. La evaluación humana no se sustituye por pruebas automáticas. Fuentes: reports/academico y DOC_004/DOC_005.
+La revisión con comparador aprobó cuarenta y siete pruebas. Edge con proveedor simulado confirmó cinco llamadas en total al comparar, repetir y seleccionar un tramo. La captura en vivo es una comprobación separada. Fuentes: DOC_004 PRU_015 y DOC_005 RES_009.
 
-## DIA_013 Demostración en tres pasos
+## DIA_013 Comparación de demoras con TomTom
 
-El manual contiene instalación, acceso, interpretación de modos, intervención, exportación y solución de errores. El lanzador requiere permanecer abierto y evita dos ejecuciones sobre los mismos puertos. No se muestran contraseñas en el material audiovisual.
+FIG_012 muestra la comparación con datos en vivo. La tabla ordena por tiempo adicional y abre el tramo de la fila seleccionada. El mapa y la tabla reutilizan lecturas por ciento veinte segundos y comparten el presupuesto de consultas. Fuente: DOC_003 MAN_014.
 
 ## DIA_014 Entrega académica y límites
 
-La entrega incluye memoria completa, casos de uso, manual, documento de pruebas, figuras, presentación y video. Sigue siendo un prototipo académico de simulación. La aceptación del docente, pruebas con personas, calibración real y despliegue municipal requieren trabajo y decisiones externas.
+La entrega cubre el simulador, el visor TomTom y el comparador. Los indicadores de FIG_012 corresponden al momento de la consulta. La evaluación del controlador procede de experimentos sintéticos. La aceptación del docente y la calibración territorial siguen pendientes.

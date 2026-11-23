@@ -9,9 +9,9 @@ reales. Consulta [alcance y revisión de la entrega académica](docs/REVISION_EN
 Para cambiar desde el escenario local anterior, detener servicios y ejecutar
 `python -m scripts.select_cuauhtemoc` antes de volver a iniciar; se conserva la BD anterior.
 
-FASE 2: base funcional de un **prototipo académico exclusivamente simulado**. Incluye FastAPI,
-PostgreSQL, servicio interno de Random Forest, Streamlit, generador de observaciones, trabajador
-de control, pruebas y documentación. No controla infraestructura vial.
+FASE 2 entrega la base funcional del prototipo académico. Incluye FastAPI, PostgreSQL,
+un servicio interno de Random Forest, Streamlit, un generador de observaciones y un controlador
+de semáforos que opera en el simulador. El dashboard también ofrece una vista de tráfico real con TomTom.
 
 - [Documento técnico de FASE 2](docs/FASE_2_Desarrollo_Implementacion.md)
 - [FASE 1 de referencia](docs/FASE_1_Documento_Tecnico_Trafico_CDMX.md)
@@ -40,6 +40,36 @@ SQLite permite esta demostración sin instalar PostgreSQL. Para Linux/macOS se u
 Al inicio, sin modelo promovido, se utiliza **modo degradado 40/40**. El simulador funciona,
 registra observaciones, incluye peatones y muestra la causa. El entrenamiento no activa
 silenciosamente un candidato.
+
+## Vista de tráfico real con TomTom
+
+1. Agrega `TOMTOM_API_KEY=<tu_clave>` al archivo `.env` con una clave habilitada para Traffic API.
+2. Reinicia el lanzador local. En Docker Compose, ejecuta `docker compose up -d --build api dashboard`
+   para desplegar los cambios. Si solo cambias la configuración de TomTom, basta con
+   `docker compose up -d api`.
+3. Inicia sesión en el dashboard y selecciona **Vista de tráfico → Tráfico real (TomTom)**.
+   Elige un punto en el mapa o en el menú lateral para consultar el tramo vial cercano.
+
+La vista muestra la geometría del tramo, las velocidades y tiempos de recorrido actuales y en
+flujo libre, el nivel de confianza y los cierres que reporte TomTom. Se actualiza cada minuto
+y también permite actualizar a demanda. El backend realiza la consulta de forma autenticada
+y conserva la clave en el servidor. Los puntos del catálogo son referencias académicas.
+
+Pulsa **Comparar puntos** para ordenar hasta cinco tramos por segundos adicionales de
+recorrido y ver el aumento porcentual. Selecciona una fila para inspeccionar su tramo en el
+mapa. El comparador se ejecuta a demanda y comparte con el mapa las lecturas de los últimos
+dos minutos. Si falta una lectura o hay un cierre, la tabla identifica el estado del punto.
+
+El backend permite hasta 1,000 llamadas a TomTom en 24 horas móviles por proceso. Ajusta
+`TOMTOM_DAILY_REQUEST_BUDGET` en `.env` según el margen disponible de tu cuenta.
+Si TomTom responde `429`, el backend pausa las llamadas nuevas y conserva las lecturas
+recientes. El contador está en memoria y cubre las llamadas de este proceso.
+Consulta [el manual ilustrado del comparador](entrega_academica/DOC_003_Manual.md#man_014-comparar-demoras-y-administrar-consultas).
+
+La vista **Simulación** conserva su flujo de observaciones, predicciones y planes de semáforos.
+Flow Segment Data aporta velocidades y tiempos por tramo. El controlador requiere conteos de
+llegada por acceso, por lo que las consultas TomTom se usan para visualización. Consulta la
+[documentación de TomTom Flow Segment Data](https://docs.tomtom.com/traffic-api/documentation/tomtom-maps/v1/traffic-flow/flow-segment-data).
 
 ## Entrenamiento y evaluación
 

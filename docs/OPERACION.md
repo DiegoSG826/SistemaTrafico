@@ -56,6 +56,54 @@ El cliente `python -m scripts.simulate_waze --once` reenvía cinco ventanas sint
 y sirve para demostrar idempotencia. El trabajador ya es la fuente sintética integrada; este
 cliente opcional no requiere Waze ni debe ejecutarse con otra semilla contra el mismo histórico.
 
+## Vista de tráfico real con TomTom
+
+1. Agregar `TOMTOM_API_KEY=<tu_clave>` al `.env` local. Usar una clave habilitada para Traffic API.
+   El backend requiere salida HTTPS hacia `api.tomtom.com`.
+2. Reiniciar el lanzador local o el proceso FastAPI. Al desplegar la actualización en Compose,
+   ejecutar `docker compose up -d --build api dashboard`. Si solo cambia la clave, basta con
+   `docker compose up -d api`.
+3. Iniciar sesión y elegir **Vista de tráfico → Tráfico real (TomTom)**. Seleccionar un punto
+   del catálogo en el menú lateral o en el mapa.
+4. Verificar el tramo resaltado, la hora de consulta y los indicadores. El visor consulta cada
+   minuto y también al pulsar **Actualizar ahora**. Volver a **Simulación** para revisar colas,
+   fases y planes del simulador.
+
+| Mensaje del visor | Acción |
+|---|---|
+| TomTom no está configurado | Revisar `TOMTOM_API_KEY` en el entorno de FastAPI y reiniciarlo |
+| TomTom rechazó la clave | Verificar que esté habilitada para Traffic API y actualizarla en el servidor |
+| Límite de consultas | Esperar y revisar la cuota de la clave en la cuenta de TomTom |
+| Sin comunicación o datos inválidos | Comprobar salida HTTPS, reintentar o elegir otro punto |
+
+El endpoint autenticado `GET /intersections/{identifier}/tomtom-flow` consulta solo el tramo
+cercano al punto seleccionado. La vista presenta la respuesta reciente del proveedor y la hora
+de consulta. Para diagnosticar, registrar el código HTTP y el identificador de correlación del
+backend. La simulación puede operar aunque TomTom no esté disponible. Ver [OpenAPI](openapi.json).
+
+### Comparador de demoras y cuota
+
+En la vista TomTom, pulsa **Comparar puntos**. El comparador llama a
+`GET /tomtom/comparison` para los primeros cinco puntos del catálogo. Ordena los tramos
+disponibles por demora adicional, muestra el aumento porcentual respecto al flujo libre y
+permite abrir un tramo en el mapa seleccionando su fila. Los cierres y los tramos sin
+referencia se indican por separado. La hora de cada fila corresponde a la lectura que se usó.
+Un resultado de 0 s indica que el tiempo actual fue igual o menor que el de flujo libre.
+
+El mapa y el comparador comparten un registro en memoria de **120 s por coordenada**.
+Las solicitudes válidas reutilizan esa lectura, incluso al pulsar **Actualizar ahora**.
+Ante un `429` del proveedor, el servidor pausa las consultas nuevas durante el intervalo
+`Retry-After` o cinco minutos si el encabezado no está disponible. El comparador sigue
+mostrando las lecturas recientes que tenga y señala los puntos indisponibles.
+
+`TOMTOM_DAILY_REQUEST_BUDGET` limita las llamadas salientes en 24 horas móviles y tiene
+un valor predeterminado de 1,000. El presupuesto y las lecturas se mantienen en el proceso
+FastAPI y se reinician con él. Para compartir una clave con otras aplicaciones, reserva
+margen en el presupuesto local.
+
+El [manual ilustrado](../entrega_academica/DOC_003_Manual.md#man_014-comparar-demoras-y-administrar-consultas)
+incluye una captura del comparador con datos en vivo y las horas visibles de consulta.
+
 ## Modelos y reversión
 
 Conservar cada `.joblib`, ficha JSON, dataset/hash y reporte. `active.json` identifica el artefacto

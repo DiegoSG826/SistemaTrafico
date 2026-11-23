@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+from tempfile import TemporaryDirectory
 from zipfile import ZipFile, ZIP_DEFLATED
 
 ROOT = Path.cwd()
@@ -26,7 +27,12 @@ def main():
     if canonical.exists() and validated != canonical:
         shutil.copy2(canonical, BUILD / "PRE_001_version_previa.pptx")
     if validated != canonical:
-        shutil.copy2(validated, canonical)
+        with TemporaryDirectory(prefix="publish-pptx-", dir=OUT) as directory:
+            publish_dir = Path(directory).resolve()
+            assert publish_dir.is_relative_to(OUT.resolve())
+            staged = publish_dir / canonical.name
+            shutil.copyfile(validated, staged)
+            staged.replace(canonical)
     # Conservar revisiones en build, no mezclarlas con el material final para el docente.
     for previous in OUT.glob("PRE_001_Presentacion_v*.pptx"):
         target = BUILD / previous.name
@@ -46,10 +52,15 @@ def main():
         "DOC_005_Resultados",
     ):
         assert all((OUT / (name + ext)).exists() for ext in (".md", ".docx", ".pdf"))
+    captures = json.loads((OUT / "figuras/CAPTURAS.json").read_text(encoding="utf-8"))
+    assert len(captures["archivos"]) == 6 and "FIG_012_comparador.png" in captures["archivos"]
+    assert all((OUT / "figuras" / name).is_file() for name in captures["archivos"])
     manifest = {
         "id": "REG_001",
+        "document_revision": "1.3",
+        "captured_app_revision": captures["version_app"],
         "created_utc": datetime.now(UTC).isoformat(),
-        "scope": "Cuauhtémoc; semáforos y llegadas sintéticas",
+        "scope": "Cuauhtémoc. Control semafórico simulado, visor TomTom y comparación de demoras por tramo",
         "documents_complete": True,
         "formal_acceptance_complete": False,
         "open_conditions": [
