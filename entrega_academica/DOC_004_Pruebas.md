@@ -1,6 +1,6 @@
 # DOC_004 Documento y guiones de pruebas
 
-Versión 1.2 · ENT_004 · 22 de noviembre de 2026. Estrategia: unidad → integración → sistema
+Versión 1.3 · ENT_004 · 23 de noviembre de 2026. Estrategia: unidad → integración → sistema
 → validación/aceptación. QA prepara datos y consolida evidencia; otro integrante revisa cambios
 de control, seguridad y ML. No usar datos productivos ni secretos de usuario en pruebas.
 
@@ -28,7 +28,8 @@ crea/elimina únicamente esquemas UUID propios. academic_validation utiliza base
 puertos 28000/28100 y 600 s con diez usuarios para cada escala; no toca la BD Cuauhtémoc.
 No confundir la verificación del contrato con mocks con la evaluación del modelo entrenado.
 Las capturas de verificación se reproducen con scripts.capture_academic_demo. El recorrido
-usa SQLite en una instancia efímera y requiere una clave TomTom configurada para FIG_011.
+usa SQLite en una instancia efímera y requiere una clave TomTom configurada para FIG_011
+y FIG_012. La instancia de captura tiene un presupuesto de hasta cinco llamadas.
 
 ## PRU_001 Contratos y permisos
 
@@ -307,6 +308,27 @@ usa SQLite en una instancia efímera y requiere una clave TomTom configurada par
 **Resultado esperado y criterio:** La consulta es de lectura, muestra información del punto y conserva la separación del control. Los fallos se informan sin devolver la clave ni el mensaje interno del proveedor.
 
 **Evidencia a conservar:** `tests/test_tomtom.py, tests/test_dashboard.py y DOC_005 RES_007`; versión, fecha, semilla/configuración y resultado obtenido.
+
+**Resultado obtenido:** consultar DOC_005 y el archivo indicado; si no hay ejecución registrada, marcar PENDIENTE, no APROBADO.
+
+## PRU_015 Comparación de demoras y cuota
+
+**Tipo:** Integración, regresión y verificación en navegador. **Requisitos:** RF_018, CU_012. **Responsable:** QA y Frontend.
+
+**Precondición y datos:** Catálogo de prueba, reloj controlado y respuestas de TomTom simuladas.
+
+### GUI_015 Pasos
+
+1. Abrir un punto del mapa.
+2. Comparar puntos y comprobar el orden de demoras.
+3. Repetir dentro de los 120 s y elegir una fila para comprobar reutilización.
+4. Vencer una lectura y comprobar una sola consulta.
+5. Provocar un 429 con Retry-After y comprobar que el lote conserva los datos disponibles.
+6. Agotar un presupuesto reducido y verificar que se repone al salir la llamada de la ventana de 24 horas.
+
+**Resultado esperado y criterio:** Cálculo correcto de segundos y porcentaje. Se identifican cierres y referencias en cero. Las lecturas recientes evitan solicitudes duplicadas y el límite conserva resultados parciales.
+
+**Evidencia a conservar:** `tests/test_tomtom.py, tests/test_dashboard.py y DOC_005 RES_009`; versión, fecha, semilla/configuración y resultado obtenido.
 
 **Resultado obtenido:** consultar DOC_005 y el archivo indicado; si no hay ejecución registrada, marcar PENDIENTE, no APROBADO.
 

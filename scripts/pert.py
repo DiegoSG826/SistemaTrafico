@@ -14,6 +14,8 @@ TASKS = [
 TOMTOM_TASKS = [
     ("P", [], 1, 2, 3), ("Q", ["P"], 2, 3, 4), ("R", ["P"], 1, 2, 3),
     ("S", ["Q", "R"], 1, 1, 1), ("T", ["S"], 1, 2, 3),
+    ("U", ["T"], 1, 1, 1), ("V", ["U"], 1, 2, 3), ("W", ["U"], 1, 1, 1),
+    ("X", ["V", "W"], 1, 2, 3),
 ]
 TOMTOM_LABELS = {
     "P": "Diseño y contrato",
@@ -21,11 +23,16 @@ TOMTOM_LABELS = {
     "R": "Integración del dashboard",
     "S": "Pruebas con el proveedor",
     "T": "Documentación y capturas",
+    "U": "Diseño del comparador",
+    "V": "Lecturas y cuota del backend",
+    "W": "Tabla y selección del tramo",
+    "X": "Pruebas y documentación",
 }
 MILESTONES = [
     {"date_cdmx": "2026-11-01", "commit": "ecf0b0a", "description": "Entrega académica inicial"},
     {"date_cdmx": "2026-11-16", "commit": "e4da62b", "description": "Mapa y simulación en el dashboard"},
     {"date_cdmx": "2026-11-22", "commit": "1e48f7e", "description": "Vista TomTom integrada"},
+    {"date_cdmx": "2026-11-23", "commit": "4f377b2", "description": "Comparador integrado"},
 ]
 
 

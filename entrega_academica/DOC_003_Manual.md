@@ -1,8 +1,8 @@
 # DOC_003 Manual de instalación y usuario
 
-Versión 1.2 · Cuauhtémoc · ENT_003 · 22 de noviembre de 2026.
+Versión 1.3 · Cuauhtémoc · ENT_003 · 23 de noviembre de 2026.
 Para usuarios autenticados, administradores y equipo de desarrollo. El manual cubre el control
-simulado y la consulta de tráfico real con TomTom.
+simulado, la consulta de tráfico real y el comparador de demoras con TomTom.
 
 ## MAN_001 Requisitos previos
 
@@ -30,8 +30,8 @@ comprueba puertos 8000, 8001 y 8501. No iniciar Uvicorn por separado al usar el 
 
 El selector usa una BD nueva data/cuauhtemoc.db y conserva data/traffic.db. Si hay URL
 personalizada, preparar una base nueva explícitamente en lugar de sobrescribir configuración.
-Las capturas proceden de una instancia temporal de la revisión 1e48f7e con cuenta de
-demostración. FIG_011 contiene la respuesta de TomTom visible al momento de la consulta.
+Las capturas proceden de una instancia temporal de la revisión 4f377b2 con cuenta de
+demostración. FIG_011 y FIG_012 muestran datos de TomTom al momento de la consulta.
 
 ## MAN_003 Acceso
 
@@ -108,6 +108,7 @@ requiere rol administrador. Un usuario lector puede consultar y exportar observa
 | ERR_010 | Trabajador sin telemetría | Revisar worker.log y lease; reiniciar desde despeje, no asumir color anterior |
 | ERR_011 | TomTom sin configurar o clave rechazada | Revisar TOMTOM_API_KEY, acceso a Traffic API y reiniciar FastAPI |
 | ERR_012 | TomTom sin comunicación, datos inválidos o cuota agotada | Verificar salida HTTPS y vigencia de la cuota. Reintentar o elegir otro punto |
+| ERR_013 | Presupuesto diario local alcanzado | Esperar a que salgan llamadas de la ventana de 24 horas. El servidor puede reutilizar lecturas vigentes |
 
 Para diagnosticar un puerto usar netstat -ano, sin cerrar procesos desconocidos. Los registros
 no deben contener contraseñas/tokens. Los servicios de prueba usan otros puertos y credenciales.
@@ -150,7 +151,7 @@ Reiniciar trabajador desde diez segundos de despeje. Revocar credenciales al ret
 2. Reiniciar el lanzador local. En Compose, usar docker compose up -d --build api dashboard para desplegar la actualización. Para recargar solo la clave, usar docker compose up -d api.
 3. Iniciar sesión. En Vista de tráfico, elegir Tráfico real (TomTom). Seleccionar un punto de consulta en el menú lateral o en el mapa.
 4. Revisar el tramo resaltado y su velocidad actual, velocidad en flujo libre, tiempos de recorrido, confianza y cierre si TomTom lo reporta. La hora de consulta se presenta en CDMX.
-5. Esperar la actualización del minuto o pulsar Actualizar ahora. Elegir Simulación para volver a colas, fases y control semafórico.
+5. Esperar la actualización del minuto o pulsar Actualizar ahora. Si existe una lectura de los últimos 120 s, el backend la reutiliza. Elegir Simulación para volver al control semafórico.
 
 Los puntos son referencias del catálogo académico. Cada respuesta corresponde al tramo cercano
 que selecciona TomTom. La consulta ofrece velocidades y tiempos por tramo. Los planes semafóricos
@@ -158,3 +159,22 @@ del prototipo usan conteos por acceso del simulador. Para incidencias del visor,
 y ERR_012.
 
 ![FIG_011 Visor actual con respuesta en vivo de TomTom](figuras/FIG_011_tomtom.png)
+
+## MAN_014 Comparar demoras y administrar consultas
+
+1. En Tráfico real (TomTom), pulsa Comparar puntos debajo del mapa.
+2. Revisa la tabla. Ordena hasta cinco puntos por segundos adicionales respecto al flujo libre. Muestra el aumento porcentual, la confianza de TomTom, la hora de consulta en CDMX y el estado de cada punto.
+3. Marca una fila para ver su tramo y las métricas completas en el mapa. Pulsa Comparar puntos otra vez para solicitar otra comparación.
+
+Por ejemplo, 210 s de recorrido actual y 120 s en flujo libre equivalen a 90 s adicionales
+y un aumento del 75 %. Un resultado de 0 s significa que el tiempo actual fue igual o menor que
+la referencia. Los cierres, los tramos sin referencia y los puntos sin datos aparecen con su estado.
+
+El mapa consulta al backend cada minuto. El comparador se ejecuta al pulsar el botón. Ambos
+reutilizan las lecturas por 120 s y conservan la hora original. El valor
+TOMTOM_DAILY_REQUEST_BUDGET de .env limita las llamadas en una ventana móvil de 24 horas
+por proceso FastAPI. El valor inicial es 1000 y el contador se reinicia con el proceso.
+Si TomTom responde 429, el backend pausa las consultas nuevas según Retry-After o durante
+cinco minutos si no tiene un valor válido. La tabla muestra los resultados que estén disponibles.
+
+![FIG_012 Comparación en vivo de los cinco puntos](figuras/FIG_012_comparador.png)

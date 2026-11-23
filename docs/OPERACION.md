@@ -88,6 +88,7 @@ En la vista TomTom, pulsa **Comparar puntos**. El comparador llama a
 disponibles por demora adicional, muestra el aumento porcentual respecto al flujo libre y
 permite abrir un tramo en el mapa seleccionando su fila. Los cierres y los tramos sin
 referencia se indican por separado. La hora de cada fila corresponde a la lectura que se usó.
+Un resultado de 0 s indica que el tiempo actual fue igual o menor que el de flujo libre.
 
 El mapa y el comparador comparten un registro en memoria de **120 s por coordenada**.
 Las solicitudes válidas reutilizan esa lectura, incluso al pulsar **Actualizar ahora**.
@@ -100,8 +101,8 @@ un valor predeterminado de 1,000. El presupuesto y las lecturas se mantienen en 
 FastAPI y se reinician con él. Para compartir una clave con otras aplicaciones, reserva
 margen en el presupuesto local.
 
-La [entrega académica](../entrega_academica/LEEME.md#ent_010-archivos-para-revisar) incluye capturas de Simulación y del visor TomTom.
-La captura de TomTom corresponde a una consulta en vivo y conserva la hora visible de respuesta.
+El [manual ilustrado](../entrega_academica/DOC_003_Manual.md#man_014-comparar-demoras-y-administrar-consultas)
+incluye una captura del comparador con datos en vivo y las horas visibles de consulta.
 
 ## Modelos y reversión
 

@@ -6,7 +6,7 @@ Presentamos un gestor de semáforos simulados para Cuauhtémoc. La IA anticipa l
 
 ## DIA_002 Control simulado y tráfico real
 
-El generador aporta observaciones al controlador simulado. El trabajador aplica los planes al inicio del ciclo. Para mostrar tráfico real, FastAPI consulta TomTom Traffic API por separado. Fuente: DOC_001, DEV_005 y FIG_005.
+El generador aporta observaciones al controlador simulado. FastAPI comparte las lecturas de TomTom entre el mapa y el comparador por ciento veinte segundos. El presupuesto de llamadas se aplica en el backend. Fuente: DOC_001 DEV_005 y DEV_006, FIG_005.
 
 ## DIA_003 Datos sintéticos y evaluación temporal
 
@@ -22,7 +22,7 @@ El ciclo conserva exclusión de movimientos y una oportunidad peatonal. Automát
 
 ## DIA_006 Casos de uso y trazabilidad
 
-DOC_002 y FIG_003 describen once casos y cinco actores. El lector consulta, supervisa y exporta. En CU_011, el backend solicita a TomTom el tramo cercano y muestra el resultado al usuario autenticado.
+DOC_002 y FIG_003 describen doce casos y cinco actores. CU_012 extiende la vista TomTom cuando el usuario pulsa Comparar puntos. Seleccionar una fila abre el tramo correspondiente en el mapa.
 
 ## DIA_007 Persistencia que protege la decisión
 
@@ -30,7 +30,7 @@ El esquema SQL contiene intersecciones, grupos, observaciones, predicciones, mod
 
 ## DIA_008 Plan base y ampliación TomTom
 
-El Gantt y PERT presentan dos órdenes de trabajo estimados. Git registra el mapa actualizado el dieciséis de noviembre y TomTom integrado el veintidós. Esas fechas acreditan hitos. Fuentes: reports/pert.json y DOC_001 CAL_001 y CAL_002.
+El Gantt y PERT estiman ocho días para el visor y cinco para el comparador. La ruta crítica de la ampliación es P–Q–S–T–U–V–X. Git registra el comparador el veintitrés de noviembre. Fuentes: reports/pert.json y DOC_001 CAL_002.
 
 ## DIA_009 El monitor de simulación
 
@@ -44,14 +44,14 @@ En la prueba sintética reservada, el error absoluto medio fue uno punto diecinu
 
 La evaluación usó cincuenta pares con las mismas llegadas. En escenarios no sobresaturados la reducción media de demora fue veintinueve punto treinta y siete por ciento. El resultado no es uniforme ni representa una medición en calles de Cuauhtémoc. Fuente: reports/experiment.json.
 
-## DIA_012 Pruebas y resultados reproducibles
+## DIA_012 Pruebas del comparador
 
-La línea base incluyó PostgreSQL, carga y restauración. La verificación TomTom obtuvo datos para los cinco puntos y recorrió ambas vistas en Edge. En esa ejecución se omitieron las pruebas PostgreSQL por falta de una base de laboratorio. Fuentes: DOC_004 y DOC_005.
+La revisión con comparador aprobó cuarenta y siete pruebas. Edge con proveedor simulado confirmó cinco llamadas en total al comparar, repetir y seleccionar un tramo. La captura en vivo es una comprobación separada. Fuentes: DOC_004 PRU_015 y DOC_005 RES_009.
 
-## DIA_013 Consulta de tráfico con TomTom
+## DIA_013 Comparación de demoras con TomTom
 
-La captura FIG_011 muestra una consulta en vivo en la rama actual. El usuario elige un punto y puede pulsar Actualizar ahora. El backend conserva la clave de TomTom. Los planes semafóricos siguen usando las llegadas del simulador. Fuente: DOC_003 MAN_013.
+FIG_012 muestra la comparación con datos en vivo. La tabla ordena por tiempo adicional y abre el tramo de la fila seleccionada. El mapa y la tabla reutilizan lecturas por ciento veinte segundos y comparten el presupuesto de consultas. Fuente: DOC_003 MAN_014.
 
 ## DIA_014 Entrega académica y límites
 
-La entrega cubre la simulación y la consulta de tráfico real por tramo con TomTom. Las cifras de demora siguen siendo de un experimento sintético. La aceptación del docente, las pruebas con personas y la calibración territorial siguen pendientes.
+La entrega cubre el simulador, el visor TomTom y el comparador. Los indicadores de FIG_012 corresponden al momento de la consulta. La evaluación del controlador procede de experimentos sintéticos. La aceptación del docente y la calibración territorial siguen pendientes.

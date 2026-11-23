@@ -116,7 +116,7 @@ def main():
                 "fps": FPS,
                 "resolution": [1280, 840],
                 "audio": "Sin locución; subtítulos en español incrustados y SRT",
-                "content": f"{len(slides)} diapositivas, capturas actuales de Simulación y TomTom y demostración sintética del controlador",
+                "content": f"{len(slides)} diapositivas, capturas actuales de Simulación y el comparador TomTom y demostración sintética del controlador",
                 "real_world_traffic_footage": False,
             },
             indent=2,

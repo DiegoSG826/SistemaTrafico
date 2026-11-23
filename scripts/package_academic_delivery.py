@@ -53,14 +53,14 @@ def main():
     ):
         assert all((OUT / (name + ext)).exists() for ext in (".md", ".docx", ".pdf"))
     captures = json.loads((OUT / "figuras/CAPTURAS.json").read_text(encoding="utf-8"))
-    assert len(captures["archivos"]) == 5
+    assert len(captures["archivos"]) == 6 and "FIG_012_comparador.png" in captures["archivos"]
     assert all((OUT / "figuras" / name).is_file() for name in captures["archivos"])
     manifest = {
         "id": "REG_001",
-        "document_revision": "1.2",
+        "document_revision": "1.3",
         "captured_app_revision": captures["version_app"],
         "created_utc": datetime.now(UTC).isoformat(),
-        "scope": "Cuauhtémoc. Control semafórico simulado y consulta de tráfico actual por tramo con TomTom",
+        "scope": "Cuauhtémoc. Control semafórico simulado, visor TomTom y comparación de demoras por tramo",
         "documents_complete": True,
         "formal_acceptance_complete": False,
         "open_conditions": [

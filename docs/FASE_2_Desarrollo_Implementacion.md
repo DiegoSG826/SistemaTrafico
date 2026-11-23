@@ -5,7 +5,7 @@
 | Identificador | SGT-CDMX-IMP-002 |
 | Versión | 0.2.0 |
 | Fecha | 31 de octubre de 2026, America/Mexico_City |
-| Revisión documental | 22 de noviembre de 2026, integración TomTom |
+| Revisión documental | 23 de noviembre de 2026, comparador de demoras TomTom |
 | Línea base | FASE_1_Documento_Tecnico_Trafico_CDMX.md, versión 1.0 |
 | Entrega | Código base funcional, esquema, entrenamiento, simulación, dashboard y verificación |
 | Entorno | Académico; cinco cruces sintéticos independientes NS/EO/PEATON |
@@ -66,13 +66,19 @@ El cálculo semafórico requiere conteos de llegadas por acceso y se ejecuta en 
 Ver [operación y diagnóstico](OPERACION.md#vista-de-tráfico-real-con-tomtom),
 [OpenAPI](openapi.json) y [TomTom Flow Segment Data](https://docs.tomtom.com/traffic-api/documentation/tomtom-maps/v1/traffic-flow/flow-segment-data).
 
-El comparador usa `GET /tomtom/comparison` con dos a cinco identificadores `point_id`
-y se ejecuta al solicitarlo. Calcula la demora adicional como la diferencia positiva
-entre el tiempo actual y el tiempo en flujo libre. El aumento porcentual se calcula sobre
-el tiempo en flujo libre. Cada fila conserva la confianza y la hora de su lectura.
-Las filas con cierre reportado, sin referencia o sin datos quedan fuera del orden de demora.
-Ambos endpoints comparten las lecturas en memoria durante 120 s y un presupuesto diario
-configurable. Ver [comparador y cuota](OPERACION.md#comparador-de-demoras-y-cuota).
+### 1.2 Comparador de demoras
+
+`GET /tomtom/comparison` recibe dos a cinco identificadores `point_id` por consulta
+autenticada. El dashboard envía hasta cinco puntos del catálogo al pulsar **Comparar puntos**.
+La demora es `max(0, tiempo_actual - tiempo_flujo_libre)`. El aumento es la demora dividida
+por el tiempo en flujo libre, multiplicada por 100 y redondeada a un decimal.
+Cada fila conserva la confianza y la hora de lectura. Los estados `closed`,
+`no_reference` y `unavailable` quedan fuera del orden numérico.
+
+La respuesta `200` puede contener resultados parciales, con el campo `detail` en los puntos
+indisponibles. Una lista inválida devuelve `422`, un identificador desconocido `404` y una
+clave ausente `503`. Ambos endpoints reutilizan lecturas por coordenada durante 120 s y
+comparten un presupuesto de llamadas en memoria. Ver [comparador y cuota](OPERACION.md#comparador-de-demoras-y-cuota).
 
 ## 2. Estructura del proyecto
 
@@ -130,11 +136,12 @@ SistemaTrafico/
 
 ```mermaid
 flowchart LR
-  D[Dashboard Streamlit con Simulación y TomTom] -->|JWT / REST| A[Backend FastAPI]
+  D[Dashboard con Simulación, TomTom y comparador] -->|JWT / REST| A[Backend FastAPI]
   S[Cliente sintético opcional] -->|lote canónico| A
   A --> P[(PostgreSQL)]
   A -->|timeout 2 s| M[Servicio interno IA]
-  A -->|HTTPS / Flow Segment Data| TT[TomTom Traffic API]
+  A --> C[Lecturas y presupuesto TomTom en memoria]
+  C -->|HTTPS si falta lectura vigente| TT[TomTom Traffic API]
   W[Trabajador único] --> P
   W -->|una decisión por ciclo| M
   G[Generador reproducible] --> W
@@ -331,7 +338,9 @@ demanda, colas, fases, ciclo, tiempos del plan y la animación del cruce. Las m�
 actualizan cada 2 s. El mapa, el detalle y las observaciones consultan el backend cada 5 s.
 La animación evoluciona en el navegador entre sincronizaciones. El administrador puede
 pedir una propuesta, intervenir, volver al automático y consultar auditoría. Las observaciones
-se exportan en JSON. La vista TomTom consulta un tramo por punto cada 60 s o a demanda.
+se exportan en JSON. La vista TomTom consulta al backend cada 60 s o a demanda.
+El comparador solo solicita lecturas al pulsar el botón. Seleccionar una fila abre su tramo
+en el mapa, que reutiliza la lectura vigente.
 Ver [el manual ilustrado](../entrega_academica/DOC_003_Manual.md).
 
 ## 9. Experimento y promoción
@@ -402,7 +411,8 @@ la duración crítica entre cuatro desarrolladores ni se suman UCP y horas presu
 
 El Gantt FIG_001 y la red PERT FIG_002 muestran dos estimaciones con su propio origen temporal.
 El plan base conserva sus 45 días hábiles más 5 de reserva. La ampliación usa las
-actividades ACTIV_016 a ACTIV_020 y estima **8 días hábiles** por la ruta **P–Q–S–T**.
+actividades ACTIV_016 a ACTIV_024 y estima **13 días hábiles** por la ruta
+**P–Q–S–T–U–V–X**. Se estiman 8 días para el visor y 5 adicionales para el comparador.
 
 | Actividad | Dependencias | Optimista / probable / pesimista (días) | Duración esperada |
 |---|---|---|---|
@@ -411,10 +421,15 @@ actividades ACTIV_016 a ACTIV_020 y estima **8 días hábiles** por la ruta **P�
 | R · Integración del dashboard | P | 1 / 2 / 3 | 2 días |
 | S · Pruebas con el proveedor | Q y R | 1 / 1 / 1 | 1 día |
 | T · Documentación y capturas | S | 1 / 2 / 3 | 2 días |
+| U · Diseño del comparador | T | 1 / 1 / 1 | 1 día |
+| V · Lecturas y cuota del backend | U | 1 / 2 / 3 | 2 días |
+| W · Tabla y selección del tramo | U | 1 / 1 / 1 | 1 día |
+| X · Pruebas y documentación | V y W | 1 / 2 / 3 | 2 días |
 
 Los hitos verificables en Git son la entrega inicial del 1 de noviembre (`ecf0b0a`),
-la actualización del mapa y la simulación del 16 de noviembre (`e4da62b`) y la integración
-TomTom del 22 de noviembre de 2026 (`1e48f7e`), en hora de CDMX. Git registra esas entregas.
+la actualización del mapa y la simulación del 16 de noviembre (`e4da62b`), el visor TomTom
+del 22 de noviembre (`1e48f7e`) y el comparador del 23 de noviembre de 2026 (`4f377b2`),
+en hora de CDMX.
 Las duraciones estimadas se calcularon para documentar el incremento, y las horas ejecutadas
 por actividad carecen de registro. Ver [el cálculo reproducible](../reports/pert.json)
 y [la memoria académica](../entrega_academica/DOC_001_Memoria.md#cal_001-calendarización-gantt-y-pert).

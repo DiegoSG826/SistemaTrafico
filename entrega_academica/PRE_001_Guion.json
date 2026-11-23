@@ -8,8 +8,8 @@
   {
     "title": "Control simulado y tráfico real",
     "lead": "Dos vistas en el dashboard",
-    "body": "Simulación: demanda, fases y planes.\nTomTom: consulta del tramo vial cercano.",
-    "notes": "El generador aporta observaciones al controlador simulado. El trabajador aplica los planes al inicio del ciclo. Para mostrar tráfico real, FastAPI consulta TomTom Traffic API por separado. Fuente: DOC_001, DEV_005 y FIG_005."
+    "body": "Simulación con fases y planes.\nTomTom con mapa y comparador.",
+    "notes": "El generador aporta observaciones al controlador simulado. FastAPI comparte las lecturas de TomTom entre el mapa y el comparador por ciento veinte segundos. El presupuesto de llamadas se aplica en el backend. Fuente: DOC_001 DEV_005 y DEV_006, FIG_005."
   },
   {
     "title": "Datos sintéticos y evaluación temporal",
@@ -31,9 +31,9 @@
   },
   {
     "title": "Casos de uso y trazabilidad",
-    "lead": "Once casos especificados",
-    "body": "Acceso para administrador y lector.\nConsulta TomTom con sesión válida.",
-    "notes": "DOC_002 y FIG_003 describen once casos y cinco actores. El lector consulta, supervisa y exporta. En CU_011, el backend solicita a TomTom el tramo cercano y muestra el resultado al usuario autenticado."
+    "lead": "Doce casos especificados",
+    "body": "Acceso para administrador y lector.\nConsulta y comparación TomTom.",
+    "notes": "DOC_002 y FIG_003 describen doce casos y cinco actores. CU_012 extiende la vista TomTom cuando el usuario pulsa Comparar puntos. Seleccionar una fila abre el tramo correspondiente en el mapa."
   },
   {
     "title": "Persistencia que protege la decisión",
@@ -44,8 +44,8 @@
   {
     "title": "Plan base y ampliación TomTom",
     "lead": "Calendarización estimada",
-    "body": "Plan base: 45 días y 5 de reserva.\nTomTom: 8 días por P–Q–S–T.",
-    "notes": "El Gantt y PERT presentan dos órdenes de trabajo estimados. Git registra el mapa actualizado el dieciséis de noviembre y TomTom integrado el veintidós. Esas fechas acreditan hitos. Fuentes: reports/pert.json y DOC_001 CAL_001 y CAL_002."
+    "body": "Plan base: 45 días y 5 de reserva.\nVisor y comparador: 13 días.",
+    "notes": "El Gantt y PERT estiman ocho días para el visor y cinco para el comparador. La ruta crítica de la ampliación es P–Q–S–T–U–V–X. Git registra el comparador el veintitrés de noviembre. Fuentes: reports/pert.json y DOC_001 CAL_002."
   },
   {
     "title": "El monitor de simulación",
@@ -66,21 +66,21 @@
     "notes": "La evaluación usó cincuenta pares con las mismas llegadas. En escenarios no sobresaturados la reducción media de demora fue veintinueve punto treinta y siete por ciento. El resultado no es uniforme ni representa una medición en calles de Cuauhtémoc. Fuente: reports/experiment.json."
   },
   {
-    "title": "Pruebas y resultados reproducibles",
-    "lead": "Resultados por ejecución",
-    "body": "Línea base: 42 aprobadas con PostgreSQL.\nIntegración TomTom: 44 aprobadas, 4 omitidas.",
-    "notes": "La línea base incluyó PostgreSQL, carga y restauración. La verificación TomTom obtuvo datos para los cinco puntos y recorrió ambas vistas en Edge. En esa ejecución se omitieron las pruebas PostgreSQL por falta de una base de laboratorio. Fuentes: DOC_004 y DOC_005."
+    "title": "Pruebas del comparador",
+    "lead": "47 pruebas aprobadas",
+    "body": "4 pruebas PostgreSQL omitidas.\nRegresión de cálculo y cuota.",
+    "notes": "La revisión con comparador aprobó cuarenta y siete pruebas. Edge con proveedor simulado confirmó cinco llamadas en total al comparar, repetir y seleccionar un tramo. La captura en vivo es una comprobación separada. Fuentes: DOC_004 PRU_015 y DOC_005 RES_009."
   },
   {
-    "title": "Consulta de tráfico con TomTom",
-    "lead": "Tramo vial cercano",
-    "body": "Velocidades y tiempos.\nConfianza y cierre reportado.\nActualización cada minuto.",
-    "notes": "La captura FIG_011 muestra una consulta en vivo en la rama actual. El usuario elige un punto y puede pulsar Actualizar ahora. El backend conserva la clave de TomTom. Los planes semafóricos siguen usando las llegadas del simulador. Fuente: DOC_003 MAN_013."
+    "title": "Comparación de demoras con TomTom",
+    "lead": "Hasta cinco puntos",
+    "body": "Segundos adicionales y aumento.\nConfianza, hora y estado.\nConsulta bajo demanda.",
+    "notes": "FIG_012 muestra la comparación con datos en vivo. La tabla ordena por tiempo adicional y abre el tramo de la fila seleccionada. El mapa y la tabla reutilizan lecturas por ciento veinte segundos y comparten el presupuesto de consultas. Fuente: DOC_003 MAN_014."
   },
   {
     "title": "Entrega académica y límites",
     "lead": "Documentación, código y evidencia",
     "body": "Memoria, diagramas y casos de uso.\nManual, guiones y resultados.\nPresentación y video reproducibles.",
-    "notes": "La entrega cubre la simulación y la consulta de tráfico real por tramo con TomTom. Las cifras de demora siguen siendo de un experimento sintético. La aceptación del docente, las pruebas con personas y la calibración territorial siguen pendientes."
+    "notes": "La entrega cubre el simulador, el visor TomTom y el comparador. Los indicadores de FIG_012 corresponden al momento de la consulta. La evaluación del controlador procede de experimentos sintéticos. La aceptación del docente y la calibración territorial siguen pendientes."
   }
 ]

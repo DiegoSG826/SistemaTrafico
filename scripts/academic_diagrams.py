@@ -66,7 +66,7 @@ def gantt_pert():
     fig.suptitle("FIG_001  Gantt del plan base y la ampliación TomTom", fontsize=17, weight="bold")
     for ax, plan, start, title in (
         (base, result, 1, "Plan base · 45 días + 5 de reserva"),
-        (added, extension, 16, "Ampliación TomTom · 8 días estimados"),
+        (added, extension, 16, f"TomTom y comparador · {extension['duration_workdays']:g} días estimados"),
     ):
         for i, (name, row) in enumerate(plan["tasks"].items(), start):
             ax.barh(i, row["TE"], left=row["ES"], color=TEAL if row["slack"] else BLUE, height=0.63)
@@ -129,16 +129,21 @@ def gantt_pert():
             fontsize=12, weight="bold")
     added.set(xlim=(0, 15), ylim=(0, 4.5))
     added.axis("off")
-    positions = {"P": (0.6, 1.45), "Q": (3.7, 2.3), "R": (3.7, 0.55), "S": (7.8, 1.45), "T": (11.25, 1.45)}
+    positions = {
+        "P": (0.2, 1.45), "Q": (2.3, 2.3), "R": (2.3, 0.55),
+        "S": (4.42, 1.45), "T": (6.5, 1.45), "U": (8.6, 1.45),
+        "V": (10.67, 2.3), "W": (10.67, 0.55), "X": (12.9, 1.45),
+    }
     for i, (n, row) in enumerate(extension["tasks"].items(), 16):
         x, y = positions[n]
         for parent in row["predecessors"]:
             px, py = positions[parent]
-            arrow(added, (px + 2.3, py + 0.58), (x, y + 0.58))
-        box(added, x, y, 2.3, 1.15,
-            f"ACTIV_{i:03d} · {n}\nTE {row['TE']:g} · ES {row['ES']:g} / EF {row['EF']:g} · H {row['slack']:g}",
+            arrow(added, (px + 1.72, py + 0.58), (x, y + 0.58))
+        box(added, x, y, 1.72, 1.15,
+            f"ACTIV_{i:03d} · {n}\nTE {row['TE']:g} · H {row['slack']:g}\nES {row['ES']:g} / EF {row['EF']:g}",
             9, "#d5e7ed" if row["slack"] == 0 else "#edf4f6")
-    added.text(0.3, 4.02, "Ampliación TomTom · 8 días hábiles estimados   |   Ruta P–Q–S–T",
+    route = "–".join(extension["critical_path"])
+    added.text(0.3, 4.02, f"TomTom y comparador · {extension['duration_workdays']:g} días hábiles estimados   |   Ruta {route}",
                fontsize=12, weight="bold")
     added.text(0.3, 0.08, "TE: duración esperada · ES/EF: inicio/fin tempranos · H: holgura", fontsize=9)
     fig.tight_layout(rect=(0, 0, 1, 0.94))
@@ -169,31 +174,34 @@ def use_cases():
         "Supervisar / exportar",
         "Consultar auditoría",
         "Visualizar tráfico real",
+        "Comparar demoras",
     ]
     coords = {i + 1: (5.1 if i < 5 else 9.8, 6.8 - (i % 5) * 1.2) for i in range(10)}
     coords[11] = (9.8, 0.8)
+    coords[12] = (5.1, 0.8)
     actor(ax, 1.1, 4.6, "ACT_001\nAdministrador")
     actor(ax, 1.1, 1.8, "ACT_005\nUsuario lector")
     actor(ax, 13.9, 6.2, "ACT_002\nProveedor")
     actor(ax, 13.9, 3.75, "ACT_003\nEvaluador")
     actor(ax, 13.9, 1.5, "ACT_004\nTomTom")
-    for i in (1, 2, 3, 4, 5, 6, 7, 9, 10, 11):
+    for i in (1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12):
         x, y = coords[i]
         ax.plot([1.4, x - 1.85], [4.75, y], color="#849ca9", lw=0.8, zorder=0)
-    for i in (1, 4, 9, 11):
+    for i in (1, 4, 9, 11, 12):
         x, y = coords[i]
         ax.plot([1.4, x - 1.85], [1.95, y], color=TEAL, lw=0.8, zorder=0)
     ax.plot([13.6, 12.4, 7.2, coords[3][0] + 1.85], [6.35, 5.0, 5.0, coords[3][1]],
             color=BLUE, lw=1)
     ax.plot([13.6, coords[8][0] + 1.85], [3.9, coords[8][1]], color=BLUE, lw=1)
     ax.plot([13.6, coords[11][0] + 1.85], [1.65, coords[11][1]], color=BLUE, lw=1)
+    arrow(ax, (7, 0.8), (7.92, 0.8), "«extend»", dashed=True)
     for i, label in enumerate(labels, 1):
         x, y = coords[i]
         ax.add_patch(Ellipse((x, y), 3.75, 0.9, facecolor="white", edgecolor=BLUE, zorder=2))
         ax.text(x, y, f"CU_{i:03d}\n{label}", ha="center", va="center", fontsize=10, zorder=3)
     ax.text(
         3.2,
-        0.45,
+        8.15,
         "CU_006 requiere una propuesta registrada y la versión vigente.",
         fontsize=8,
     )
@@ -248,7 +256,7 @@ def er_diagram():
     ax.text(
         0.3,
         0.9,
-        "TomTom usa las coordenadas del catálogo. La respuesta del proveedor se muestra sin persistir.",
+        "El mapa y el comparador usan coordenadas del catálogo. Las lecturas TomTom se conservan en memoria de FastAPI.",
         fontsize=11,
     )
     ax.text(
@@ -262,8 +270,8 @@ def er_diagram():
 
 def architecture():
     fig, ax = canvas("FIG_005  Arquitectura de control simulado y monitoreo", 16, 9)
-    box(ax, 0.4, 5.2, 3, 1.4, "COMP_006\nDashboard Streamlit\nSimulación y TomTom")
-    box(ax, 5.7, 5.2, 3.6, 1.4, "COMP_001\nBackend FastAPI\nautorización / validación")
+    box(ax, 0.4, 5.2, 3, 1.4, "COMP_006\nDashboard Streamlit\nSimulación y comparador TomTom")
+    box(ax, 5.7, 5.2, 3.6, 1.4, "COMP_001\nBackend FastAPI\nlecturas y cuota en memoria")
     box(ax, 11.2, 5.2, 3.3, 1.4, "COMP_005\nServicio IA\npronóstico sin actuación")
     box(ax, 5.7, 1.3, 3.6, 1.4, "COMP_007\nPostgreSQL\nhistórico / planes / auditoría")
     box(ax, 0.4, 1.3, 3, 1.4, "COMP_003\nTrabajador único\ncontrol / colas / reloj")
@@ -283,7 +291,7 @@ def architecture():
     ax.text(
         0.5,
         0.45,
-        "El trabajador confirma el plan simulado. El visor muestra el tramo consultado a TomTom.",
+        "El mapa y el comparador comparten las lecturas TomTom durante 120 s. El trabajador aplica los planes simulados.",
         fontsize=12,
     )
     save(fig, "FIG_005_arquitectura")
@@ -300,7 +308,7 @@ def architecture():
     arrow(ax, (4.1, 5.75), (5.3, 5.75))
     arrow(ax, (8.7, 5.75), (10, 5.75))
     arrow(ax, (12, 5), (12, 3.3), "SQL")
-    arrow(ax, (12, 6.5), (12, 8.05), "HTTPS · clave en FastAPI")
+    arrow(ax, (12, 6.5), (12, 8.05), "HTTPS · clave y cuota en FastAPI")
     arrow(ax, (10, 5), (8.7, 3.3), "inferencia")
     arrow(ax, (4.1, 2.55), (5.3, 2.55), "inferencia")
     arrow(ax, (4.1, 1.6), (10, 1.6), "SQL / auditoría")

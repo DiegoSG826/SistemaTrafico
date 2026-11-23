@@ -1,6 +1,6 @@
 # DOC_005 Resultados de verificación y límites de aceptación
 
-Versión 1.2 · ENT_005 · 22 de noviembre de 2026. Incluye la línea base académica y la verificación de la integración TomTom.
+Versión 1.3 · ENT_005 · 23 de noviembre de 2026. Incluye la línea base académica y las verificaciones del visor y el comparador TomTom.
 
 ## RES_001 Batería automatizada de la línea base
 
@@ -56,4 +56,10 @@ La consulta en vivo recibió datos de TomTom para los cinco puntos del catálogo
 
 ## RES_008 Capturas de la versión actual
 
-Edge recorrió acceso, monitor, intervención, auditoría y TomTom en una instancia temporal de la revisión 1e48f7e. Se comprobó la carga del mapa y del tramo consultado en vivo para FIG_011. Las figuras FIG_007 a FIG_011 y figuras/CAPTURAS.json registran esta demostración. El resultado de la consulta es una observación puntual del proveedor.
+Edge recorrió acceso, monitor, intervención, auditoría, TomTom y el comparador en una instancia temporal de la revisión 4f377b2. FIG_011 y FIG_012 muestran datos en vivo. Las figuras FIG_007 a FIG_012 y figuras/CAPTURAS.json registran esta demostración y su fecha.
+
+## RES_009 Verificación del comparador de demoras
+
+La suite de 4f377b2 registró 47 pruebas aprobadas y 4 de PostgreSQL omitidas por falta de TEST_DATABASE_URL. Las pruebas del comparador verifican el cálculo, orden, resultados parciales, reutilización por coordenada, vencimiento, presupuesto diario y recuperación tras 429. Fuentes de reproducción: tests/test_tomtom.py y tests/test_dashboard.py.
+
+La prueba de navegador con proveedor simulado registró cinco llamadas en total al abrir el mapa, comparar los cinco puntos, repetir la comparación y seleccionar una fila. FIG_012 corresponde a una prueba separada con la API en vivo. Sus resultados describen el instante de la consulta.

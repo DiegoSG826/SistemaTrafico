@@ -147,6 +147,16 @@ TESTS = [
         "La consulta es de lectura, muestra información del punto y conserva la separación del control. Los fallos se informan sin devolver la clave ni el mensaje interno del proveedor",
         "tests/test_tomtom.py, tests/test_dashboard.py y DOC_005 RES_007",
     ),
+    (
+        "Comparación de demoras y cuota",
+        "Integración, regresión y verificación en navegador",
+        "RF_018, CU_012",
+        "QA y Frontend",
+        "Catálogo de prueba, reloj controlado y respuestas de TomTom simuladas",
+        "abrir un punto del mapa; comparar puntos y comprobar el orden de demoras; repetir dentro de los 120 s y elegir una fila para comprobar reutilización; vencer una lectura y comprobar una sola consulta; provocar un 429 con Retry-After y comprobar que el lote conserva los datos disponibles; agotar un presupuesto reducido y verificar que se repone al salir la llamada de la ventana de 24 horas",
+        "Cálculo correcto de segundos y porcentaje. Se identifican cierres y referencias en cero. Las lecturas recientes evitan solicitudes duplicadas y el límite conserva resultados parciales",
+        "tests/test_tomtom.py, tests/test_dashboard.py y DOC_005 RES_009",
+    ),
 ]
 
 
@@ -155,9 +165,9 @@ def manual():
         "DOC_003_Manual.md",
         r"""# DOC_003 Manual de instalación y usuario
 
-Versión 1.2 · Cuauhtémoc · ENT_003 · 22 de noviembre de 2026.
+Versión 1.3 · Cuauhtémoc · ENT_003 · 23 de noviembre de 2026.
 Para usuarios autenticados, administradores y equipo de desarrollo. El manual cubre el control
-simulado y la consulta de tráfico real con TomTom.
+simulado, la consulta de tráfico real y el comparador de demoras con TomTom.
 
 ## MAN_001 Requisitos previos
 
@@ -185,8 +195,8 @@ comprueba puertos 8000, 8001 y 8501. No iniciar Uvicorn por separado al usar el 
 
 El selector usa una BD nueva data/cuauhtemoc.db y conserva data/traffic.db. Si hay URL
 personalizada, preparar una base nueva explícitamente en lugar de sobrescribir configuración.
-Las capturas proceden de una instancia temporal de la revisión 1e48f7e con cuenta de
-demostración. FIG_011 contiene la respuesta de TomTom visible al momento de la consulta.
+Las capturas proceden de una instancia temporal de la revisión 4f377b2 con cuenta de
+demostración. FIG_011 y FIG_012 muestran datos de TomTom al momento de la consulta.
 
 ## MAN_003 Acceso
 
@@ -261,6 +271,7 @@ requiere rol administrador. Un usuario lector puede consultar y exportar observa
 | ERR_010 | Trabajador sin telemetría | Revisar worker.log y lease; reiniciar desde despeje, no asumir color anterior |
 | ERR_011 | TomTom sin configurar o clave rechazada | Revisar TOMTOM_API_KEY, acceso a Traffic API y reiniciar FastAPI |
 | ERR_012 | TomTom sin comunicación, datos inválidos o cuota agotada | Verificar salida HTTPS y vigencia de la cuota. Reintentar o elegir otro punto |
+| ERR_013 | Presupuesto diario local alcanzado | Esperar a que salgan llamadas de la ventana de 24 horas. El servidor puede reutilizar lecturas vigentes |
 
 Para diagnosticar un puerto usar netstat -ano, sin cerrar procesos desconocidos. Los registros
 no deben contener contraseñas/tokens. Los servicios de prueba usan otros puertos y credenciales.
@@ -303,7 +314,7 @@ Reiniciar trabajador desde diez segundos de despeje. Revocar credenciales al ret
 2. Reiniciar el lanzador local. En Compose, usar docker compose up -d --build api dashboard para desplegar la actualización. Para recargar solo la clave, usar docker compose up -d api.
 3. Iniciar sesión. En Vista de tráfico, elegir Tráfico real (TomTom). Seleccionar un punto de consulta en el menú lateral o en el mapa.
 4. Revisar el tramo resaltado y su velocidad actual, velocidad en flujo libre, tiempos de recorrido, confianza y cierre si TomTom lo reporta. La hora de consulta se presenta en CDMX.
-5. Esperar la actualización del minuto o pulsar Actualizar ahora. Elegir Simulación para volver a colas, fases y control semafórico.
+5. Esperar la actualización del minuto o pulsar Actualizar ahora. Si existe una lectura de los últimos 120 s, el backend la reutiliza. Elegir Simulación para volver al control semafórico.
 
 Los puntos son referencias del catálogo académico. Cada respuesta corresponde al tramo cercano
 que selecciona TomTom. La consulta ofrece velocidades y tiempos por tramo. Los planes semafóricos
@@ -311,6 +322,25 @@ del prototipo usan conteos por acceso del simulador. Para incidencias del visor,
 y ERR_012.
 
 ![FIG_011 Visor actual con respuesta en vivo de TomTom](figuras/FIG_011_tomtom.png)
+
+## MAN_014 Comparar demoras y administrar consultas
+
+1. En Tráfico real (TomTom), pulsa Comparar puntos debajo del mapa.
+2. Revisa la tabla. Ordena hasta cinco puntos por segundos adicionales respecto al flujo libre. Muestra el aumento porcentual, la confianza de TomTom, la hora de consulta en CDMX y el estado de cada punto.
+3. Marca una fila para ver su tramo y las métricas completas en el mapa. Pulsa Comparar puntos otra vez para solicitar otra comparación.
+
+Por ejemplo, 210 s de recorrido actual y 120 s en flujo libre equivalen a 90 s adicionales
+y un aumento del 75 %. Un resultado de 0 s significa que el tiempo actual fue igual o menor que
+la referencia. Los cierres, los tramos sin referencia y los puntos sin datos aparecen con su estado.
+
+El mapa consulta al backend cada minuto. El comparador se ejecuta al pulsar el botón. Ambos
+reutilizan las lecturas por 120 s y conservan la hora original. El valor
+TOMTOM_DAILY_REQUEST_BUDGET de .env limita las llamadas en una ventana móvil de 24 horas
+por proceso FastAPI. El valor inicial es 1000 y el contador se reinicia con el proceso.
+Si TomTom responde 429, el backend pausa las consultas nuevas según Retry-After o durante
+cinco minutos si no tiene un valor válido. La tabla muestra los resultados que estén disponibles.
+
+![FIG_012 Comparación en vivo de los cinco puntos](figuras/FIG_012_comparador.png)
 """,
     )
 
@@ -319,7 +349,7 @@ def testing():
     parts = [
         """# DOC_004 Documento y guiones de pruebas
 
-Versión 1.2 · ENT_004 · 22 de noviembre de 2026. Estrategia: unidad → integración → sistema
+Versión 1.3 · ENT_004 · 23 de noviembre de 2026. Estrategia: unidad → integración → sistema
 → validación/aceptación. QA prepara datos y consolida evidencia; otro integrante revisa cambios
 de control, seguridad y ML. No usar datos productivos ni secretos de usuario en pruebas.
 
@@ -347,7 +377,8 @@ crea/elimina únicamente esquemas UUID propios. academic_validation utiliza base
 puertos 28000/28100 y 600 s con diez usuarios para cada escala; no toca la BD Cuauhtémoc.
 No confundir la verificación del contrato con mocks con la evaluación del modelo entrenado.
 Las capturas de verificación se reproducen con scripts.capture_academic_demo. El recorrido
-usa SQLite en una instancia efímera y requiere una clave TomTom configurada para FIG_011.
+usa SQLite en una instancia efímera y requiere una clave TomTom configurada para FIG_011
+y FIG_012. La instancia de captura tiene un presupuesto de hasta cinco llamadas.
 """
     ]
     for i, (name, kind, req, owner, data, steps, expected, evidence) in enumerate(TESTS, 1):
@@ -388,7 +419,7 @@ la participación y aceptación humana permanecen pendientes hasta ejecutarlas.
 
 def results():
     parts = [
-        "# DOC_005 Resultados de verificación y límites de aceptación\n\nVersión 1.2 · ENT_005 · 22 de noviembre de 2026. Incluye la línea base académica y la verificación de la integración TomTom.\n"
+        "# DOC_005 Resultados de verificación y límites de aceptación\n\nVersión 1.3 · ENT_005 · 23 de noviembre de 2026. Incluye la línea base académica y las verificaciones del visor y el comparador TomTom.\n"
     ]
     junit = Path("reports/academico/tests.xml")
     if junit.exists():
@@ -466,10 +497,19 @@ def results():
     )
     parts.append(
         "## RES_008 Capturas de la versión actual\n\n"
-        "Edge recorrió acceso, monitor, intervención, auditoría y TomTom en una instancia temporal "
-        "de la revisión 1e48f7e. Se comprobó la carga del mapa y del tramo consultado en vivo "
-        "para FIG_011. Las figuras FIG_007 a FIG_011 y figuras/CAPTURAS.json registran esta "
-        "demostración. El resultado de la consulta es una observación puntual del proveedor.\n"
+        "Edge recorrió acceso, monitor, intervención, auditoría, TomTom y el comparador en una instancia "
+        "temporal de la revisión 4f377b2. FIG_011 y FIG_012 muestran datos en vivo. Las figuras FIG_007 "
+        "a FIG_012 y figuras/CAPTURAS.json registran esta demostración y su fecha.\n"
+    )
+    parts.append(
+        "## RES_009 Verificación del comparador de demoras\n\n"
+        "La suite de 4f377b2 registró 47 pruebas aprobadas y 4 de PostgreSQL omitidas por falta de "
+        "TEST_DATABASE_URL. Las pruebas del comparador verifican el cálculo, orden, resultados parciales, "
+        "reutilización por coordenada, vencimiento, presupuesto diario y recuperación tras 429. "
+        "Fuentes de reproducción: tests/test_tomtom.py y tests/test_dashboard.py.\n\n"
+        "La prueba de navegador con proveedor simulado registró cinco llamadas en total al abrir el mapa, "
+        "comparar los cinco puntos, repetir la comparación y seleccionar una fila. FIG_012 corresponde a una "
+        "prueba separada con la API en vivo. Sus resultados describen el instante de la consulta.\n"
     )
     write("DOC_005_Resultados.md", "\n".join(parts))
 

@@ -47,7 +47,11 @@ try {
   await map.locator('.leaflet-tile-loaded').first().waitFor();
   await position(text('Tráfico real · TomTom'));
   await save('FIG_011_tomtom.png');
-  console.log('Cinco capturas verificadas en el dashboard actual.');
+  await page.getByRole('button', { name: 'Comparar puntos', exact: true }).click();
+  await page.getByTestId('stDataFrame').last().getByTestId('data-grid-canvas').waitFor();
+  await position(text('Comparador de demoras'));
+  await save('FIG_012_comparador.png');
+  console.log('Seis capturas verificadas, incluida la comparación con TomTom en vivo.');
 } finally {
   await browser.close();
 }

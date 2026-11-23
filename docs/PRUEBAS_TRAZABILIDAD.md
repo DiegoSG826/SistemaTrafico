@@ -51,10 +51,24 @@ por falta de `TEST_DATABASE_URL`. La prueba con TomTom confirma disponibilidad p
 puntos consultados en ese momento. Los resultados de PostgreSQL y carga de Fase 2 corresponden
 a la línea base académica y se documentan por separado en [DOC_005](../entrega_academica/DOC_005_Resultados.md).
 
-La demostración de la edición 1.2 volvió a recorrer en Edge el acceso, simulación, intervención,
-auditoría y el visor en vivo. Las cinco pantallas y su fecha se registran en
+La demostración de la edición 1.3 recorrió en Edge el acceso, simulación, intervención,
+auditoría, visor y comparador en vivo. Las seis pantallas y su fecha se registran en
 [CAPTURAS.json](../entrega_academica/figuras/CAPTURAS.json). El recorrido usa SQLite temporal
 y una cuenta de demostración.
+
+### Verificación del comparador de demoras
+
+| Requisito y caso | Comprobación | Evidencia |
+|---|---|---|
+| RF_018 y CU_012 | Cálculo, orden, cierre, referencia cero e indisponibilidad parcial | `tests/test_tomtom.py`, PRU_015 |
+| RF_018 y CU_012 | Reutilización mapa y tabla, vencimiento y presupuesto de 24 h | `tests/test_tomtom.py`, PRU_015 |
+| RF_018 y CU_012 | Pausa tras 429 y recuperación según Retry-After | `tests/test_tomtom.py`, PRU_015 |
+| RF_018 y CU_012 | Consulta bajo demanda y selección de un tramo en el mapa | `tests/test_dashboard.py`, Edge y RES_009 |
+
+La suite de esta revisión registró 47 pruebas aprobadas y 4 de PostgreSQL omitidas por
+falta de `TEST_DATABASE_URL`. La prueba en Edge con un proveedor simulado confirmó cinco
+llamadas al abrir el mapa, comparar, repetir y seleccionar una fila. FIG_012 registra la
+consulta en vivo. Ver [DOC_005](../entrega_academica/DOC_005_Resultados.md).
 
 ## 2. Familias de prueba de Fase 1
 

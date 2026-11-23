@@ -1,8 +1,8 @@
 # DOC_002 Especificación de casos de uso
 
-Versión 1.2 · Cuauhtémoc · 22 de noviembre de 2026.
+Versión 1.3 · Cuauhtémoc · 23 de noviembre de 2026.
 
-El sistema combina control semafórico simulado y consulta de tráfico actual. El administrador (ACT_001) gestiona y consulta. El proveedor de observaciones (ACT_002) y el evaluador académico (ACT_003) aportan datos o evidencia. TomTom (ACT_004) devuelve el tramo para CU_011. Un usuario lector (ACT_005) puede iniciar sesión, consultar y exportar observaciones. El trabajador y la IA son componentes internos.
+El sistema combina control semafórico simulado y monitoreo vial. El administrador (ACT_001) gestiona y consulta. El proveedor de observaciones (ACT_002) y el evaluador académico (ACT_003) aportan datos o evidencia. TomTom (ACT_004) aporta lecturas para CU_011 y CU_012. Un usuario lector (ACT_005) puede iniciar sesión, consultar, comparar demoras y exportar observaciones. El trabajador y la IA son componentes internos.
 
 ## CU_001 Acceder
 
@@ -276,3 +276,27 @@ Punto desconocido: 404. Clave ausente, rechazada o cuota agotada: 503. Fallo de 
 **Postcondición y criterio de aceptación:** La clave permanece en el servidor y la consulta no registra observaciones ni interviene en planes.
 
 **Evidencia asociada:** `tests/test_tomtom.py, tests/test_dashboard.py, DOC_005 RES_007`. La existencia de una prueba no equivale a la aceptación humana del caso.
+
+## CU_012 Comparar demoras por tramo
+
+**Actor:** ACT_001 o ACT_005. ACT_004 aporta lecturas que falten o hayan vencido. **Requisitos:** RF_018.
+
+**Disparador:** el actor solicita comparar demoras por tramo. **Precondiciones:** Vista TomTom abierta, sesión válida y al menos dos puntos de catálogo.
+
+**Entradas:** datos del contrato OpenAPI o parámetros CLI del caso. **Resultado:** Comparación bajo demanda con demora, aumento, confianza, hora de lectura y estado.
+
+### FLU_012 Flujo principal
+
+1. Pulsar Comparar puntos.
+2. Consultar GET /tomtom/comparison para hasta cinco puntos.
+3. Reutilizar lecturas recientes o consultar TomTom dentro del presupuesto.
+4. Ordenar los tramos disponibles por demora adicional e indicar cierres o datos ausentes.
+5. Seleccionar una fila para abrir su tramo en el mapa.
+
+### ALT_012 Alternativas y excepciones
+
+Lista inválida o punto desconocido reciben 422 o 404. Falta de clave recibe 503. Ante un cierre, una referencia nula o una lectura indisponible, la fila conserva el estado correspondiente. Un 429 activa la pausa del proveedor.
+
+**Postcondición y criterio de aceptación:** Los resultados parciales permanecen visibles. El mapa y la tabla comparten lecturas por 120 s.
+
+**Evidencia asociada:** `tests/test_tomtom.py, tests/test_dashboard.py, DOC_004 PRU_015 y DOC_005 RES_009`. La existencia de una prueba no equivale a la aceptación humana del caso.

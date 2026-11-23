@@ -14,13 +14,16 @@ y [verificación](PRUEBAS_TRAZABILIDAD.md#verificación-de-la-vista-tomtom).
 
 ## REV_ACT_001 Verificación de la entrega vigente
 
+**23 de noviembre de 2026 · revisión 4f377b2.** La edición 1.3 incorpora el comparador de
+demoras, el presupuesto de consultas de TomTom y la verificación en navegador.
+
 | Elementos | Evidencia |
 |---|---|
-| Gantt y PERT | FIG_001, FIG_002 y reports/pert.json reflejan el plan base, la ampliación y los hitos de Git |
-| Casos de uso | FIG_003 y DOC_002 muestran once casos y distinguen al lector, al administrador y a TomTom |
-| Datos, arquitectura y despliegue | FIG_004 usa los nombres de columnas del esquema. FIG_005 y FIG_006 muestran la consulta HTTPS del backend |
-| Capturas | FIG_007 a FIG_011 proceden de la rama actual. CAPTURAS.json registra versión, fecha y origen |
-| Manual, pruebas y resultados | DOC_003 a DOC_005 incluyen el flujo visible y su evidencia en la instancia temporal |
+| Gantt y PERT | FIG_001, FIG_002 y reports/pert.json incluyen las actividades del comparador y el hito 4f377b2 |
+| Casos de uso | FIG_003 y DOC_002 muestran doce casos e incluyen CU_012 y los roles de consulta |
+| Datos, arquitectura y despliegue | FIG_004 a FIG_006 documentan la consulta por coordenada y el presupuesto en FastAPI |
+| Capturas | FIG_007 a FIG_012 se tomaron en la versión 4f377b2. CAPTURAS.json registra su origen |
+| Manual, pruebas y resultados | DOC_003 a DOC_005 incorporan MAN_014, PRU_015 y RES_009 |
 | Presentación, video y paquete | PRE_001, VID_001 y MANIFIESTO.json acompañan la edición revisada |
 
 La auditoría inicial se conserva abajo como antecedente. El estado vigente se consulta en

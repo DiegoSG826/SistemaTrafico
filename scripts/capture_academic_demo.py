@@ -30,7 +30,8 @@ def available_ports(count):
 
 
 def main():
-    if not Settings().tomtom_api_key.get_secret_value().strip():
+    config = Settings()
+    if not config.tomtom_api_key.get_secret_value().strip():
         raise RuntimeError("Configura TOMTOM_API_KEY para documentar el visor con datos en vivo.")
     directory = Path("data") / f"academic-demo-{uuid4().hex}"
     directory.mkdir(parents=True)
@@ -47,6 +48,7 @@ def main():
         "ML_SERVICE_URL": f"http://127.0.0.1:{ml_port}",
         "SGT_DEMO_URL": dashboard_url,
         "SGT_DEMO_FIGURES": str(figures),
+        "TOMTOM_DAILY_REQUEST_BUDGET": str(min(config.tomtom_daily_request_budget, 5)),
         "SIM_SPEED": "10",
     }
     initialize(
@@ -107,7 +109,7 @@ def main():
         destination = Path("entrega_academica/figuras")
         items = [
             "FIG_007_acceso.png", "FIG_008_monitor.png", "FIG_009_intervencion.png",
-            "FIG_010_auditoria.png", "FIG_011_tomtom.png",
+            "FIG_010_auditoria.png", "FIG_011_tomtom.png", "FIG_012_comparador.png",
         ]
         if not all((figures / name).is_file() for name in items):
             raise RuntimeError("Faltan capturas de la instancia de demostración.")
@@ -117,7 +119,8 @@ def main():
             "version_app": subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True).strip(),
             "fecha_cdmx": datetime.now(ZoneInfo("America/Mexico_City")).isoformat(timespec="seconds"),
             "ambiente": "Instancia temporal con SQLite y cuenta de demostración",
-            "fuente_tomtom": "Consulta en vivo al tramo cercano al primer punto del catálogo",
+            "fuente_tomtom": "Consultas en vivo del mapa y del comparador de cinco puntos del catálogo",
+            "presupuesto_captura": int(env["TOMTOM_DAILY_REQUEST_BUDGET"]),
             "archivos": items,
         }
         (destination / "CAPTURAS.json").write_text(

@@ -155,6 +155,17 @@ CASES = [
         "tests/test_tomtom.py, tests/test_dashboard.py, DOC_005 RES_007",
         "La clave permanece en el servidor y la consulta no registra observaciones ni interviene en planes",
     ),
+    (
+        "Comparar demoras por tramo",
+        "ACT_001 o ACT_005. ACT_004 aporta lecturas que falten o hayan vencido",
+        "RF_018",
+        "Vista TomTom abierta, sesión válida y al menos dos puntos de catálogo",
+        "Pulsar Comparar puntos; consultar GET /tomtom/comparison para hasta cinco puntos; reutilizar lecturas recientes o consultar TomTom dentro del presupuesto; ordenar los tramos disponibles por demora adicional e indicar cierres o datos ausentes; seleccionar una fila para abrir su tramo en el mapa",
+        "Lista inválida o punto desconocido reciben 422 o 404. Falta de clave recibe 503. Ante un cierre, una referencia nula o una lectura indisponible, la fila conserva el estado correspondiente. Un 429 activa la pausa del proveedor",
+        "Comparación bajo demanda con demora, aumento, confianza, hora de lectura y estado",
+        "tests/test_tomtom.py, tests/test_dashboard.py, DOC_004 PRU_015 y DOC_005 RES_009",
+        "Los resultados parciales permanecen visibles. El mapa y la tabla comparten lecturas por 120 s",
+    ),
 ]
 
 
@@ -164,7 +175,7 @@ def capitalize_first(value):
 
 def cases_document():
     parts = [
-        "# DOC_002 Especificación de casos de uso\n\nVersión 1.2 · Cuauhtémoc · 22 de noviembre de 2026.\n\nEl sistema combina control semafórico simulado y consulta de tráfico actual. El administrador (ACT_001) gestiona y consulta. El proveedor de observaciones (ACT_002) y el evaluador académico (ACT_003) aportan datos o evidencia. TomTom (ACT_004) devuelve el tramo para CU_011. Un usuario lector (ACT_005) puede iniciar sesión, consultar y exportar observaciones. El trabajador y la IA son componentes internos.\n"
+        "# DOC_002 Especificación de casos de uso\n\nVersión 1.3 · Cuauhtémoc · 23 de noviembre de 2026.\n\nEl sistema combina control semafórico simulado y monitoreo vial. El administrador (ACT_001) gestiona y consulta. El proveedor de observaciones (ACT_002) y el evaluador académico (ACT_003) aportan datos o evidencia. TomTom (ACT_004) aporta lecturas para CU_011 y CU_012. Un usuario lector (ACT_005) puede iniciar sesión, consultar, comparar demoras y exportar observaciones. El trabajador y la IA son componentes internos.\n"
     ]
     for i, (title, actor, req, pre, steps, exceptions, post, evidence, acceptance) in enumerate(
         CASES, 1
@@ -188,12 +199,13 @@ def main():
     exp = json.loads(Path("reports/experiment.json").read_text())
     memo = """# DOC_001 Memoria técnica del sistema de semáforos simulados de Cuauhtémoc
 
-Versión 1.2 · 22 de noviembre de 2026 · ENT_001. Proyecto académico para cuatro integrantes.
+Versión 1.3 · 23 de noviembre de 2026 · ENT_001. Proyecto académico para cuatro integrantes.
 
 Esta memoria reúne descripción, fundamentos, análisis, diseño, desarrollo y verificación de un
 prototipo que adapta semáforos **simulados** a la demanda vehicular pronosticada. El alcance es
 ALC_001 Cuauhtémoc, con CUA_001 a CUA_005 sintéticos, sin aforos ni controladores físicos.
 El dashboard incorpora consulta de tráfico actual con TomTom para tramos cercanos al catálogo.
+El comparador ordena hasta cinco puntos por tiempo adicional de recorrido.
 Los documentos DOC_002 a DOC_005 y figuras FIG_001 a FIG_006 forman parte de esta memoria.
 La entrega documental está preparada; la aceptación por docente y evaluadores no se presume.
 No se afirma certificación ISO. Los resultados de la línea base se identifican como sintéticos.
@@ -378,8 +390,8 @@ malicioso. Joblib solo debe cargar modelos propios y confiables [REF_006].
 | ACT_001 | Administrador | Consulta, configura, interviene y revisa auditoría |
 | ACT_002 | Proveedor de observaciones | Generador o adaptador externo autorizado; registra lotes |
 | ACT_003 | Evaluador académico | Ejecuta evaluación y revisa reportes exportados |
-| ACT_004 | TomTom Traffic API | Entrega geometría, velocidad, tiempos y cierre del tramo consultado |
-| ACT_005 | Usuario lector | Inicia sesión, consulta y exporta observaciones y visualiza el tramo TomTom |
+| ACT_004 | TomTom Traffic API | Entrega geometría, velocidad, tiempos y cierre para el visor y el comparador |
+| ACT_005 | Usuario lector | Inicia sesión, consulta y exporta observaciones, visualiza tramos y compara demoras |
 | INT_001 | Conductores simulados | Generan demanda; no usan interfaz |
 | INT_002 | Peatones simulados | Requieren fase exclusiva; no usan interfaz |
 | INT_003 | Docente | Acepta entrega y limitaciones; no se atribuye aprobación automática |
@@ -395,6 +407,10 @@ son alternativas del mismo puerto; Waze efectivo permanece fuera del MVP sin aut
 **RF_017 Visualizar tráfico real.** Un usuario autenticado puede seleccionar un punto del
 catálogo y consultar las métricas del tramo cercano, con fecha, fuente y estado de disponibilidad.
 El backend conserva la clave del proveedor. Ver CU_011 y PRU_014.
+
+**RF_018 Comparar demoras.** El usuario autenticado puede solicitar una comparación de hasta
+cinco puntos, ordenada por demora adicional, con estados y hora por lectura. El mapa y la tabla
+comparten lecturas recientes. Ver CU_012 y PRU_015.
 
 ### REQ_002 Requerimientos no funcionales
 
@@ -426,8 +442,8 @@ La red no sustituye nivelación de recursos ni registra ejecución de ceremonias
 
 ### CAL_002 Estimación de la ampliación TomTom e hitos
 
-La ruta P–Q–S–T estima 8 días hábiles para el incremento. El diseño precede al backend
-y al dashboard. Las pruebas esperan ambos componentes y habilitan la revisión documental.
+La ruta P–Q–S–T estima 8 días hábiles para el visor original. El comparador agrega
+5 días estimados y lleva la ampliación completa a 13 días por la ruta P–Q–S–T–U–V–X.
 Los tres valores de cada fila son estimaciones optimista, probable y pesimista.
 
 | ID y código | Actividad | Depende de | Tres estimaciones (días) | Duración esperada |
@@ -437,9 +453,14 @@ Los tres valores de cada fila son estimaciones optimista, probable y pesimista.
 | ACTIV_018 · R | Integración del dashboard | P | 1 / 2 / 3 | 2 |
 | ACTIV_019 · S | Pruebas con el proveedor | Q y R | 1 / 1 / 1 | 1 |
 | ACTIV_020 · T | Documentación y capturas | S | 1 / 2 / 3 | 2 |
+| ACTIV_021 · U | Diseño del comparador | T | 1 / 1 / 1 | 1 |
+| ACTIV_022 · V | Lecturas y cuota del backend | U | 1 / 2 / 3 | 2 |
+| ACTIV_023 · W | Tabla y selección del tramo | U | 1 / 1 / 1 | 1 |
+| ACTIV_024 · X | Pruebas y documentación | V y W | 1 / 2 / 3 | 2 |
 
 Git registra la entrega inicial el 1 de noviembre de 2026 (ecf0b0a), el mapa y la simulación
-actualizados el 16 de noviembre (e4da62b) y TomTom integrado el 22 de noviembre (1e48f7e).
+actualizados el 16 de noviembre (e4da62b), el visor TomTom el 22 de noviembre (1e48f7e)
+y el comparador el 23 de noviembre (4f377b2).
 Estas fechas documentan hitos del repositorio. Las duraciones reales de cada actividad
 carecen de registro. El cálculo se reproduce con scripts.pert y reports/pert.json.
 
@@ -486,10 +507,10 @@ ciclo de IA ya propuestos en Fase 1; no se presume certificación a ninguna de e
 
 ### MOD_001 Diagrama de casos de uso
 
-FIG_003 representa el límite del sistema, cinco actores y once casos. Aplicar un plan requiere
+FIG_003 representa el límite del sistema, cinco actores y doce casos. Aplicar un plan requiere
 una propuesta registrada y una versión vigente. El lector autenticado consulta, supervisa y
-exporta. TomTom participa en CU_011. DOC_002 especifica entradas, precondiciones, flujo,
-alternativas, postcondiciones, criterios y evidencia de CU_001 a CU_011.
+exporta. CU_012 extiende CU_011 cuando el usuario elige comparar puntos. DOC_002 especifica
+entradas, flujo, alternativas, postcondiciones, criterios y evidencia de CU_001 a CU_012.
 
 ![FIG_003 Casos de uso](figuras/FIG_003_casos_uso.png)
 
@@ -499,8 +520,8 @@ FIG_004 identifica entidades ENTBD_001..014, PK/FK y cardinalidades. El esquema 
 autoridad ejecutable; no se introduce otro historial duplicado. Detalles y plan_prediccion son
 relaciones asociativas. Las tablas técnicas schema_versions/control_worker soportan migración
 y exclusión del trabajador. No hay actuadores físicos representados en la BD.
-El lector se representa mediante usuarios.role. La consulta TomTom usa las coordenadas
-existentes y entrega la respuesta al visor sin agregar registros de tráfico.
+El lector se representa mediante usuarios.role. El mapa y el comparador usan las coordenadas
+del catálogo. Las lecturas y el contador TomTom residen en memoria del proceso FastAPI.
 
 ![FIG_004 Modelo entidad relación](figuras/FIG_004_bd.png)
 
@@ -532,6 +553,7 @@ normalizada. La ruta de consulta permite operar la simulación de forma independ
 | COMP_007 | BD | database/ | Migración, restricciones, catálogo y rol runtime |
 | COMP_008 | Operación | scripts/, compose.yaml | Inicio, carga, respaldo y evidencia |
 | COMP_009 | Adaptador TomTom | backend/app/tomtom.py | Consulta y validación del tramo cercano |
+| COMP_010 | Comparador | backend/app/tomtom.py y frontend/dashboard.py | Orden de demoras, lecturas compartidas y control de llamadas |
 
 ### DEV_002 Flujo de implementación
 
@@ -574,11 +596,25 @@ La respuesta describe un tramo cercano a un punto académico. La consulta no per
 ni aporta conteos de llegadas por acceso. El modelo, el control de fases y la estimación de colas
 continúan con sus observaciones de simulación. DOC_003 explica la configuración y el diagnóstico.
 
+### DEV_006 Comparador de demoras y presupuesto de consultas
+
+GET /tomtom/comparison recibe de dos a cinco point_id. Devuelve intersection_id, status,
+delay_s, increase_pct, confidence, fetched_at y detail por punto. La demora es el máximo
+entre cero y la diferencia del tiempo actual y el tiempo en flujo libre. El aumento se
+calcula sobre el tiempo en flujo libre y se redondea a un decimal. Cierre, referencia cero
+y ausencia de lectura se muestran con estados propios y fuera del orden numérico.
+
+FastAPI mantiene 120 s de reutilización por coordenada y agrupa las consultas concurrentes
+del mapa y la tabla en un mismo proceso. TOMTOM_DAILY_REQUEST_BUDGET fija el presupuesto
+en 24 horas móviles. Su valor predeterminado es 1000 y el contador en memoria se reinicia con
+el proceso. Ante un 429 se respeta Retry-After o se aplican cinco minutos de espera si
+falta un valor válido. El comparador conserva resultados parciales y las horas originales.
+
 ## CAP_007 Pruebas
 
 ### VER_001 Plan y procedimientos
 
-DOC_004 identifica PRU_001..014, nivel/tipo, responsable, entrada, pasos, resultado esperado,
+DOC_004 identifica PRU_001..015, nivel/tipo, responsable, entrada, pasos, resultado esperado,
 evidencia y criterio de salida. Sus guiones separan ejecución automatizada de evaluación humana.
 Las suites están en tests/ y la CI usa PostgreSQL aislado. Los ensayos actuales y los históricos
 se identifican por archivo y fecha; no se suman como si fueran una única ejecución.
@@ -593,6 +629,8 @@ Estos resultados pertenecen al experimento sintético de referencia previo a cal
 
 La integración TomTom se verificó con respuestas para los cinco puntos y con una navegación en
 Edge entre ambas vistas. DOC_005 RES_007 registra el alcance y los resultados de esa comprobación.
+RES_009 distingue la suite de la revisión con comparador, la prueba de cuota con proveedor
+simulado y la captura de cinco puntos con datos en vivo.
 
 El anexo de resultados DOC_005 lee JUnit/cobertura, carga 5/50 y restauración si los reportes
 existen; un criterio fallido se conserva como resultado negativo. La cobertura no mide utilidad
@@ -648,7 +686,7 @@ La regla se aplica a todos los números de cada familia. OG_001 es el objetivo g
 ACT_001..005 identifican los actores. INT_001..003 identifican interesados. TER y GLO
 identifican términos y REF identifica fuentes.
 DOC documentos; FIG figuras; TAB tablas; ENT entregables; COMP componentes.
-ACTIV_001..015 corresponden a A..O del plan base. ACTIV_016..020 corresponden a P..T del incremento TomTom.
+ACTIV_001..015 corresponden a A..O del plan base. ACTIV_016..024 corresponden a P..X del incremento TomTom.
 Los IDs de base de datos son claves técnicas y no sustituyen identificadores de requisitos.
 
 ## ANX_D Relación de entregables
@@ -656,7 +694,7 @@ Los IDs de base de datos son claves técnicas y no sustituyen identificadores de
 | ID | Artefacto | Contenido |
 |---|---|---|
 | ENT_001 | DOC_001 Memoria | Capítulos 2 a 7, glosario, referencias e IDs |
-| ENT_002 | DOC_002 Casos de uso | Once especificaciones completas |
+| ENT_002 | DOC_002 Casos de uso | Doce especificaciones con trazabilidad |
 | ENT_003 | DOC_003 Manual | Instalación, usuario, errores, recuperación |
 | ENT_004 | DOC_004 Pruebas | Tipos, guiones y criterios |
 | ENT_005 | DOC_005 Resultados | Evidencias y límites de aceptación |

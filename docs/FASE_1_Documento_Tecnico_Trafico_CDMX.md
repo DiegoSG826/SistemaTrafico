@@ -13,8 +13,8 @@
 | Equipo | Cuatro integrantes: Líder/Backend, Frontend, IA/Data Science y QA/Soporte |
 | Entrega posterior | Fase 2: implementación; no se incluye código en este documento |
 
-**Nota de vigencia del 22 de noviembre de 2026.** Esta fase conserva la especificación
-original. La implementación posterior incorpora una vista opcional de tráfico real con TomTom.
+**Nota de vigencia del 23 de noviembre de 2026.** Esta fase conserva la especificación
+original. La implementación posterior incorpora la vista TomTom y su comparador de demoras.
 El alcance de actuación semafórica sigue siendo simulado. Consulta la
 [integración implementada en Fase 2](FASE_2_Desarrollo_Implementacion.md#11-vista-de-tráfico-real-con-tomtom).
 El plan de 45 días y sus cinco días de reserva pertenecen a esta línea base. La calendarización

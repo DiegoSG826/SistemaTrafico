@@ -64,6 +64,7 @@ El backend permite hasta 1,000 llamadas a TomTom en 24 horas móviles por proces
 `TOMTOM_DAILY_REQUEST_BUDGET` en `.env` según el margen disponible de tu cuenta.
 Si TomTom responde `429`, el backend pausa las llamadas nuevas y conserva las lecturas
 recientes. El contador está en memoria y cubre las llamadas de este proceso.
+Consulta [el manual ilustrado del comparador](entrega_academica/DOC_003_Manual.md#man_014-comparar-demoras-y-administrar-consultas).
 
 La vista **Simulación** conserva su flujo de observaciones, predicciones y planes de semáforos.
 Flow Segment Data aporta velocidades y tiempos por tramo. El controlador requiere conteos de
