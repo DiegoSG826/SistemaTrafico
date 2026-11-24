@@ -4,6 +4,7 @@ from streamlit.testing.v1 import AppTest
 def test_login_dashboard_renders_without_backend():
     app = AppTest.from_file("frontend/dashboard.py").run(timeout=20)
     assert not app.exception
+    assert app.title[0].value == "Sistema inteligente de tráfico · Cuauhtémoc"
     assert len(app.text_input) == 2
     assert app.text_input[0].label == "Correo"
 
@@ -65,23 +66,30 @@ def test_switching_to_tomtom_shows_traffic_for_the_selected_point(monkeypatch):
     app.session_state["token"] = "test-token"
     app.run(timeout=20)
     assert not app.exception
+    assert not app.sidebar.selectbox
+    assert app.selectbox(key="sel_id").label == "Intersección simulada"
+    assert [tab.label for tab in app.tabs] == ["Monitor en vivo", "Intervención y Modelo", "Comparador y Auditoría"]
+    assert app.tabs[1].slider[0].label == "Verde NS (s)"
     assert all(not path.endswith("/tomtom-flow") for path in requests)
 
+    app.button(key="selbtn_2").click().run(timeout=20)
+    assert app.selectbox(key="sel_id").value == 2
     requests.clear()
-    app.radio[0].set_value("Tráfico real (TomTom)").run(timeout=20)
+    app.selectbox(key="vista_trafico").set_value("Tráfico real (TomTom)").run(timeout=20)
     assert not app.exception
-    assert requests == ["/intersections", "/intersections/1/tomtom-flow"]
-    assert {metric.value for metric in app.metric} == {"22 km/h", "45 km/h", "87 s", "43 s"}
+    assert requests == ["/intersections", "/intersections/2/tomtom-flow"]
+    assert app.selectbox(key="sel_id").label == "Punto de consulta"
+    assert {metric.value for metric in app.metric} == {"22 km/h", "45 km/h", "87 s", "43 s", "84%"}
     assert any("Cierre vial" in warning.value for warning in app.warning)
     assert not app.slider
 
     requests.clear()
-    app.selectbox(key="sel_id").set_value(2).run(timeout=20)
+    app.selectbox(key="sel_id").set_value(1).run(timeout=20)
     assert not app.exception
-    assert requests == ["/intersections", "/intersections/2/tomtom-flow"]
+    assert requests == ["/intersections", "/intersections/1/tomtom-flow"]
 
     requests.clear()
-    next(button for button in app.button if button.label == "Comparar puntos").click().run(timeout=20)
+    next(button for button in app.tabs[2].button if button.label == "Comparar puntos").click().run(timeout=20)
     assert not app.exception
     assert requests.count("/tomtom/comparison") == 1
     table = app.dataframe[0].value
@@ -90,7 +98,7 @@ def test_switching_to_tomtom_shows_traffic_for_the_selected_point(monkeypatch):
     assert table.loc[1, "Estado"] == "Cierre reportado"
 
     requests.clear()
-    app.selectbox(key="sel_id").set_value(1).run(timeout=20)
+    app.selectbox(key="sel_id").set_value(2).run(timeout=20)
     assert not app.exception
-    assert requests == ["/intersections", "/intersections/1/tomtom-flow"]
+    assert requests == ["/intersections", "/intersections/2/tomtom-flow"]
     assert app.dataframe[0].value.loc[0, "Demora adicional"] == 44

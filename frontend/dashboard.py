@@ -10,13 +10,137 @@ import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 st.set_page_config(page_title="SGT CDMX · tráfico", page_icon="🚦", layout="wide")
-st.title("Sistema inteligente de tráfico · Cuauhtémoc")
-st.caption("Alcaldía Cuauhtémoc, CDMX · prototipo académico")
-st.markdown("""<style>
-.kp-fila{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
-.kp{flex:1 1 130px;min-width:120px;background:rgba(128,128,128,.14);border-radius:10px;padding:8px 12px}
-.kp span{display:block;font-size:.78rem;opacity:.75}
-.kp b{font-size:1.1rem}
+st.markdown("""<style data-sgt-layout>
+[data-testid="stHeader"], [data-testid="stStatusWidget"],
+[data-testid="stLayoutWrapper"]:has(> .st-key-selbtns),
+[data-testid="stElementContainer"]:has(style[data-sgt-layout]) { display: none; }
+[data-testid="stMain"]:has(.st-key-access, .st-key-workspace) { overflow: hidden; }
+[data-testid="stMainBlockContainer"] {
+    max-width: none;
+    padding: .65rem clamp(.75rem, 2vw, 1.75rem);
+    box-sizing: border-box;
+}
+[data-testid="stMainBlockContainer"]:has(.st-key-access, .st-key-workspace) {
+    height: 100vh;
+    height: 100dvh;
+}
+[data-testid="stMainBlockContainer"]:has(.st-key-access, .st-key-workspace) > [data-testid="stVerticalBlock"] {
+    height: 100%;
+    min-height: 0;
+    gap: .65rem;
+}
+[data-testid="stLayoutWrapper"]:has(> .st-key-access),
+[data-testid="stLayoutWrapper"]:has(> .st-key-workspace) { flex: 1 1 0; min-height: 0; }
+.st-key-access {
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+    padding: 1.35rem;
+    max-height: 100%;
+    overflow-y: auto;
+    border: 1px solid color-mix(in srgb, currentColor 17%, transparent);
+    border-radius: 1rem;
+    box-shadow: 0 12px 36px rgba(10, 24, 45, .10);
+}
+.st-key-access h1 { font-size: clamp(1.45rem, 5vw, 1.85rem); line-height: 1.15; padding: 0; }
+.st-key-access [data-testid="stForm"] { border: 0; padding: 0; }
+.st-key-topbar {
+    flex: 0 0 auto;
+    padding-bottom: .6rem;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+}
+.st-key-topbar [data-testid="stColumn"] { min-width: 0; }
+.st-key-topbar [data-testid="stWidgetLabel"] { min-height: auto; margin-bottom: .15rem; }
+.st-key-topbar [data-testid="stWidgetLabel"] p { font-size: .78rem; }
+.st-key-topbar h1 { font-size: clamp(1rem, 1.55vw, 1.4rem); line-height: 1.15; padding: 0 0 .5rem; }
+.st-key-topbar button { min-height: 2.5rem; }
+.st-key-workspace,
+.st-key-workspace > [data-testid="stLayoutWrapper"],
+.st-key-workspace > [data-testid="stLayoutWrapper"] > [data-testid="stHorizontalBlock"],
+[data-testid="stLayoutWrapper"]:has(> :is(.st-key-map-pane, .st-key-operations-pane, .st-key-map-canvas)),
+.st-key-map-pane, .st-key-operations-pane { flex: 1 1 0; min-height: 0; }
+.st-key-workspace > [data-testid="stLayoutWrapper"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+[data-testid="stVerticalBlock"]:has(> [data-testid="stLayoutWrapper"] > :is(.st-key-map-pane, .st-key-operations-pane)) {
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+}
+.st-key-map-pane, .st-key-operations-pane, .st-key-indicators { gap: .45rem; }
+.st-key-map-heading { flex: 0 0 auto; }
+.st-key-map-heading [data-testid="stPopoverButton"] { min-height: 1.9rem; padding-block: 0; }
+.st-key-map-canvas, .st-key-map-canvas :is([data-testid="stLayoutWrapper"], [data-testid="stVerticalBlock"]),
+.st-key-map-canvas [data-testid="stElementContainer"]:has(iframe) { flex: 1 1 0; min-height: 0; }
+.st-key-map-canvas iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: calc(100vh - 110px);
+    max-height: calc(100dvh - 110px);
+    border-radius: .75rem;
+}
+.st-key-indicators [data-testid="stVerticalBlock"] { gap: .35rem; }
+.st-key-indicators [data-testid="stMarkdownContainer"]:has(> .kp-fila) { margin-bottom: 0; }
+.st-key-indicators [data-testid="stCaptionContainer"] p { font-size: .75rem; line-height: 1.3; }
+.st-key-indicators [data-testid="stAlertContainer"] { padding: .4rem .65rem; }
+.st-key-indicators [data-testid="stPopoverButton"] { min-height: 1.65rem; padding: 0; }
+.st-key-indicators [data-testid="stPopoverButton"] p { font-size: .8rem; }
+.kp-fila, .st-key-tomtom-kpis { display: grid; gap: .35rem; }
+.kp-fila { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.st-key-tomtom-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.kp, .st-key-tomtom-kpis [data-testid="stMetric"] {
+    box-sizing: border-box;
+    padding: .35rem .55rem;
+    background: color-mix(in srgb, currentColor 5%, transparent);
+    border: 1px solid color-mix(in srgb, currentColor 13%, transparent);
+    border-radius: .5rem;
+    line-height: 1.2;
+}
+.kp span { display: block; font-size: .72rem; opacity: .8; }
+.kp b { display: block; margin-top: .16rem; font-size: .9rem; }
+.st-key-tomtom-kpis [data-testid="stMetricLabel"] { min-height: 0; }
+.st-key-tomtom-kpis [data-testid="stMetricLabel"] p { font-size: .72rem; white-space: normal; }
+.st-key-tomtom-kpis [data-testid="stMetricValue"] { font-size: 1rem; font-weight: 650; }
+.st-key-operations-pane > [data-testid="stTabs"],
+.st-key-operations-pane > [data-testid="stTabs"] > div {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+}
+.st-key-operations-pane [data-testid="stTabs"] > div > :not([role="tabpanel"]) { flex-shrink: 0; }
+.st-key-operations-pane [role="tab"] { padding-inline: .4rem; }
+.st-key-operations-pane [role="tab"] p { font-size: .85rem; }
+.st-key-operations-pane [role="tabpanel"] {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: .55rem .3rem .15rem .1rem;
+}
+.st-key-operations-pane [role="tabpanel"] h3 { font-size: 1.15rem; padding: .15rem 0; }
+.st-key-operations-pane [role="tabpanel"] [data-testid="stVerticalBlock"] { gap: .65rem; }
+.st-key-operations-pane [data-testid="stForm"] { padding: .7rem; }
+@media (max-width: 1100px) {
+    .kp-fila { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+    .st-key-topbar > [data-testid="stLayoutWrapper"] > [data-testid="stHorizontalBlock"] {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .4rem;
+    }
+    :is(.st-key-topbar, .st-key-workspace) > [data-testid="stLayoutWrapper"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+        width: 100% !important;
+    }
+    .st-key-workspace > [data-testid="stLayoutWrapper"] > [data-testid="stHorizontalBlock"] {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 34%) minmax(0, 1fr);
+        gap: .5rem;
+    }
+    [data-testid="stLayoutWrapper"]:has(> .st-key-indicators) { max-height: 55%; overflow: auto; }
+}
 </style>""", unsafe_allow_html=True)
 load_dotenv()
 # Dirección de la API del backend. Se puede cambiar en .env o con la variable API_URL.
@@ -28,13 +152,14 @@ SIM_SPEED = float(os.getenv("SIM_SPEED", "10"))
 RESYNC_S = 30
 
 ESTILOS = ["Calles", "Claro", "Oscuro", "Satélite"]
+VISTAS = ["Simulación", "Tráfico real (TomTom)"]
 FASES = {
     "NS_GREEN": "Verde Norte–Sur", "NS_YELLOW": "Amarillo Norte–Sur", "NS_CLEAR": "Despeje Norte–Sur",
     "EO_GREEN": "Verde Este–Oeste", "EO_YELLOW": "Amarillo Este–Oeste", "EO_CLEAR": "Despeje Este–Oeste",
     "PEDESTRIAN": "Fase peatonal", "PEDESTRIAN_CLEAR": "Despeje peatonal",
 }
 NOMBRE_LUZ = {"GREEN": "🟢 Verde", "YELLOW": "🟡 Amarillo", "RED": "🔴 Rojo"}
-MODOS = {"degraded": "Degradado (fijo 40/40)", "automatic": "Automático", "manual": "Manual"}
+MODOS = {"degraded": "Degradado", "automatic": "Automático", "manual": "Manual"}
 
 
 # ---------------------------------------------------------------------------
@@ -63,67 +188,28 @@ def api(method, path, *, timeout=5, **kwargs):
 # ---------------------------------------------------------------------------
 # Login
 # ---------------------------------------------------------------------------
-if "token" not in st.session_state:
-    with st.form("login"):
-        email = st.text_input("Correo", value="admin@example.test")
-        password = st.text_input("Contraseña", type="password")
-        submit = st.form_submit_button("Entrar")
-    if submit:
-        response = api("POST", "/auth/token", json={"email": email, "password": password})
-        if response:
-            st.session_state.token = response["access_token"]
-            st.rerun()
+def iniciar_sesion():
+    with st.container(key="access"):
+        st.title("Sistema inteligente de tráfico · Cuauhtémoc", anchor=False)
+        st.caption("Alcaldía Cuauhtémoc, CDMX · prototipo académico")
+        with st.form("login"):
+            email = st.text_input("Correo", value="admin@example.test")
+            password = st.text_input("Contraseña", type="password")
+            submit = st.form_submit_button("Entrar", type="primary", width="stretch")
+        if submit:
+            response = api("POST", "/auth/token", json={"email": email, "password": password})
+            if response:
+                st.session_state.token = response["access_token"]
+                st.rerun()
     st.stop()
-
-if st.sidebar.button("Cerrar sesión"):
-    st.session_state.clear()
-    st.rerun()
-
-vista = st.sidebar.radio("Vista de tráfico", ["Simulación", "Tráfico real (TomTom)"])
-vista_real = vista == "Tráfico real (TomTom)"
-
-# ---------------------------------------------------------------------------
-# Selección de intersección (menú lateral o clic en el mapa)
-# ---------------------------------------------------------------------------
-catalog = api("GET", "/intersections")
-if not catalog or not catalog["items"]:
-    st.info("No hay intersecciones disponibles. Comprueba que el backend y el simulador estén iniciados.")
-    st.stop()
-
-ids = [i["id"] for i in catalog["items"]]
-nombres = {i["id"]: f"{i['id']} · {i['name']}" for i in catalog["items"]}
-puntos = {i["id"]: f"Punto {i['id']} · {i['latitude']:.5f}, {i['longitude']:.5f}"
-          for i in catalog["items"]}
-if st.session_state.get("sel_id") not in ids:
-    st.session_state.sel_id = ids[0]
-identifier = st.sidebar.selectbox("Punto de consulta" if vista_real else "Intersección simulada",
-                                  ids, key="sel_id", format_func=(puntos if vista_real else nombres).get)
-estilo = st.sidebar.selectbox("Estilo del mapa", ESTILOS)
-if vista_real:
-    st.sidebar.caption("Elige un punto en el mapa o en el menú. TomTom devuelve el tramo vial cercano.")
-else:
-    st.sidebar.caption("Las fechas se presentan en America/Mexico_City; persistencia en UTC.")
-    st.sidebar.markdown(
-        "**Cómo leer el mapa**\n\n"
-        "- Cada cruce tiene 4 luces: **arriba** Norte–Sur, **derecha** Este–Oeste, "
-        "**abajo** peatón (azul = paso peatonal).\n"
-        "- El anillo indica la congestión: verde fluido, amarillo moderado, rojo congestionado, "
-        "gris sin datos vigentes.\n"
-        "- La letra de la esquina indica el modo: **D** degradado (plan fijo 40/40), "
-        "**A** automático, **M** manual.\n"
-        "- Arrastra para moverte, usa la rueda para acercar y **haz clic en un cruce** para seleccionarlo."
-    )
 
 
 def _elegir(identificador):
-    st.session_state.sel_id = identificador
+    st.session_state.interseccion_activa = identificador
 
 
-# Botones ocultos: el mapa (JavaScript) los pulsa cuando haces clic en un cruce.
-with st.container(key="selbtns"):
-    for _id in ids:
-        st.button(f"sel-{_id}", key=f"selbtn_{_id}", on_click=_elegir, args=(_id,))
-st.markdown("<style>.st-key-selbtns{display:none}</style>", unsafe_allow_html=True)
+def seleccionar_del_menu():
+    _elegir(st.session_state.sel_id)
 
 
 def item_actual(items):
@@ -204,7 +290,8 @@ function phase(G,s){
   return {n:"?",ns:"RED",eo:"RED",ped:"RED",left:0};
 }
 
-const map=L.map('map',{preferCanvas:true});
+const mapEl=document.getElementById('map');
+const map=L.map(mapEl,{preferCanvas:true});
 const flowCoords=FLOW?FLOW.geometry.map(c=>[c.latitude,c.longitude]):null;
 
 // Mosaicos sin API key. Si el proveedor elegido falla, se pasa al siguiente automáticamente.
@@ -227,13 +314,14 @@ usaMosaicos(0);
 
 // Vista: se conserva entre sincronizaciones (localStorage) para que el mapa no "salte".
 const bounds=L.latLngBounds(D.map(c=>[c.lat,c.lon]));
-function ajusta(){ map.invalidateSize(); map.fitBounds(bounds.pad(0.25),{maxZoom:18,animate:false}); }
+function ajusta(){ map.fitBounds(bounds.pad(0.25),{maxZoom:18,animate:false}); }
 const viewKey=REAL?'sgt_tomtom_view':'sgt_view2', selectionKey=REAL?'sgt_tomtom_sel':'sgt_sel';
 let saved=null, prevSel=null;
 try{ saved=JSON.parse(localStorage.getItem(viewKey)||'null'); prevSel=localStorage.getItem(selectionKey); }catch(e){}
-if(saved && isFinite(saved.lat) && isFinite(saved.lng) && isFinite(saved.z))
+const vistaValida=saved && isFinite(saved.lat) && isFinite(saved.lng) && isFinite(saved.z);
+if(vistaValida)
   map.setView([saved.lat,saved.lng],saved.z,{animate:false});
-else ajusta();
+else map.setView(bounds.getCenter(),15,{animate:false});
 const selC=D.find(c=>c.id===SEL);
 function encuadraSeleccion(){
   if(!selC) return;
@@ -241,19 +329,26 @@ function encuadraSeleccion(){
   if(flowCoords) map.fitBounds(L.latLngBounds([...flowCoords,point]).pad(0.15),{maxZoom:18});
   else map.setView(point,18);
 }
-if(String(SEL)!==prevSel){
+const cambioSeleccion=String(SEL)!==prevSel;
+if(cambioSeleccion){
   try{ localStorage.setItem(selectionKey,String(SEL)); }catch(e){}
-  if(prevSel!==null){
-    if(REAL) encuadraSeleccion();
-    else if(selC) map.setView([selC.lat,selC.lon],Math.max(map.getZoom(),17),{animate:false});
-  }
 }
+let encuadrePendiente=true;
+new ResizeObserver(()=>{
+  if(mapEl.clientWidth<100 || mapEl.clientHeight<100) return;
+  map.invalidateSize({debounceMoveend:true});
+  if(!encuadrePendiente) return;
+  encuadrePendiente=false;
+  if(cambioSeleccion && prevSel!==null && selC){
+    if(REAL) encuadraSeleccion();
+    else map.setView([selC.lat,selC.lon],Math.max(map.getZoom(),17),{animate:false});
+  }else if(!vistaValida) ajusta();
+}).observe(mapEl);
 map.on('moveend',()=>{ try{ const p=map.getCenter();
   localStorage.setItem(viewKey,JSON.stringify({lat:p.lat,lng:p.lng,z:map.getZoom()})); }catch(e){} });
 function escala(){ const z=map.getZoom(); const s=Math.min(2.2,Math.max(.45,.25+(z-13)*.22));
-  document.getElementById('map').style.setProperty('--s',s); }
+  mapEl.style.setProperty('--s',s); }
 map.on('zoomend',escala); escala();
-setTimeout(()=>{ map.invalidateSize(); if(!saved) ajusta(); },300);
 
 function pick(id){
   try{
@@ -266,7 +361,7 @@ function pick(id){
 const Ctl=L.Control.extend({options:{position:'topright'},onAdd:function(){
   const d=L.DomUtil.create('div'); L.DomEvent.disableClickPropagation(d);
   const b1=L.DomUtil.create('div','btn',d); b1.textContent='Ver todos';
-  b1.onclick=()=>map.fitBounds(bounds.pad(0.25),{maxZoom:18});
+  b1.onclick=ajusta;
   const b2=L.DomUtil.create('div','btn',d); b2.textContent=REAL?'Ir al punto elegido':'Ir al cruce elegido';
   b2.onclick=encuadraSeleccion;
   return d; }});
@@ -327,8 +422,7 @@ const Leg=L.Control.extend({options:{position:'bottomleft'},onAdd:function(){
   const d=L.DomUtil.create('div','leg');
   d.innerHTML='<b>Congestión</b><br><i style="background:#00c878"></i>Fluido<br>'+
    '<i style="background:#ffbe00"></i>Moderado<br><i style="background:#eb3232"></i>Congestionado<br>'+
-   '<i style="background:#969696"></i>Sin datos vigentes<br>'+
-   '<small>Luces: ↑ N–S · → E–O · ↓ peatón<br>Modo: D degradado · A automático · M manual</small>';
+   '<i style="background:#969696"></i>Sin datos vigentes';
   return d; }});
 map.addControl(new Leg());
 
@@ -398,31 +492,25 @@ def construir_mapa(items):
 
 
 @st.fragment(run_every="60s")
-def panel_tomtom():
-    st.subheader("Tráfico real · TomTom")
-    st.button("Actualizar ahora")
-    flujo = api("GET", f"/intersections/{identifier}/tomtom-flow")
+def panel_tomtom(mapa, indicadores):
+    # Las dos zonas se reemplazan juntas en cada actualización del fragmento.
+    with indicadores.container():
+        flujo = api("GET", f"/intersections/{identifier}/tomtom-flow")
+        if flujo and flujo["road_closed"]:
+            st.warning("Cierre vial reportado por TomTom")
+        with st.container(key="tomtom-kpis"):
+            st.metric("Velocidad actual", f"{flujo['current_speed_kmh']} km/h" if flujo else "—")
+            st.metric("Velocidad en flujo libre", f"{flujo['free_flow_speed_kmh']} km/h" if flujo else "—")
+            st.metric("Tiempo de recorrido", f"{flujo['current_travel_time_s']} s" if flujo else "—")
+            st.metric("Tiempo en flujo libre", f"{flujo['free_flow_travel_time_s']} s" if flujo else "—")
+            st.metric("Confianza de TomTom", f"{flujo['confidence']:.0%}" if flujo else "—")
+        if flujo:
+            consulta = pd.Timestamp(flujo["fetched_at"]).tz_convert("America/Mexico_City")
+            st.caption(f"Consulta {consulta:%d/%m/%Y %H:%M:%S} hora CDMX · Actualización cada minuto")
     referencias = [{"id": i["id"], "name": puntos[i["id"]], "lat": i["latitude"], "lon": i["longitude"]}
                    for i in catalog["items"]]
-    mapa, detalle = st.columns([3, 2])
-    with mapa:
-        components.html(mapa_html(referencias, real=True, flujo=flujo), height=560)
-    with detalle:
-        st.markdown(f"**{puntos[identifier]}**")
-        st.caption("El tramo de TomTom se ubica cerca de este punto de referencia. "
-                   "Los estados y tiempos de los semáforos están en la vista Simulación.")
-        if flujo is None:
-            return
-        if flujo["road_closed"]:
-            st.warning("Cierre vial reportado por TomTom")
-        izquierda, derecha = st.columns(2)
-        izquierda.metric("Velocidad actual", f"{flujo['current_speed_kmh']} km/h")
-        derecha.metric("Velocidad en flujo libre", f"{flujo['free_flow_speed_kmh']} km/h")
-        izquierda.metric("Tiempo de recorrido", f"{flujo['current_travel_time_s']} s")
-        derecha.metric("Tiempo en flujo libre", f"{flujo['free_flow_travel_time_s']} s")
-        consulta = pd.Timestamp(flujo["fetched_at"]).tz_convert("America/Mexico_City")
-        st.caption(f"Confianza de TomTom {flujo['confidence']:.0%} · Consulta {consulta:%d/%m/%Y %H:%M:%S} "
-                   "hora CDMX · Actualización cada minuto")
+    with mapa.container():
+        components.html(mapa_html(referencias, real=True, flujo=flujo), height=1)
 
 
 def seleccionar_tramo_comparado():
@@ -432,7 +520,7 @@ def seleccionar_tramo_comparado():
 
 
 def panel_comparacion_tomtom():
-    st.subheader("Comparador de demoras")
+    st.subheader("Comparador de demoras", anchor=False)
     referencias = tuple((i["id"], i["latitude"], i["longitude"]) for i in catalog["items"][:5])
     if len(referencias) < 2:
         st.info("Se necesitan al menos dos puntos en el catálogo para comparar demoras.")
@@ -480,12 +568,6 @@ def panel_comparacion_tomtom():
                  })
 
 
-if vista_real:
-    panel_tomtom()
-    panel_comparacion_tomtom()
-    st.stop()
-
-
 @st.fragment(run_every="5s")
 def panel_mapa():
     datos = api("GET", "/intersections")
@@ -497,7 +579,7 @@ def panel_mapa():
              tuple((i["id"], bool(i["telemetry_current"]), verdes_de(i.get("state")),
                     (i.get("state") or {}).get("mode")) for i in items))
     html = html_cacheado("html_mapa", firma, lambda: construir_mapa(items), RESYNC_S)
-    components.html(html, height=560)
+    components.html(html, height=1)
 
 
 @st.fragment(run_every="2s")
@@ -531,10 +613,11 @@ def panel_metricas():
                f"{estado.get('cycle', '—')}. El reloj simulado corre más rápido que el real (SIM_SPEED).")
     modos = {(i.get("state") or {}).get("mode") for i in datos["items"] if i["telemetry_current"]}
     if modos == {"degraded"}:
-        st.info("Todos los cruces están en **modo degradado** (plan fijo 40/40 s) porque todavía no hay un "
-                "modelo promovido. Por eso los semáforos de todos los cruces se ven iguales. Para ver el "
-                "control adaptativo hay que entrenar, evaluar y promover el modelo (sección «Entrenamiento "
-                "y evaluación» del README) y reiniciar el servicio de IA.")
+        with st.popover("Todos los cruces en modo degradado", type="tertiary"):
+            st.info("Todos los cruces están en **modo degradado** (plan fijo 40/40 s) porque todavía no hay un "
+                    "modelo promovido. Por eso los semáforos de todos los cruces se ven iguales. Para ver el "
+                    "control adaptativo hay que entrenar, evaluar y promover el modelo (sección «Entrenamiento "
+                    "y evaluación» del README) y reiniciar el servicio de IA.")
 
 
 # ---------------------------------------------------------------------------
@@ -542,8 +625,9 @@ def panel_metricas():
 # ---------------------------------------------------------------------------
 SIM_HTML = """
 <canvas id="c" width="420" height="420"
- style="background:#1d222c;border-radius:12px;display:block;width:100%;max-width:420px;height:auto"></canvas>
-<div id="cmp" style="font:12px system-ui,sans-serif;color:#cfd6e2;margin-top:8px;line-height:1.5"></div>
+ style="background:#1d222c;border-radius:12px;display:block;width:100%;max-width:264px;height:auto;margin:auto"></canvas>
+<div id="cmp" style="font:12px system-ui,sans-serif;color:#e2e8f0;background:#1d222c;
+ padding:6px 8px;border-radius:6px;margin-top:8px;line-height:1.5"></div>
 <script>
 const LIVE=__LIVE__, SPEED=__SPEED__;
 const G={ns:__GNS__, eo:__GEO__};
@@ -743,7 +827,8 @@ def panel_detalle():
         return
     st.markdown(f"**Simulación del cruce {nombres[identifier]}**")
     firma = (identifier, bool(item["telemetry_current"]), verdes_de(item.get("state")))
-    components.html(html_cacheado("html_sim", firma, lambda: construir_sim(item), RESYNC_S), height=490)
+    components.html(html_cacheado("html_sim", firma, lambda: construir_sim(item), RESYNC_S), height=348,
+                    scrolling=True)
     estado = item.get("state") or {}
     verdes = estado.get("green_s")
     if verdes:
@@ -767,70 +852,163 @@ def panel_datos():
     if not (trafico and trafico["items"]):
         st.info("Aún no hay observaciones de tráfico para este cruce.")
         return
-    tabla = pd.DataFrame(trafico["items"])
-    tabla["window_end"] = pd.to_datetime(tabla.window_end, utc=True).dt.tz_convert("America/Mexico_City")
-    grafica = tabla.pivot_table(index="window_end", columns="group", values="arrivals_vpm", aggfunc="first")
-    st.line_chart(grafica, y_label="Llegadas (veh/min)")
-    st.dataframe(tabla[["group", "window_end", "arrivals_vpm", "speed_kmh", "weather",
-                        "source", "quality", "current"]], width="stretch", hide_index=True)
     st.download_button("Exportar observaciones JSON", json.dumps(trafico, ensure_ascii=False, indent=2),
-                       file_name=f"trafico-sintetico-{identifier}.json", mime="application/json")
+                       file_name=f"trafico-sintetico-{identifier}.json", mime="application/json",
+                       on_click="ignore")
+    with st.expander("Observaciones de tráfico"):
+        tabla = pd.DataFrame(trafico["items"])
+        tabla["window_end"] = pd.to_datetime(tabla.window_end, utc=True).dt.tz_convert("America/Mexico_City")
+        grafica = tabla.pivot_table(index="window_end", columns="group", values="arrivals_vpm", aggfunc="first")
+        st.line_chart(grafica, y_label="Llegadas (veh/min)")
+        st.dataframe(tabla[["group", "window_end", "arrivals_vpm", "speed_kmh", "weather",
+                            "source", "quality", "current"]], width="stretch", hide_index=True)
+
+
+@st.fragment
+def panel_intervencion():
+    st.subheader("Intervención del administrador", anchor=False)
+    with st.form("manual"):
+        green_ns = st.slider("Verde NS (s)", 20, 60, 40)
+        st.write(f"Verde EO: {80-green_ns} s · fase peatonal obligatoria: 20 s · ciclo: 120 s")
+        motivo, vigencia = st.columns([2, 1], gap="small")
+        reason = motivo.text_input("Motivo de la intervención", max_chars=300)
+        cycles = vigencia.number_input("Vigencia en ciclos", min_value=1, max_value=10, value=1)
+        submit = st.form_submit_button("Solicitar intervención al siguiente ciclo", type="primary")
+    if submit:
+        # Consultar la versión en el momento del envío para reducir conflictos evitables.
+        current = api("GET", "/intersections")
+        if current:
+            item = item_actual(current["items"])
+            result = api("POST", "/manual_override", json={
+                "intersection_id": identifier, "previous_version": item["plan_version"],
+                "green_ns": green_ns, "green_eo": 80 - green_ns,
+                "reason": reason, "duration_cycles": int(cycles)})
+            if result:
+                st.success(f"Solicitud {result['id']}: {result['status']}. "
+                           "La aplicación requiere confirmación del trabajador.")
+                st.json(result)
+
+    left, right = st.columns(2, gap="small")
+    if left.button("Obtener propuesta del modelo", width="stretch"):
+        current = api("GET", "/intersections")
+        if current:
+            item = item_actual(current["items"])
+            result = api("POST", "/predict_light", json={"intersection_id": identifier,
+                                                        "previous_version": item["plan_version"]})
+            if result:
+                st.json(result)
+    if right.button("Volver al automático al siguiente ciclo", width="stretch"):
+        current = api("GET", "/intersections")
+        if current:
+            item = item_actual(current["items"])
+            result = api("POST", "/automatic", json={"intersection_id": identifier,
+                                                    "previous_version": item["plan_version"]})
+            if result:
+                st.success("Retorno solicitado; el modo confirmado cambiará al siguiente ciclo.")
+
+
+@st.fragment
+def panel_auditoria():
+    with st.expander("Auditoría reciente"):
+        if st.button("Consultar auditoría"):
+            result = api("GET", "/audit", params={"limit": 30})
+            if result:
+                st.dataframe(pd.DataFrame(result["items"]), width="stretch")
 
 
 # ---------------------------------------------------------------------------
 # Distribución de la página
 # ---------------------------------------------------------------------------
-col_mapa, col_detalle = st.columns([3, 2])
-with col_mapa:
-    panel_mapa()
-    panel_metricas()
-with col_detalle:
-    panel_detalle()
+if "token" not in st.session_state:
+    iniciar_sesion()
 
-st.subheader("Observaciones de tráfico")
-panel_datos()
+with st.container(key="topbar"):
+    anchos = [1.15, 1.35, 1.25, .95]
+    if st.session_state.get("vista_trafico") == VISTAS[1]:
+        anchos.append(1)
+    marca, selector_vista, selector_punto, selector_mapa, *acciones, salir = st.columns(
+        [*anchos, .95], gap="small", vertical_alignment="bottom"
+    )
+    marca.title("SGT Cuauhtémoc", anchor=False)
+    vista_real = selector_vista.selectbox("Vista de tráfico", VISTAS, key="vista_trafico") == VISTAS[1]
+    if acciones:
+        acciones[0].button("Actualizar ahora", width="stretch")
+    if salir.button("Cerrar sesión", width="stretch"):
+        st.session_state.clear()
+        st.rerun()
 
-st.subheader("Intervención del administrador")
-with st.form("manual"):
-    green_ns = st.slider("Verde NS (s)", 20, 60, 40)
-    st.write(f"Verde EO: {80-green_ns} s · fase peatonal obligatoria: 20 s · ciclo: 120 s")
-    reason = st.text_input("Motivo de la intervención", max_chars=300)
-    cycles = st.number_input("Vigencia en ciclos", min_value=1, max_value=10, value=1)
-    submit = st.form_submit_button("Solicitar intervención al siguiente ciclo")
-if submit:
-    # Consultar la versión en el momento del envío para reducir conflictos evitables.
-    current = api("GET", "/intersections")
-    if current:
-        item = item_actual(current["items"])
-        result = api("POST", "/manual_override", json={
-            "intersection_id": identifier, "previous_version": item["plan_version"],
-            "green_ns": green_ns, "green_eo": 80 - green_ns,
-            "reason": reason, "duration_cycles": int(cycles)})
-        if result:
-            st.success(f"Solicitud {result['id']}: {result['status']}. "
-                       "La aplicación requiere confirmación del trabajador.")
-            st.json(result)
+catalog = api("GET", "/intersections")
+if not catalog or not catalog["items"]:
+    st.info("No hay intersecciones disponibles. Comprueba que el backend y el simulador estén iniciados.")
+    st.stop()
 
-left, right = st.columns(2)
-if left.button("Obtener propuesta del modelo"):
-    current = api("GET", "/intersections")
-    if current:
-        item = item_actual(current["items"])
-        result = api("POST", "/predict_light", json={"intersection_id": identifier,
-                                                    "previous_version": item["plan_version"]})
-        if result:
-            st.json(result)
-if right.button("Volver al automático al siguiente ciclo"):
-    current = api("GET", "/intersections")
-    if current:
-        item = item_actual(current["items"])
-        result = api("POST", "/automatic", json={"intersection_id": identifier,
-                                                "previous_version": item["plan_version"]})
-        if result:
-            st.success("Retorno solicitado; el modo confirmado cambiará al siguiente ciclo.")
+ids = [i["id"] for i in catalog["items"]]
+nombres = {i["id"]: i["name"].removeprefix("Cuauhtémoc · Cruce sintético ") for i in catalog["items"]}
+puntos = {i["id"]: f"Punto {n} · {i['latitude']:.5f}, {i['longitude']:.5f}"
+          for n, i in enumerate(catalog["items"], start=1)}
+if st.session_state.get("interseccion_activa") not in ids:
+    _elegir(ids[0])
+# Streamlit recrea el selector si cambian las etiquetas al alternar entre vistas.
+st.session_state.sel_id = st.session_state.interseccion_activa
+etiquetas = {i: puntos[i].partition(" · ")[0] for i in ids} if vista_real else nombres
+identifier = selector_punto.selectbox("Punto de consulta" if vista_real else "Intersección simulada",
+                                      ids, key="sel_id", format_func=etiquetas.get, on_change=seleccionar_del_menu)
+estilo = selector_mapa.selectbox("Estilo del mapa", ESTILOS, key="estilo_mapa")
 
-with st.expander("Auditoría reciente"):
-    if st.button("Consultar auditoría"):
-        result = api("GET", "/audit", params={"limit": 30})
-        if result:
-            st.dataframe(pd.DataFrame(result["items"]), width="stretch")
+# Los marcadores del mapa pulsan estos botones dentro de la página anfitriona.
+with st.container(key="selbtns"):
+    for _id in ids:
+        st.button(f"sel-{_id}", key=f"selbtn_{_id}", on_click=_elegir, args=(_id,))
+
+with st.container(key="workspace"):
+    col_mapa, col_detalle = st.columns([0.58, 0.42], gap="medium")
+    with col_mapa, st.container(key="map-pane"):
+        with st.container(key="map-heading", horizontal=True, horizontal_alignment="distribute",
+                          vertical_alignment="center"):
+            st.markdown("**Tráfico real · TomTom**" if vista_real else "**Mapa de intersecciones**")
+            with st.popover("? Cómo leer el mapa", type="tertiary"):
+                if vista_real:
+                    st.caption("Elige un punto en el mapa o en el selector. TomTom devuelve el tramo vial cercano.")
+                else:
+                    st.markdown(
+                        "- Las cuatro luces vehiculares se representan por eje: **arriba** Norte–Sur y "
+                        "**derecha** Este–Oeste. **Abajo**, el azul indica el paso peatonal.\n"
+                        "- El anillo indica la congestión: verde fluido, amarillo moderado, rojo congestionado, "
+                        "gris sin datos vigentes.\n"
+                        "- La letra indica el modo: **D** degradado (plan fijo 40/40), **A** automático, **M** manual.\n"
+                        "- Arrastra para moverte, usa la rueda para acercar y **haz clic en un cruce** para seleccionarlo."
+                    )
+                    st.caption("Las fechas se presentan en America/Mexico_City; persistencia en UTC.")
+        with st.container(key="map-canvas"):
+            if vista_real:
+                mapa = st.empty()
+            else:
+                panel_mapa()
+
+    with col_detalle, st.container(key="operations-pane"):
+        with st.container(key="indicators"):
+            if vista_real:
+                indicadores = st.empty()
+                panel_tomtom(mapa, indicadores)
+            else:
+                panel_metricas()
+
+        monitor, intervencion, comparador = st.tabs(["Monitor en vivo", "Intervención y Modelo", "Comparador y Auditoría"])
+        with monitor:
+            if vista_real:
+                st.markdown(f"**{puntos[identifier]}**")
+                st.caption("El tramo de TomTom se ubica cerca de este punto de referencia. "
+                           "Los estados y tiempos de los semáforos están en la vista Simulación.")
+            else:
+                panel_detalle()
+        with intervencion:
+            if vista_real:
+                st.info("Cambia a Simulación para intervenir un cruce o consultar el modelo.")
+            else:
+                panel_intervencion()
+        with comparador:
+            if vista_real:
+                panel_comparacion_tomtom()
+            else:
+                panel_datos()
+            panel_auditoria()
