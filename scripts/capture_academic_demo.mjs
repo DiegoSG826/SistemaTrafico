@@ -14,42 +14,48 @@ try {
   await fs.mkdir(env.SGT_DEMO_FIGURES, { recursive: true });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
   page.setDefaultTimeout(30000);
-  const save = name => page.screenshot({ path: path.join(env.SGT_DEMO_FIGURES, name) });
-  const position = async locator => {
-    await locator.evaluate(node => node.scrollIntoView({ block: 'start' }));
-    await page.evaluate(() => window.scrollBy(0, -70));
+  const save = async name => {
+    await page.locator('[data-stale="true"]:visible').first().waitFor({ state: 'hidden' });
+    await page.screenshot({ path: path.join(env.SGT_DEMO_FIGURES, name), animations: 'disabled' });
   };
   const text = label => page.getByText(label, { exact: true });
-  const map = page.frameLocator('iframe[title="st.iframe"]').first();
+  const tab = name => page.getByRole('tab', { name, exact: true });
+  const map = page.frameLocator('.st-key-map-canvas iframe');
   await page.goto(env.SGT_DEMO_URL, { waitUntil: 'domcontentloaded' });
   await page.getByLabel('Correo', { exact: true }).waitFor();
   await save('FIG_007_acceso.png');
   await page.getByLabel('Correo', { exact: true }).fill(env.ADMIN_EMAIL);
   await page.getByLabel('Contraseña', { exact: true }).fill(env.ADMIN_PASSWORD);
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await page.getByRole('button', { name: 'Entrar', exact: true }).waitFor({ state: 'detached' });
   await text('Tiempos del plan en ejecución').waitFor();
   await map.locator('.leaflet-tile-loaded').first().waitFor();
   await save('FIG_008_monitor.png');
 
-  await position(text('Intervención del administrador'));
+  await tab('Intervención y Modelo').click();
+  await page.getByRole('slider', { name: 'Verde NS (s)', exact: true }).waitFor();
   await save('FIG_009_intervencion.png');
+
+  await tab('Comparador y Auditoría').click();
   await text('Auditoría reciente').click();
   const audit = page.locator('details').filter({ hasText: 'Auditoría reciente' });
   await audit.getByRole('button', { name: 'Consultar auditoría' }).click();
   await audit.locator('[data-testid="stDataFrame"]').waitFor();
-  await position(text('Auditoría reciente'));
   await save('FIG_010_auditoria.png');
 
-  await text('Tráfico real (TomTom)').click();
+  await page.getByRole('combobox', { name: /Vista de tráfico/ }).click();
+  await page.getByRole('option', { name: 'Tráfico real (TomTom)', exact: true }).click();
+  await tab('Monitor en vivo').click();
   await text('Velocidad actual').waitFor();
   await map.locator('.leaflet-overlay-pane canvas').waitFor();
   await map.locator('.leaflet-control-attribution').filter({ hasText: 'Datos de tráfico © TomTom' }).waitFor();
   await map.locator('.leaflet-tile-loaded').first().waitFor();
-  await position(text('Tráfico real · TomTom'));
   await save('FIG_011_tomtom.png');
+
+  await tab('Comparador y Auditoría').click();
   await page.getByRole('button', { name: 'Comparar puntos', exact: true }).click();
-  await page.getByTestId('stDataFrame').last().getByTestId('data-grid-canvas').waitFor();
-  await position(text('Comparador de demoras'));
+  await page.getByRole('tabpanel', { name: 'Comparador y Auditoría' })
+    .getByTestId('data-grid-canvas').waitFor();
   await save('FIG_012_comparador.png');
   console.log('Seis capturas verificadas, incluida la comparación con TomTom en vivo.');
 } finally {

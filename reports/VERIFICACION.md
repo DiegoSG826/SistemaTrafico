@@ -1,5 +1,14 @@
 # Evidencia de verificación de FASE 2
 
+## Regresión del tablero `aad52be`
+
+El 23 de noviembre de 2026 la suite obtuvo **47 pruebas aprobadas** y **4 de PostgreSQL omitidas**
+por falta de `TEST_DATABASE_URL`. El contrato OpenAPI coincide con las 14 rutas actuales. Se
+renovaron las seis capturas en Edge con TomTom en vivo en las dos pantallas del visor.
+[JUnit](academico/dashboard-aad52be.xml) · [Capturas](../entrega_academica/figuras/CAPTURAS.json).
+
+## Línea base del 31 de octubre de 2026
+
 Generado: 2026-10-31T02:54:51-06:00. Entorno observado: Windows, Python 3.13.9.
 
 ## Pruebas y ejecución

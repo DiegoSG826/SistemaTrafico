@@ -57,7 +57,7 @@ def main():
     assert all((OUT / "figuras" / name).is_file() for name in captures["archivos"])
     manifest = {
         "id": "REG_001",
-        "document_revision": "1.3",
+        "document_revision": "1.4",
         "captured_app_revision": captures["version_app"],
         "created_utc": datetime.now(UTC).isoformat(),
         "scope": "Cuauhtémoc. Control semafórico simulado, visor TomTom y comparación de demoras por tramo",
@@ -83,7 +83,7 @@ def main():
     with ZipFile(archive, "w", ZIP_DEFLATED, compresslevel=6) as zipfile:
         for file in OUT.rglob("*"):
             if file.is_file() and file.suffix != ".zip":
-                zipfile.write(file, "documentos/" + file.relative_to(OUT).as_posix())
+                zipfile.write(file, file.relative_to(ROOT).as_posix())
         for directory in (
             "backend",
             "database",
@@ -97,7 +97,7 @@ def main():
             for file in (ROOT / directory).rglob("*"):
                 if not file.is_file() or "__pycache__" in file.parts or "artifacts" in file.parts:
                     continue
-                zipfile.write(file, "codigo/" + file.relative_to(ROOT).as_posix())
+                zipfile.write(file, file.relative_to(ROOT).as_posix())
         for name in (
             "README.md",
             "LICENSE",
@@ -113,10 +113,10 @@ def main():
         ):
             file = ROOT / name
             if file.exists():
-                zipfile.write(file, "codigo/" + name)
+                zipfile.write(file, name)
         for file in (ROOT / "reports").rglob("*"):
             if file.is_file() and file.suffix in (".json", ".xml", ".md"):
-                zipfile.write(file, "codigo/" + file.relative_to(ROOT).as_posix())
+                zipfile.write(file, file.relative_to(ROOT).as_posix())
         # Incluir el modelo local seleccionado para una demostración reproducible.
         active = ROOT / "ml_model/artifacts/active.json"
         if active.exists():
@@ -128,7 +128,7 @@ def main():
             )
             for file in (active, artifact, active.parent / f"{meta['version']}.json"):
                 if file.exists():
-                    zipfile.write(file, "codigo/" + file.relative_to(ROOT).as_posix())
+                    zipfile.write(file, file.relative_to(ROOT).as_posix())
     with ZipFile(archive) as zipfile:
         assert zipfile.testzip() is None
         assert not any(Path(name).name == ".env" for name in zipfile.namelist())

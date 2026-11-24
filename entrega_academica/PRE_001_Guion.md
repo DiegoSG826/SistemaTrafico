@@ -6,7 +6,7 @@ Presentamos un gestor de semáforos simulados para Cuauhtémoc. La IA anticipa l
 
 ## DIA_002 Control simulado y tráfico real
 
-El generador aporta observaciones al controlador simulado. FastAPI comparte las lecturas de TomTom entre el mapa y el comparador por ciento veinte segundos. El presupuesto de llamadas se aplica en el backend. Fuente: DOC_001 DEV_005 y DEV_006, FIG_005.
+La barra superior alterna entre Simulación y TomTom. El generador aporta observaciones al controlador simulado. FastAPI comparte las lecturas de TomTom entre el mapa y el comparador por ciento veinte segundos y aplica el presupuesto de consultas. Fuente: DOC_001 DEV_004 a DEV_006, FIG_005.
 
 ## DIA_003 Datos sintéticos y evaluación temporal
 
@@ -34,7 +34,7 @@ El Gantt y PERT estiman ocho días para el visor y cinco para el comparador. La 
 
 ## DIA_009 El monitor de simulación
 
-La captura FIG_008 muestra la versión actual del dashboard en una instancia temporal. El mapa permite seleccionar un cruce y el monitor muestra la animación, las fases y los tiempos del plan.
+FIG_008 muestra el tablero actual. El mapa y los indicadores siguen visibles al desplazarse por el panel derecho. En Monitor en vivo se ven la animación y los tiempos del plan. La pestaña Intervención y Modelo concentra las acciones administrativas.
 
 ## DIA_010 El modelo supera la persistencia
 
@@ -44,13 +44,13 @@ En la prueba sintética reservada, el error absoluto medio fue uno punto diecinu
 
 La evaluación usó cincuenta pares con las mismas llegadas. En escenarios no sobresaturados la reducción media de demora fue veintinueve punto treinta y siete por ciento. El resultado no es uniforme ni representa una medición en calles de Cuauhtémoc. Fuente: reports/experiment.json.
 
-## DIA_012 Pruebas del comparador
+## DIA_012 Pruebas del tablero y el comparador
 
-La revisión con comparador aprobó cuarenta y siete pruebas. Edge con proveedor simulado confirmó cinco llamadas en total al comparar, repetir y seleccionar un tramo. La captura en vivo es una comprobación separada. Fuentes: DOC_004 PRU_015 y DOC_005 RES_009.
+La revisión actual aprobó cuarenta y siete pruebas. En el ensayo previo con proveedor simulado se registraron cinco llamadas en total al comparar, repetir y seleccionar un tramo. Las capturas en vivo pertenecen a una comprobación separada. Fuentes: DOC_004 PRU_015 y DOC_005 RES_009 y RES_010.
 
 ## DIA_013 Comparación de demoras con TomTom
 
-FIG_012 muestra la comparación con datos en vivo. La tabla ordena por tiempo adicional y abre el tramo de la fila seleccionada. El mapa y la tabla reutilizan lecturas por ciento veinte segundos y comparten el presupuesto de consultas. Fuente: DOC_003 MAN_014.
+FIG_012 muestra la comparación con datos en vivo. En Comparador y Auditoría, la tabla ordena por tiempo adicional y seleccionar una fila actualiza el mapa y los indicadores del tramo. El mapa y la tabla reutilizan lecturas por ciento veinte segundos y comparten el presupuesto de consultas. Fuente: DOC_003 MAN_014.
 
 ## DIA_014 Entrega académica y límites
 

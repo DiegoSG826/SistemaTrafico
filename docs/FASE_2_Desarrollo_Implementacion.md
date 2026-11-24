@@ -5,7 +5,7 @@
 | Identificador | SGT-CDMX-IMP-002 |
 | Versión | 0.2.0 |
 | Fecha | 31 de octubre de 2026, America/Mexico_City |
-| Revisión documental | 23 de noviembre de 2026, comparador de demoras TomTom |
+| Revisión documental | 23 de noviembre de 2026, tablero de la revisión `aad52be` |
 | Línea base | FASE_1_Documento_Tecnico_Trafico_CDMX.md, versión 1.0 |
 | Entrega | Código base funcional, esquema, entrenamiento, simulación, dashboard y verificación |
 | Entorno | Académico; cinco cruces sintéticos independientes NS/EO/PEATON |
@@ -136,7 +136,7 @@ SistemaTrafico/
 
 ```mermaid
 flowchart LR
-  D[Dashboard con Simulación, TomTom y comparador] -->|JWT / REST| A[Backend FastAPI]
+  D[Streamlit con barra superior, mapa, indicadores y pestañas] -->|JWT / REST| A[Backend FastAPI]
   S[Cliente sintético opcional] -->|lote canónico| A
   A --> P[(PostgreSQL)]
   A -->|timeout 2 s| M[Servicio interno IA]
@@ -150,7 +150,8 @@ flowchart LR
   R --> M
 ```
 
-El dashboard consulta exclusivamente la API. La IA no recibe credenciales de BD ni aplica
+El dashboard consulta FastAPI para los datos y acciones del sistema. El navegador carga Leaflet
+y las teselas del proveedor cartográfico por HTTPS. La IA no recibe credenciales de BD ni aplica
 fases. El trabajador es un proceso independiente: iniciar varios workers HTTP no crea varios
 simuladores. Un arrendamiento global con heartbeat identifica al único trabajador; PostgreSQL
 bloquea filas de intersección durante la decisión/aplicación. El perfil inicial no particiona la
@@ -332,16 +333,39 @@ de enviar la respuesta exitosa, para evitar confirmar cambios que luego fallen a
 
 ## 8. Dashboard
 
-`frontend/dashboard.py` permite alternar entre **Simulación** y **Tráfico real (TomTom)**.
-En Simulación, el mapa permite elegir el cruce y cambiar el estilo de mapa. La interfaz muestra
-demanda, colas, fases, ciclo, tiempos del plan y la animación del cruce. Las métricas se
-actualizan cada 2 s. El mapa, el detalle y las observaciones consultan el backend cada 5 s.
-La animación evoluciona en el navegador entre sincronizaciones. El administrador puede
-pedir una propuesta, intervenir, volver al automático y consultar auditoría. Las observaciones
-se exportan en JSON. La vista TomTom consulta al backend cada 60 s o a demanda.
-El comparador solo solicita lecturas al pulsar el botón. Seleccionar una fila abre su tramo
-en el mapa, que reutiliza la lectura vigente.
-Ver [el manual ilustrado](../entrega_academica/DOC_003_Manual.md).
+`frontend/dashboard.py` usa Streamlit en el puerto 8501. El formulario de acceso se centra en una
+tarjeta de hasta 400 px. Tras iniciar sesión, los controles de vista, cruce o punto, estilo de mapa
+y cierre de sesión están en la barra superior. **Actualizar ahora** aparece en TomTom.
+
+En pantallas panorámicas el tablero ocupa la altura de la ventana. El mapa Leaflet tiene el 58 %
+del ancho y el panel operativo el 42 %. El mapa y los indicadores quedan fuera del desplazamiento
+de las pestañas. En pantalla estrecha, el mapa pasa encima del panel operativo.
+
+```mermaid
+flowchart TB
+  A[Tarjeta de acceso] --> B[Barra superior]
+  B --> M[Mapa Leaflet 58 %]
+  B --> O[Panel operativo 42 %]
+  M --> G[Guía Cómo leer el mapa]
+  O --> K[Indicadores de la vista]
+  O --> T[Pestañas con desplazamiento interno]
+  T --> V[Monitor en vivo]
+  T --> I[Intervención y Modelo]
+  T --> C[Comparador y Auditoría]
+```
+
+| Panel | Simulación | Tráfico real (TomTom) |
+|---|---|---|
+| Indicadores | Fase, colores por eje, colas, modo y reparto de verde | Velocidades, tiempos, confianza y hora de consulta |
+| Monitor en vivo | Animación del cruce y tiempos del plan | Referencia del punto consultado |
+| Intervención y Modelo | Propuesta, solicitud de intervención y retorno al automático para administradores | Instrucción para cambiar a Simulación |
+| Comparador y Auditoría | Observaciones, exportación JSON y auditoría administrativa | Comparación a demanda y auditoría administrativa |
+
+En Simulación, los indicadores consultan cada 2 s y el mapa, el detalle y las observaciones cada
+5 s. Las luces y la animación evolucionan en el navegador entre sincronizaciones. TomTom consulta
+cada 60 s o a demanda. Seleccionar una fila del comparador actualiza el punto, el mapa y los
+indicadores con la lectura vigente. FastAPI verifica los permisos administrativos.
+[Manual ilustrado](../entrega_academica/DOC_003_Manual.md).
 
 ## 9. Experimento y promoción
 

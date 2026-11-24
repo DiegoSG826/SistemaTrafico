@@ -1,6 +1,6 @@
 # DOC_002 Especificación de casos de uso
 
-Versión 1.3 · Cuauhtémoc · 23 de noviembre de 2026.
+Versión 1.4 · Cuauhtémoc · 23 de noviembre de 2026.
 
 El sistema combina control semafórico simulado y monitoreo vial. El administrador (ACT_001) gestiona y consulta. El proveedor de observaciones (ACT_002) y el evaluador académico (ACT_003) aportan datos o evidencia. TomTom (ACT_004) aporta lecturas para CU_011 y CU_012. Un usuario lector (ACT_005) puede iniciar sesión, consultar, comparar demoras y exportar observaciones. El trabajador y la IA son componentes internos.
 
@@ -14,11 +14,11 @@ El sistema combina control semafórico simulado y monitoreo vial. El administrad
 
 ### FLU_001 Flujo principal
 
-1. Ingresar correo y contraseña.
-2. Enviar formulario.
+1. Introducir Correo y Contraseña en la tarjeta de acceso.
+2. Pulsar Entrar.
 3. Verificar hash y usuario activo.
 4. Emitir JWT.
-5. Abrir monitor.
+5. Abrir el tablero.
 
 ### ALT_001 Alternativas y excepciones
 
@@ -111,12 +111,12 @@ Fecha sin zona: 422; cruce desconocido: 404; falta de comunicación: estado desc
 
 ### FLU_005 Flujo principal
 
-1. Solicitar propuesta.
+1. En Simulación, abrir Intervención y Modelo y pulsar Obtener propuesta del modelo.
 2. Verificar versión.
 3. Construir atributos de cinco ventanas.
 4. Consultar IA con timeout.
-5. Calcular verdes/restricciones.
-6. Persistir modelo/predicciones/plan.
+5. Calcular verdes con restricciones.
+6. Persistir modelo, predicciones y plan.
 7. Devolver PROPOSED.
 
 ### ALT_005 Alternativas y excepciones
@@ -162,13 +162,12 @@ Doble reserva o ciclo obsoleto: 409; trabajador vencido: 503; falla fuente/IA: p
 
 ### FLU_007 Flujo principal
 
-1. Introducir verdes complementarios.
-2. Validar invariantes.
-3. Reservar para siguiente ciclo.
-4. Confirmar.
-5. Respetar vigencia.
-6. Caducar o solicitar retorno automático.
-7. Auditar.
+1. En Intervención y Modelo, ajustar Verde NS (s), motivo y vigencia.
+2. Solicitar intervención.
+3. Validar verdes complementarios y reservar para el siguiente ciclo.
+4. Confirmar en el monitor.
+5. Esperar caducidad o solicitar retorno.
+6. Auditar.
 
 ### ALT_007 Alternativas y excepciones
 
@@ -215,12 +214,11 @@ Artefacto alterado: rechazo; criterio no superado: conservar fijo; sobresaturaci
 
 ### FLU_009 Flujo principal
 
-1. Seleccionar cruce.
-2. Actualizar cada 2 s.
-3. Leer modo, colas y tiempos.
-4. Revisar frescura.
-5. Exportar JSON.
-6. Distinguir solicitud pendiente de plan activo.
+1. Elegir Simulación y el cruce en la barra superior o el mapa.
+2. Leer fase, modo y colas junto al mapa.
+3. Abrir Monitor en vivo para los tiempos.
+4. Exportar JSON en Comparador y Auditoría.
+5. Distinguir solicitud pendiente de plan activo.
 
 ### ALT_009 Alternativas y excepciones
 
@@ -240,10 +238,9 @@ Más de 5 s sin heartbeat: colores desconocidos; token vencido: iniciar sesión;
 
 ### FLU_010 Flujo principal
 
-1. Abrir auditoría.
-2. Pedir página.
-3. Mostrar actor, entidad, antes/después, motivo, instante y correlación.
-4. Seguir referencia a plan.
+1. Abrir Comparador y Auditoría en cualquiera de las dos vistas.
+2. Desplegar Auditoría reciente y pulsar Consultar auditoría.
+3. Revisar actor, entidad, antes/después, motivo, instante y correlación.
 
 ### ALT_010 Alternativas y excepciones
 
@@ -263,10 +260,10 @@ Viewer: 403; API/BD caída: no mostrar éxito; no permitir editar/borrar desde r
 
 ### FLU_011 Flujo principal
 
-1. Elegir Tráfico real (TomTom) y un punto del catálogo.
+1. Elegir Tráfico real (TomTom) y un punto del catálogo en la barra superior o en el mapa.
 2. Consultar el tramo cercano por medio de FastAPI.
-3. Mostrar geometría, velocidades, tiempos, confianza, cierre y hora de consulta.
-4. Actualizar al minuto o a demanda.
+3. Leer geometría, velocidades, tiempos, confianza, cierre y hora de consulta.
+4. Esperar el minuto o pulsar Actualizar ahora.
 5. Volver a Simulación desde el selector.
 
 ### ALT_011 Alternativas y excepciones
@@ -287,11 +284,11 @@ Punto desconocido: 404. Clave ausente, rechazada o cuota agotada: 503. Fallo de 
 
 ### FLU_012 Flujo principal
 
-1. Pulsar Comparar puntos.
+1. En Comparador y Auditoría, pulsar Comparar puntos.
 2. Consultar GET /tomtom/comparison para hasta cinco puntos.
 3. Reutilizar lecturas recientes o consultar TomTom dentro del presupuesto.
 4. Ordenar los tramos disponibles por demora adicional e indicar cierres o datos ausentes.
-5. Seleccionar una fila para abrir su tramo en el mapa.
+5. Seleccionar una fila para actualizar el mapa y los indicadores.
 
 ### ALT_012 Alternativas y excepciones
 

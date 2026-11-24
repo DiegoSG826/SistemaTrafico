@@ -1,6 +1,6 @@
 # DOC_003 Manual de instalación y usuario
 
-Versión 1.3 · Cuauhtémoc · ENT_003 · 23 de noviembre de 2026.
+Versión 1.4 · Cuauhtémoc · ENT_003 · 23 de noviembre de 2026.
 Para usuarios autenticados, administradores y equipo de desarrollo. El manual cubre el control
 simulado, la consulta de tráfico real y el comparador de demoras con TomTom.
 
@@ -30,14 +30,16 @@ comprueba puertos 8000, 8001 y 8501. No iniciar Uvicorn por separado al usar el 
 
 El selector usa una BD nueva data/cuauhtemoc.db y conserva data/traffic.db. Si hay URL
 personalizada, preparar una base nueva explícitamente en lugar de sobrescribir configuración.
-Las capturas proceden de una instancia temporal de la revisión 4f377b2 con cuenta de
-demostración. FIG_011 y FIG_012 muestran datos de TomTom al momento de la consulta.
+Las capturas proceden de una instancia temporal con una cuenta de demostración.
+figuras/CAPTURAS.json registra la revisión y la fecha. FIG_011 y FIG_012 muestran datos de TomTom
+al momento de la consulta.
 
 ## MAN_003 Acceso
 
 Consultar ADMIN_EMAIL y ADMIN_PASSWORD en .env; copiar solo el valor a la derecha del signo
-igual, sin espacios ni comillas adicionales. La contraseña generada es larga; conservarla de
-forma privada. No compartir .env. Pulsar Entrar. Una sesión vence tras una hora.
+igual, sin espacios ni comillas adicionales. Introducir Correo y Contraseña en la tarjeta centrada
+y pulsar Entrar. Conservar la contraseña y .env en privado. El token vence tras una hora.
+Para salir, pulsar Cerrar sesión en el extremo derecho de la barra superior.
 Modificar ADMIN_PASSWORD en .env no cambia por sí solo el hash de un usuario ya existente;
 el inicializador solo crea usuarios ausentes. Para restablecer una cuenta existente se necesita
 un procedimiento administrativo controlado, sin borrar la BD.
@@ -46,10 +48,16 @@ un procedimiento administrativo controlado, sin borrar la BD.
 
 ## MAN_004 Consultar circulación y tiempos
 
-En Vista de tráfico, elegir Simulación y seleccionar CUA_001 a CUA_005 en el menú lateral.
-Revisar reloj simulado, ciclo, modo confirmado,
-colas NS/EO y colores con texto. La tabla indica verde, amarillo y rojo en segundos; el gráfico
-presenta llegadas veh/min. La fecha de observación y la procedencia acompañan cada fila.
+En la barra superior, elegir Simulación en Vista de tráfico y seleccionar CUA_001 a CUA_005
+en Intersección simulada o en un marcador del mapa. Estilo del mapa permite elegir Calles, Claro,
+Oscuro o Satélite. Abrir ? Cómo leer el mapa para consultar las luces, los anillos de congestión
+y las letras de modo.
+
+En el panel derecho se ven fase, colores, colas, modo y reparto de verde. En Monitor en vivo se
+visualizan la animación y los tiempos de verde, amarillo y rojo por dirección. En pantallas
+panorámicas, el mapa y los indicadores siguen visibles al desplazarse dentro de cada pestaña.
+Para consultar el gráfico de llegadas (veh/min), la procedencia y la fecha de cada fila, abrir
+Comparador y Auditoría y desplegar Observaciones de tráfico.
 El reloj simulado puede avanzar más rápido que el real según SIM_SPEED. No comparar su
 antigüedad con la hora del navegador para decidir si la fuente está vigente.
 
@@ -65,7 +73,8 @@ Con NS=30 y EO=10 veh/min desde 40/40, el siguiente ciclo propone 45/35 por el l
 
 ## MAN_006 Pedir una propuesta
 
-Pulsar Obtener propuesta del modelo. La respuesta muestra modo, motivo, demanda y tiempos.
+En Simulación, abrir Intervención y Modelo y pulsar Obtener propuesta del modelo. La respuesta
+muestra modo, motivo, demanda y tiempos. FastAPI requiere un usuario administrador.
 PROPOSED significa que no se aplicó. Para solicitar aplicación mediante API usar POST
 /plans/{id}/apply con previous_version y target_cycle de la propuesta. PENDING tampoco es
 confirmación: esperar ACTIVE y applied_at. Si la versión cambió, refrescar antes de reintentar.
@@ -73,20 +82,22 @@ El trabajador genera también sus propias propuestas al decidir ciclos automáti
 
 ## MAN_007 Intervención manual y retorno
 
-Usar el deslizador de verde NS; EO es el complemento para sumar 80. Escribir un motivo
-descriptivo de al menos cinco caracteres; seleccionar 1 a 10 ciclos y solicitar intervención.
+En Intervención y Modelo, ajustar Verde NS (s). El verde EO completa los 80 s. Escribir un motivo
+descriptivo de al menos cinco caracteres, indicar de 1 a 10 ciclos en Vigencia en ciclos y pulsar
+Solicitar intervención al siguiente ciclo.
 Comprobar confirmación en un ciclo posterior. El modo degradado tiene precedencia: una
-intervención no evita fallback por IA/fuente inválida. Pulsar Volver al automático para cancelar
-la intervención desde el siguiente ciclo; la solicitud no cambia una fase a mitad.
+intervención no evita fallback por IA/fuente inválida. Pulsar Volver al automático al siguiente ciclo
+para solicitar el retorno. El trabajador confirma el cambio en el límite del ciclo.
 
 ![FIG_009 Intervención administrativa](figuras/FIG_009_intervencion.png)
 
 ## MAN_008 Exportación y auditoría
 
-Exportar observaciones JSON descarga datos con fechas, unidades y procedencia. No hay CSV
-arbitrario que permita fórmulas de hoja de cálculo. Abrir Auditoría reciente y pulsar Consultar
-auditoría para ver actor, acción, antes/después, motivo y correlación. La API de auditoría
-requiere rol administrador. Un usuario lector puede consultar y exportar observaciones.
+En Simulación, abrir Comparador y Auditoría y pulsar Exportar observaciones JSON para descargar
+los datos del cruce con fechas, unidades y procedencia. Un usuario lector puede consultar y exportar
+observaciones. En cualquiera de las dos vistas, abrir Auditoría reciente y pulsar Consultar auditoría
+para ver las 30 acciones más recientes con actor, entidad, motivo, fecha, antes, después y correlación.
+La API de auditoría requiere rol administrador.
 
 ![FIG_010 Auditoría de la instancia de demostración](figuras/FIG_010_auditoria.png)
 
@@ -149,9 +160,9 @@ Reiniciar trabajador desde diez segundos de despeje. Revocar credenciales al ret
 
 1. En el archivo .env local, agregar TOMTOM_API_KEY con una clave habilitada para Traffic API. El backend necesita salida HTTPS hacia api.tomtom.com. Mantener el valor de la clave en el servidor.
 2. Reiniciar el lanzador local. En Compose, usar docker compose up -d --build api dashboard para desplegar la actualización. Para recargar solo la clave, usar docker compose up -d api.
-3. Iniciar sesión. En Vista de tráfico, elegir Tráfico real (TomTom). Seleccionar un punto de consulta en el menú lateral o en el mapa.
-4. Revisar el tramo resaltado y su velocidad actual, velocidad en flujo libre, tiempos de recorrido, confianza y cierre si TomTom lo reporta. La hora de consulta se presenta en CDMX.
-5. Esperar la actualización del minuto o pulsar Actualizar ahora. Si existe una lectura de los últimos 120 s, el backend la reutiliza. Elegir Simulación para volver al control semafórico.
+3. Iniciar sesión. En la barra superior, elegir Tráfico real (TomTom) en Vista de tráfico. Seleccionar Punto 1 a Punto 5 en Punto de consulta o en el mapa.
+4. Revisar el tramo resaltado a la izquierda. A la derecha se muestran las velocidades y tiempos actual y en flujo libre, la confianza, la hora de consulta en CDMX y los cierres reportados.
+5. Esperar la consulta del minuto o pulsar Actualizar ahora en la barra superior. Si existe una lectura de los últimos 120 s, el backend la reutiliza. Elegir Simulación para volver al control semafórico.
 
 Los puntos son referencias del catálogo académico. Cada respuesta corresponde al tramo cercano
 que selecciona TomTom. La consulta ofrece velocidades y tiempos por tramo. Los planes semafóricos
@@ -162,9 +173,9 @@ y ERR_012.
 
 ## MAN_014 Comparar demoras y administrar consultas
 
-1. En Tráfico real (TomTom), pulsa Comparar puntos debajo del mapa.
-2. Revisa la tabla. Ordena hasta cinco puntos por segundos adicionales respecto al flujo libre. Muestra el aumento porcentual, la confianza de TomTom, la hora de consulta en CDMX y el estado de cada punto.
-3. Marca una fila para ver su tramo y las métricas completas en el mapa. Pulsa Comparar puntos otra vez para solicitar otra comparación.
+1. En Tráfico real (TomTom), abre Comparador y Auditoría y pulsa Comparar puntos.
+2. Revisa la tabla. Ordena hasta cinco puntos por segundos adicionales respecto al flujo libre. Desplázate horizontalmente en la tabla si es necesario para ver aumento porcentual, confianza, hora de consulta en CDMX y estado.
+3. Marca una fila para resaltar su tramo en el mapa y actualizar los indicadores del punto. Pulsa Comparar puntos otra vez para solicitar otra comparación.
 
 Por ejemplo, 210 s de recorrido actual y 120 s en flujo libre equivalen a 90 s adicionales
 y un aumento del 75 %. Un resultado de 0 s significa que el tiempo actual fue igual o menor que

@@ -1,6 +1,6 @@
 # DOC_004 Documento y guiones de pruebas
 
-Versión 1.3 · ENT_004 · 23 de noviembre de 2026. Estrategia: unidad → integración → sistema
+Versión 1.4 · ENT_004 · 23 de noviembre de 2026. Estrategia: unidad → integración → sistema
 → validación/aceptación. QA prepara datos y consolida evidencia; otro integrante revisa cambios
 de control, seguridad y ML. No usar datos productivos ni secretos de usuario en pruebas.
 
@@ -302,8 +302,8 @@ y FIG_012. La instancia de captura tiene un presupuesto de hasta cinco llamadas.
 1. Consultar el punto del catálogo con sesión válida.
 2. Repetir sin token, con punto desconocido y con clave ausente.
 3. Simular clave rechazada, cuota agotada y respuesta incompleta.
-4. Abrir Tráfico real (TomTom), revisar métricas y seleccionar otro punto.
-5. Con acceso al servicio real, comprobar tramo y métricas en navegador y volver a Simulación.
+4. Elegir Tráfico real (TomTom) en la barra superior, revisar los cinco indicadores y seleccionar otro punto.
+5. Con servicio real, comprobar el tramo en navegador y volver a Simulación conservando la selección.
 
 **Resultado esperado y criterio:** La consulta es de lectura, muestra información del punto y conserva la separación del control. Los fallos se informan sin devolver la clave ni el mensaje interno del proveedor.
 
@@ -319,12 +319,12 @@ y FIG_012. La instancia de captura tiene un presupuesto de hasta cinco llamadas.
 
 ### GUI_015 Pasos
 
-1. Abrir un punto del mapa.
-2. Comparar puntos y comprobar el orden de demoras.
-3. Repetir dentro de los 120 s y elegir una fila para comprobar reutilización.
+1. En TomTom, abrir Comparador y Auditoría, pulsar Comparar puntos y revisar el orden de demoras.
+2. Elegir una fila y comprobar el cambio del mapa y los indicadores.
+3. Repetir dentro de los 120 s para comprobar reutilización.
 4. Vencer una lectura y comprobar una sola consulta.
-5. Provocar un 429 con Retry-After y comprobar que el lote conserva los datos disponibles.
-6. Agotar un presupuesto reducido y verificar que se repone al salir la llamada de la ventana de 24 horas.
+5. Provocar un 429 con Retry-After y comprobar los datos disponibles.
+6. Agotar un presupuesto reducido y verificar su reposición al salir la llamada de la ventana de 24 horas.
 
 **Resultado esperado y criterio:** Cálculo correcto de segundos y porcentaje. Se identifican cierres y referencias en cero. Las lecturas recientes evitan solicitudes duplicadas y el límite conserva resultados parciales.
 

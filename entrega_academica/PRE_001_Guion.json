@@ -7,9 +7,9 @@
   },
   {
     "title": "Control simulado y tráfico real",
-    "lead": "Dos vistas en el dashboard",
-    "body": "Simulación con fases y planes.\nTomTom con mapa y comparador.",
-    "notes": "El generador aporta observaciones al controlador simulado. FastAPI comparte las lecturas de TomTom entre el mapa y el comparador por ciento veinte segundos. El presupuesto de llamadas se aplica en el backend. Fuente: DOC_001 DEV_005 y DEV_006, FIG_005."
+    "lead": "Dos vistas en el tablero",
+    "body": "Barra superior para elegir vista.\nMapa e indicadores junto a las pestañas.",
+    "notes": "La barra superior alterna entre Simulación y TomTom. El generador aporta observaciones al controlador simulado. FastAPI comparte las lecturas de TomTom entre el mapa y el comparador por ciento veinte segundos y aplica el presupuesto de consultas. Fuente: DOC_001 DEV_004 a DEV_006, FIG_005."
   },
   {
     "title": "Datos sintéticos y evaluación temporal",
@@ -49,9 +49,9 @@
   },
   {
     "title": "El monitor de simulación",
-    "lead": "Mapa, colas y tiempos",
-    "body": "Selección de un cruce.\nAnimación y fases simuladas.\nTiempos del plan activo.",
-    "notes": "La captura FIG_008 muestra la versión actual del dashboard en una instancia temporal. El mapa permite seleccionar un cruce y el monitor muestra la animación, las fases y los tiempos del plan."
+    "lead": "Mapa e indicadores fijos",
+    "body": "Selección de un cruce.\nAnimación y tiempos en Monitor en vivo.\nIntervención en su pestaña.",
+    "notes": "FIG_008 muestra el tablero actual. El mapa y los indicadores siguen visibles al desplazarse por el panel derecho. En Monitor en vivo se ven la animación y los tiempos del plan. La pestaña Intervención y Modelo concentra las acciones administrativas."
   },
   {
     "title": "El modelo supera la persistencia",
@@ -66,16 +66,16 @@
     "notes": "La evaluación usó cincuenta pares con las mismas llegadas. En escenarios no sobresaturados la reducción media de demora fue veintinueve punto treinta y siete por ciento. El resultado no es uniforme ni representa una medición en calles de Cuauhtémoc. Fuente: reports/experiment.json."
   },
   {
-    "title": "Pruebas del comparador",
+    "title": "Pruebas del tablero y el comparador",
     "lead": "47 pruebas aprobadas",
-    "body": "4 pruebas PostgreSQL omitidas.\nRegresión de cálculo y cuota.",
-    "notes": "La revisión con comparador aprobó cuarenta y siete pruebas. Edge con proveedor simulado confirmó cinco llamadas en total al comparar, repetir y seleccionar un tramo. La captura en vivo es una comprobación separada. Fuentes: DOC_004 PRU_015 y DOC_005 RES_009."
+    "body": "4 pruebas PostgreSQL omitidas.\nRegresión de navegación, cálculo y cuota.",
+    "notes": "La revisión actual aprobó cuarenta y siete pruebas. En el ensayo previo con proveedor simulado se registraron cinco llamadas en total al comparar, repetir y seleccionar un tramo. Las capturas en vivo pertenecen a una comprobación separada. Fuentes: DOC_004 PRU_015 y DOC_005 RES_009 y RES_010."
   },
   {
     "title": "Comparación de demoras con TomTom",
     "lead": "Hasta cinco puntos",
-    "body": "Segundos adicionales y aumento.\nConfianza, hora y estado.\nConsulta bajo demanda.",
-    "notes": "FIG_012 muestra la comparación con datos en vivo. La tabla ordena por tiempo adicional y abre el tramo de la fila seleccionada. El mapa y la tabla reutilizan lecturas por ciento veinte segundos y comparten el presupuesto de consultas. Fuente: DOC_003 MAN_014."
+    "body": "Pestaña Comparador y Auditoría.\nDemora, confianza, hora y estado.\nConsulta bajo demanda.",
+    "notes": "FIG_012 muestra la comparación con datos en vivo. En Comparador y Auditoría, la tabla ordena por tiempo adicional y seleccionar una fila actualiza el mapa y los indicadores del tramo. El mapa y la tabla reutilizan lecturas por ciento veinte segundos y comparten el presupuesto de consultas. Fuente: DOC_003 MAN_014."
   },
   {
     "title": "Entrega académica y límites",

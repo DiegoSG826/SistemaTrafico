@@ -31,6 +31,9 @@ def main():
     stamp = datetime.now(ZoneInfo("America/Mexico_City")).isoformat(timespec="seconds")
     text = f"""# Evidencia de verificación de FASE 2
 
+La [trazabilidad de pruebas](../docs/PRUEBAS_TRAZABILIDAD.md) reúne las regresiones posteriores.
+Los resultados de este informe corresponden a la línea base.
+
 Generado: {stamp}. Entorno observado: {platform.system()}, Python {platform.python_version()}.
 
 ## Pruebas y ejecución

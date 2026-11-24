@@ -1,6 +1,6 @@
 # DOC_005 Resultados de verificación y límites de aceptación
 
-Versión 1.3 · ENT_005 · 23 de noviembre de 2026. Incluye la línea base académica y las verificaciones del visor y el comparador TomTom.
+Versión 1.4 · ENT_005 · 23 de noviembre de 2026. Incluye la línea base académica y las verificaciones del visor, el comparador TomTom y el tablero.
 
 ## RES_001 Batería automatizada de la línea base
 
@@ -56,10 +56,16 @@ La consulta en vivo recibió datos de TomTom para los cinco puntos del catálogo
 
 ## RES_008 Capturas de la versión actual
 
-Edge recorrió acceso, monitor, intervención, auditoría, TomTom y el comparador en una instancia temporal de la revisión 4f377b2. FIG_011 y FIG_012 muestran datos en vivo. Las figuras FIG_007 a FIG_012 y figuras/CAPTURAS.json registran esta demostración y su fecha.
+Edge recorrió acceso, monitor, intervención, auditoría, TomTom y el comparador en una instancia temporal de la revisión aad52be. Las capturas muestran la tarjeta de acceso y el tablero con barra superior, mapa, indicadores y pestañas. FIG_011 y FIG_012 muestran datos en vivo. Las figuras FIG_007 a FIG_012 y figuras/CAPTURAS.json registran esta demostración y su fecha.
 
 ## RES_009 Verificación del comparador de demoras
 
 La suite de 4f377b2 registró 47 pruebas aprobadas y 4 de PostgreSQL omitidas por falta de TEST_DATABASE_URL. Las pruebas del comparador verifican el cálculo, orden, resultados parciales, reutilización por coordenada, vencimiento, presupuesto diario y recuperación tras 429. Fuentes de reproducción: tests/test_tomtom.py y tests/test_dashboard.py.
 
 La prueba de navegador con proveedor simulado registró cinco llamadas en total al abrir el mapa, comparar los cinco puntos, repetir la comparación y seleccionar una fila. FIG_012 corresponde a una prueba separada con la API en vivo. Sus resultados describen el instante de la consulta.
+
+## RES_010 Regresión del tablero actual
+
+La ejecución de aad52be registró 47 pruebas aprobadas, 0 fallas o errores y 4 pruebas de PostgreSQL omitidas sin TEST_DATABASE_URL. Fuente: reports/academico/dashboard-aad52be.xml.
+
+La regresión de la interfaz verifica el acceso sin Bearer vacío, las tres pestañas, la selección desde el mapa, su conservación al cambiar de vista, los cinco indicadores TomTom y la consulta del comparador a demanda. El OpenAPI coincide con las 14 rutas generadas por FastAPI. Las cifras de carga y restauración corresponden a los ensayos de línea base.

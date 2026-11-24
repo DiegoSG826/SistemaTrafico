@@ -1,6 +1,6 @@
 # ENT_009 Entrega académica de Cuauhtémoc
 
-**Versión documental 1.3 · 23 de noviembre de 2026.** Proyecto de cuatro integrantes.
+**Versión documental 1.4 · 23 de noviembre de 2026.** Proyecto de cuatro integrantes.
 La memoria, anexos, diagramas y guiones completan los apartados solicitados para un prototipo
 de **semáforos simulados** con un visor TomTom y un **comparador de demoras por tramo**. Los resultados
 de rendimiento y aceptación conservan el estado de cada ensayo.
@@ -13,7 +13,7 @@ de rendimiento y aceptación conservan el estado de cada ensayo.
 | DOC_002 | DOC_002_Casos_de_uso.pdf / .docx / .md | Doce casos con actores, flujos, alternativas y criterios |
 | DOC_003 | DOC_003_Manual.pdf / .docx / .md | Instalación, simulación, visor, comparador y diagnóstico |
 | DOC_004 | DOC_004_Pruebas.pdf / .docx / .md | Quince familias de pruebas, guiones y formatos Alpha/Beta |
-| DOC_005 | DOC_005_Resultados.pdf / .docx / .md | Ensayos de línea base y verificaciones del visor y del comparador |
+| DOC_005 | DOC_005_Resultados.pdf / .docx / .md | Ensayos de línea base y verificaciones de TomTom y del tablero |
 | PRE_001 | PRE_001_Presentacion.pptx | 14 diapositivas editables con notas y gráficos vinculados a datos incrustados |
 | VID_001 | VID_001_Presentacion.mp4 | Video explicativo sin locución, con subtítulos en español y demostración de un ciclo |
 | VID_002 | VID_001_Subtitulos.srt | Subtítulos externos, además de los incrustados en el MP4 |
@@ -22,8 +22,9 @@ de rendimiento y aceptación conservan el estado de cada ensayo.
 | REG_002 | figuras/CAPTURAS.json | Fecha, versión de aplicación, presupuesto de captura y origen |
 | REG_001 | MANIFIESTO.json | Archivos, hashes y estado de la entrega |
 
-Las seis capturas se tomaron en Edge con la revisión `4f377b2`, una BD temporal y una cuenta
-de demostración. FIG_011 y FIG_012 muestran el visor y el comparador con TomTom en vivo.
+Las seis capturas se tomaron en Edge con la revisión `aad52be`, una BD temporal y una cuenta
+de demostración. Muestran la tarjeta de acceso, la barra superior y el panel de pestañas.
+FIG_011 y FIG_012 muestran el visor y el comparador con TomTom en vivo.
 El video presenta la comparación y una demostración del controlador con el reparto 45/35.
 
 ## MAT_002 Cobertura de la lista académica
@@ -53,7 +54,7 @@ El video presenta la comparación y una demostración del controlador con el rep
 | MAT_504 | Arquitectura | DOC_001 MOD_003; FIG_005 y FIG_006 |
 | MAT_601 | Desarrollo | DOC_001 DEV_001..006 y código del repositorio |
 | MAT_701 | Pruebas a realizar | DOC_004 PRU_001..015 |
-| MAT_702 | Resultados de pruebas | DOC_005 RES_001..009 y reports/academico |
+| MAT_702 | Resultados de pruebas | DOC_005 RES_001..010 y reports/academico |
 | MAT_801 | Glosarios | DOC_001 NEG_001 y ANX_A |
 | MAT_802 | Referencias | DOC_001 ANX_B y REF_001..011 |
 | MAT_901 | Implementación final | Simulador, visor TomTom y comparador. Aceptación pendiente |
@@ -81,6 +82,10 @@ La revisión con comparador aprobó **47 pruebas** y omitió 4 de PostgreSQL por
 de laboratorio. La prueba de navegador con proveedor simulado confirmó la reutilización
 de lecturas. Ver [DOC_005 RES_009](DOC_005_Resultados.md#res_009-verificación-del-comparador-de-demoras).
 
+La revisión `aad52be` del tablero aprobó **47 pruebas** y omitió 4 de PostgreSQL por falta de base
+de laboratorio. Cubre el acceso, las pestañas, los indicadores y la selección de punto al cambiar
+de vista. Ver [DOC_005 RES_010](DOC_005_Resultados.md#res_010-regresión-del-tablero-actual).
+
 Las consultas cumplieron el umbral de 500 ms p95 en la segunda carga; las **predicciones no
 cumplieron 1 s p95**, y hubo errores bajo carga. DOC_005 conserva ambos ensayos y la corrección
 parcial realizada. RNF_001/RNF_002 no se declaran aceptados. Los ensayos compartieron equipo
@@ -100,7 +105,9 @@ Para habilitar el visor real, configurar TOMTOM_API_KEY en el backend y seguir
 [MAN_013](DOC_003_Manual.md#man_013-consultar-tráfico-real-con-tomtom).
 El [comparador](DOC_003_Manual.md#man_014-comparar-demoras-y-administrar-consultas)
 usa el presupuesto configurable TOMTOM_DAILY_REQUEST_BUDGET.
-El paquete excluye .env, contraseñas, bases de usuario, .git y datasets grandes. Si no se copia
+El ZIP conserva la estructura del repositorio para mantener los enlaces relativos. Tras extraerlo,
+abrir `entrega_academica/LEEME.md`. El paquete excluye .env, contraseñas, bases de usuario, .git y
+datasets grandes. Si no se copia
 un modelo promovido, inicia en degradado 40/40; entrenar/evaluar/promover según el manual.
 
 Los scripts build_academic_content, build_academic_support y academic_diagrams regeneran

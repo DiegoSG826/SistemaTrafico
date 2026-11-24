@@ -55,7 +55,10 @@ def arrow(ax, a, b, label="", dashed=False):
 
 def save(fig, name):
     fig.savefig(OUT / (name + ".png"), dpi=150, bbox_inches="tight", facecolor="white")
-    fig.savefig(OUT / (name + ".svg"), bbox_inches="tight", facecolor="white")
+    svg = OUT / (name + ".svg")
+    fig.savefig(svg, bbox_inches="tight", facecolor="white")
+    svg.write_text("\n".join(line.rstrip() for line in svg.read_text(encoding="utf-8").splitlines()) + "\n",
+                   encoding="utf-8")
     plt.close(fig)
 
 
@@ -270,13 +273,15 @@ def er_diagram():
 
 def architecture():
     fig, ax = canvas("FIG_005  Arquitectura de control simulado y monitoreo", 16, 9)
-    box(ax, 0.4, 5.2, 3, 1.4, "COMP_006\nDashboard Streamlit\nSimulación y comparador TomTom")
+    box(ax, 0.4, 5.2, 3, 1.4, "COMP_006\nStreamlit · barra superior\nMapa Leaflet · KPIs · pestañas")
     box(ax, 5.7, 5.2, 3.6, 1.4, "COMP_001\nBackend FastAPI\nlecturas y cuota en memoria")
     box(ax, 11.2, 5.2, 3.3, 1.4, "COMP_005\nServicio IA\npronóstico sin actuación")
     box(ax, 5.7, 1.3, 3.6, 1.4, "COMP_007\nPostgreSQL\nhistórico / planes / auditoría")
     box(ax, 0.4, 1.3, 3, 1.4, "COMP_003\nTrabajador único\ncontrol / colas / reloj")
     box(ax, 11.2, 1.3, 3.3, 1.4, "FUENTE_001\nGenerador sintético\nseed / ventanas 60 s")
+    box(ax, 0.4, 7.3, 3, 0.85, "Leaflet y teselas\nCDN · OpenStreetMap y Esri", fill="#e9f5f0")
     box(ax, 5.7, 7.3, 3.6, 0.85, "TomTom Traffic API\nFlow Segment Data", fill="#e9f5f0")
+    arrow(ax, (1.9, 6.6), (1.9, 7.3), "navegador")
     arrow(ax, (3.4, 5.9), (5.7, 5.9), "JWT + REST")
     arrow(ax, (9.3, 5.9), (11.2, 5.9), "timeout 2 s")
     arrow(ax, (7.5, 5.2), (7.5, 2.7))
@@ -291,7 +296,7 @@ def architecture():
     ax.text(
         0.5,
         0.45,
-        "El mapa y el comparador comparten las lecturas TomTom durante 120 s. El trabajador aplica los planes simulados.",
+        "El mapa y el comparador comparten lecturas TomTom durante 120 s. El trabajador aplica los planes simulados.",
         fontsize=12,
     )
     save(fig, "FIG_005_arquitectura")
@@ -299,7 +304,7 @@ def architecture():
     ax.add_patch(Rectangle((0.2, 1), 14.5, 6.8, fill=False, edgecolor=BLUE))
     ax.text(0.5, 7.4, "NODO_001  Equipo de laboratorio", fontsize=13)
     box(ax, 0.7, 5, 3.4, 1.5, "PROC_001\nNavegador\nlocalhost:8501")
-    box(ax, 5.3, 5, 3.4, 1.5, "PROC_002\nStreamlit\nAPI_URL interno")
+    box(ax, 5.3, 5, 3.4, 1.5, "PROC_002\nStreamlit · acceso y tablero\nAPI_URL del backend")
     box(ax, 10, 5, 4, 1.5, "PROC_003\nFastAPI :8000\nJWT y API")
     box(ax, 0.7, 1.8, 3.4, 1.5, "PROC_004\nWorker independiente\nlease exclusivo")
     box(ax, 5.3, 1.8, 3.4, 1.5, "PROC_005\nIA interna :8001\nmodelo solo lectura")

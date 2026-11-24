@@ -143,7 +143,7 @@ TESTS = [
         "RF_017, CU_011",
         "QA y Frontend",
         "Catálogo de prueba, usuario autenticado, respuestas de proveedor controladas y clave de laboratorio para la comprobación en vivo",
-        "consultar el punto del catálogo con sesión válida; repetir sin token, con punto desconocido y con clave ausente; simular clave rechazada, cuota agotada y respuesta incompleta; abrir Tráfico real (TomTom), revisar métricas y seleccionar otro punto; con acceso al servicio real, comprobar tramo y métricas en navegador y volver a Simulación",
+        "consultar el punto del catálogo con sesión válida; repetir sin token, con punto desconocido y con clave ausente; simular clave rechazada, cuota agotada y respuesta incompleta; elegir Tráfico real (TomTom) en la barra superior, revisar los cinco indicadores y seleccionar otro punto; con servicio real, comprobar el tramo en navegador y volver a Simulación conservando la selección",
         "La consulta es de lectura, muestra información del punto y conserva la separación del control. Los fallos se informan sin devolver la clave ni el mensaje interno del proveedor",
         "tests/test_tomtom.py, tests/test_dashboard.py y DOC_005 RES_007",
     ),
@@ -153,7 +153,7 @@ TESTS = [
         "RF_018, CU_012",
         "QA y Frontend",
         "Catálogo de prueba, reloj controlado y respuestas de TomTom simuladas",
-        "abrir un punto del mapa; comparar puntos y comprobar el orden de demoras; repetir dentro de los 120 s y elegir una fila para comprobar reutilización; vencer una lectura y comprobar una sola consulta; provocar un 429 con Retry-After y comprobar que el lote conserva los datos disponibles; agotar un presupuesto reducido y verificar que se repone al salir la llamada de la ventana de 24 horas",
+        "en TomTom, abrir Comparador y Auditoría, pulsar Comparar puntos y revisar el orden de demoras; elegir una fila y comprobar el cambio del mapa y los indicadores; repetir dentro de los 120 s para comprobar reutilización; vencer una lectura y comprobar una sola consulta; provocar un 429 con Retry-After y comprobar los datos disponibles; agotar un presupuesto reducido y verificar su reposición al salir la llamada de la ventana de 24 horas",
         "Cálculo correcto de segundos y porcentaje. Se identifican cierres y referencias en cero. Las lecturas recientes evitan solicitudes duplicadas y el límite conserva resultados parciales",
         "tests/test_tomtom.py, tests/test_dashboard.py y DOC_005 RES_009",
     ),
@@ -165,7 +165,7 @@ def manual():
         "DOC_003_Manual.md",
         r"""# DOC_003 Manual de instalación y usuario
 
-Versión 1.3 · Cuauhtémoc · ENT_003 · 23 de noviembre de 2026.
+Versión 1.4 · Cuauhtémoc · ENT_003 · 23 de noviembre de 2026.
 Para usuarios autenticados, administradores y equipo de desarrollo. El manual cubre el control
 simulado, la consulta de tráfico real y el comparador de demoras con TomTom.
 
@@ -195,14 +195,16 @@ comprueba puertos 8000, 8001 y 8501. No iniciar Uvicorn por separado al usar el 
 
 El selector usa una BD nueva data/cuauhtemoc.db y conserva data/traffic.db. Si hay URL
 personalizada, preparar una base nueva explícitamente en lugar de sobrescribir configuración.
-Las capturas proceden de una instancia temporal de la revisión 4f377b2 con cuenta de
-demostración. FIG_011 y FIG_012 muestran datos de TomTom al momento de la consulta.
+Las capturas proceden de una instancia temporal con una cuenta de demostración.
+figuras/CAPTURAS.json registra la revisión y la fecha. FIG_011 y FIG_012 muestran datos de TomTom
+al momento de la consulta.
 
 ## MAN_003 Acceso
 
 Consultar ADMIN_EMAIL y ADMIN_PASSWORD en .env; copiar solo el valor a la derecha del signo
-igual, sin espacios ni comillas adicionales. La contraseña generada es larga; conservarla de
-forma privada. No compartir .env. Pulsar Entrar. Una sesión vence tras una hora.
+igual, sin espacios ni comillas adicionales. Introducir Correo y Contraseña en la tarjeta centrada
+y pulsar Entrar. Conservar la contraseña y .env en privado. El token vence tras una hora.
+Para salir, pulsar Cerrar sesión en el extremo derecho de la barra superior.
 Modificar ADMIN_PASSWORD en .env no cambia por sí solo el hash de un usuario ya existente;
 el inicializador solo crea usuarios ausentes. Para restablecer una cuenta existente se necesita
 un procedimiento administrativo controlado, sin borrar la BD.
@@ -211,10 +213,16 @@ un procedimiento administrativo controlado, sin borrar la BD.
 
 ## MAN_004 Consultar circulación y tiempos
 
-En Vista de tráfico, elegir Simulación y seleccionar CUA_001 a CUA_005 en el menú lateral.
-Revisar reloj simulado, ciclo, modo confirmado,
-colas NS/EO y colores con texto. La tabla indica verde, amarillo y rojo en segundos; el gráfico
-presenta llegadas veh/min. La fecha de observación y la procedencia acompañan cada fila.
+En la barra superior, elegir Simulación en Vista de tráfico y seleccionar CUA_001 a CUA_005
+en Intersección simulada o en un marcador del mapa. Estilo del mapa permite elegir Calles, Claro,
+Oscuro o Satélite. Abrir ? Cómo leer el mapa para consultar las luces, los anillos de congestión
+y las letras de modo.
+
+En el panel derecho se ven fase, colores, colas, modo y reparto de verde. En Monitor en vivo se
+visualizan la animación y los tiempos de verde, amarillo y rojo por dirección. En pantallas
+panorámicas, el mapa y los indicadores siguen visibles al desplazarse dentro de cada pestaña.
+Para consultar el gráfico de llegadas (veh/min), la procedencia y la fecha de cada fila, abrir
+Comparador y Auditoría y desplegar Observaciones de tráfico.
 El reloj simulado puede avanzar más rápido que el real según SIM_SPEED. No comparar su
 antigüedad con la hora del navegador para decidir si la fuente está vigente.
 
@@ -230,7 +238,8 @@ Con NS=30 y EO=10 veh/min desde 40/40, el siguiente ciclo propone 45/35 por el l
 
 ## MAN_006 Pedir una propuesta
 
-Pulsar Obtener propuesta del modelo. La respuesta muestra modo, motivo, demanda y tiempos.
+En Simulación, abrir Intervención y Modelo y pulsar Obtener propuesta del modelo. La respuesta
+muestra modo, motivo, demanda y tiempos. FastAPI requiere un usuario administrador.
 PROPOSED significa que no se aplicó. Para solicitar aplicación mediante API usar POST
 /plans/{id}/apply con previous_version y target_cycle de la propuesta. PENDING tampoco es
 confirmación: esperar ACTIVE y applied_at. Si la versión cambió, refrescar antes de reintentar.
@@ -238,20 +247,22 @@ El trabajador genera también sus propias propuestas al decidir ciclos automáti
 
 ## MAN_007 Intervención manual y retorno
 
-Usar el deslizador de verde NS; EO es el complemento para sumar 80. Escribir un motivo
-descriptivo de al menos cinco caracteres; seleccionar 1 a 10 ciclos y solicitar intervención.
+En Intervención y Modelo, ajustar Verde NS (s). El verde EO completa los 80 s. Escribir un motivo
+descriptivo de al menos cinco caracteres, indicar de 1 a 10 ciclos en Vigencia en ciclos y pulsar
+Solicitar intervención al siguiente ciclo.
 Comprobar confirmación en un ciclo posterior. El modo degradado tiene precedencia: una
-intervención no evita fallback por IA/fuente inválida. Pulsar Volver al automático para cancelar
-la intervención desde el siguiente ciclo; la solicitud no cambia una fase a mitad.
+intervención no evita fallback por IA/fuente inválida. Pulsar Volver al automático al siguiente ciclo
+para solicitar el retorno. El trabajador confirma el cambio en el límite del ciclo.
 
 ![FIG_009 Intervención administrativa](figuras/FIG_009_intervencion.png)
 
 ## MAN_008 Exportación y auditoría
 
-Exportar observaciones JSON descarga datos con fechas, unidades y procedencia. No hay CSV
-arbitrario que permita fórmulas de hoja de cálculo. Abrir Auditoría reciente y pulsar Consultar
-auditoría para ver actor, acción, antes/después, motivo y correlación. La API de auditoría
-requiere rol administrador. Un usuario lector puede consultar y exportar observaciones.
+En Simulación, abrir Comparador y Auditoría y pulsar Exportar observaciones JSON para descargar
+los datos del cruce con fechas, unidades y procedencia. Un usuario lector puede consultar y exportar
+observaciones. En cualquiera de las dos vistas, abrir Auditoría reciente y pulsar Consultar auditoría
+para ver las 30 acciones más recientes con actor, entidad, motivo, fecha, antes, después y correlación.
+La API de auditoría requiere rol administrador.
 
 ![FIG_010 Auditoría de la instancia de demostración](figuras/FIG_010_auditoria.png)
 
@@ -312,9 +323,9 @@ Reiniciar trabajador desde diez segundos de despeje. Revocar credenciales al ret
 
 1. En el archivo .env local, agregar TOMTOM_API_KEY con una clave habilitada para Traffic API. El backend necesita salida HTTPS hacia api.tomtom.com. Mantener el valor de la clave en el servidor.
 2. Reiniciar el lanzador local. En Compose, usar docker compose up -d --build api dashboard para desplegar la actualización. Para recargar solo la clave, usar docker compose up -d api.
-3. Iniciar sesión. En Vista de tráfico, elegir Tráfico real (TomTom). Seleccionar un punto de consulta en el menú lateral o en el mapa.
-4. Revisar el tramo resaltado y su velocidad actual, velocidad en flujo libre, tiempos de recorrido, confianza y cierre si TomTom lo reporta. La hora de consulta se presenta en CDMX.
-5. Esperar la actualización del minuto o pulsar Actualizar ahora. Si existe una lectura de los últimos 120 s, el backend la reutiliza. Elegir Simulación para volver al control semafórico.
+3. Iniciar sesión. En la barra superior, elegir Tráfico real (TomTom) en Vista de tráfico. Seleccionar Punto 1 a Punto 5 en Punto de consulta o en el mapa.
+4. Revisar el tramo resaltado a la izquierda. A la derecha se muestran las velocidades y tiempos actual y en flujo libre, la confianza, la hora de consulta en CDMX y los cierres reportados.
+5. Esperar la consulta del minuto o pulsar Actualizar ahora en la barra superior. Si existe una lectura de los últimos 120 s, el backend la reutiliza. Elegir Simulación para volver al control semafórico.
 
 Los puntos son referencias del catálogo académico. Cada respuesta corresponde al tramo cercano
 que selecciona TomTom. La consulta ofrece velocidades y tiempos por tramo. Los planes semafóricos
@@ -325,9 +336,9 @@ y ERR_012.
 
 ## MAN_014 Comparar demoras y administrar consultas
 
-1. En Tráfico real (TomTom), pulsa Comparar puntos debajo del mapa.
-2. Revisa la tabla. Ordena hasta cinco puntos por segundos adicionales respecto al flujo libre. Muestra el aumento porcentual, la confianza de TomTom, la hora de consulta en CDMX y el estado de cada punto.
-3. Marca una fila para ver su tramo y las métricas completas en el mapa. Pulsa Comparar puntos otra vez para solicitar otra comparación.
+1. En Tráfico real (TomTom), abre Comparador y Auditoría y pulsa Comparar puntos.
+2. Revisa la tabla. Ordena hasta cinco puntos por segundos adicionales respecto al flujo libre. Desplázate horizontalmente en la tabla si es necesario para ver aumento porcentual, confianza, hora de consulta en CDMX y estado.
+3. Marca una fila para resaltar su tramo en el mapa y actualizar los indicadores del punto. Pulsa Comparar puntos otra vez para solicitar otra comparación.
 
 Por ejemplo, 210 s de recorrido actual y 120 s en flujo libre equivalen a 90 s adicionales
 y un aumento del 75 %. Un resultado de 0 s significa que el tiempo actual fue igual o menor que
@@ -349,7 +360,7 @@ def testing():
     parts = [
         """# DOC_004 Documento y guiones de pruebas
 
-Versión 1.3 · ENT_004 · 23 de noviembre de 2026. Estrategia: unidad → integración → sistema
+Versión 1.4 · ENT_004 · 23 de noviembre de 2026. Estrategia: unidad → integración → sistema
 → validación/aceptación. QA prepara datos y consolida evidencia; otro integrante revisa cambios
 de control, seguridad y ML. No usar datos productivos ni secretos de usuario en pruebas.
 
@@ -419,7 +430,7 @@ la participación y aceptación humana permanecen pendientes hasta ejecutarlas.
 
 def results():
     parts = [
-        "# DOC_005 Resultados de verificación y límites de aceptación\n\nVersión 1.3 · ENT_005 · 23 de noviembre de 2026. Incluye la línea base académica y las verificaciones del visor y el comparador TomTom.\n"
+        "# DOC_005 Resultados de verificación y límites de aceptación\n\nVersión 1.4 · ENT_005 · 23 de noviembre de 2026. Incluye la línea base académica y las verificaciones del visor, el comparador TomTom y el tablero.\n"
     ]
     junit = Path("reports/academico/tests.xml")
     if junit.exists():
@@ -498,7 +509,8 @@ def results():
     parts.append(
         "## RES_008 Capturas de la versión actual\n\n"
         "Edge recorrió acceso, monitor, intervención, auditoría, TomTom y el comparador en una instancia "
-        "temporal de la revisión 4f377b2. FIG_011 y FIG_012 muestran datos en vivo. Las figuras FIG_007 "
+        "temporal de la revisión aad52be. Las capturas muestran la tarjeta de acceso y el tablero con barra "
+        "superior, mapa, indicadores y pestañas. FIG_011 y FIG_012 muestran datos en vivo. Las figuras FIG_007 "
         "a FIG_012 y figuras/CAPTURAS.json registran esta demostración y su fecha.\n"
     )
     parts.append(
@@ -511,6 +523,22 @@ def results():
         "comparar los cinco puntos, repetir la comparación y seleccionar una fila. FIG_012 corresponde a una "
         "prueba separada con la API en vivo. Sus resultados describen el instante de la consulta.\n"
     )
+    dashboard_junit = Path("reports/academico/dashboard-aad52be.xml")
+    if dashboard_junit.exists():
+        suites = list(ElementTree.parse(dashboard_junit).getroot().iter("testsuite"))
+        skipped = sum(int(s.get("skipped", 0)) for s in suites)
+        failed = sum(int(s.get("failures", 0)) + int(s.get("errors", 0)) for s in suites)
+        passed = sum(int(s.get("tests", 0)) for s in suites) - skipped - failed
+        parts.append(
+            "## RES_010 Regresión del tablero actual\n\n"
+            f"La ejecución de aad52be registró {passed} pruebas aprobadas, {failed} fallas o errores y "
+            f"{skipped} pruebas de PostgreSQL omitidas sin TEST_DATABASE_URL. "
+            f"Fuente: {dashboard_junit.as_posix()}.\n\n"
+            "La regresión de la interfaz verifica el acceso sin Bearer vacío, las tres pestañas, "
+            "la selección desde el mapa, su conservación al cambiar de vista, los cinco indicadores "
+            "TomTom y la consulta del comparador a demanda. El OpenAPI coincide con las 14 rutas "
+            "generadas por FastAPI. Las cifras de carga y restauración corresponden a los ensayos de línea base.\n"
+        )
     write("DOC_005_Resultados.md", "\n".join(parts))
 
 

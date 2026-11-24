@@ -39,7 +39,7 @@ CASES = [
         "ACT_001, ACT_005",
         "RF_001",
         "Credenciales y API disponibles",
-        "Ingresar correo y contraseña; enviar formulario; verificar hash y usuario activo; emitir JWT; abrir monitor",
+        "Introducir Correo y Contraseña en la tarjeta de acceso; pulsar Entrar; verificar hash y usuario activo; emitir JWT; abrir el tablero",
         "Credenciales inválidas: 401 sin sesión; API ausente: mensaje de conexión; token vencido: volver a entrar",
         "Sesión válida de una hora o rechazo explícito",
         "test_permissions, test_login_does_not_send_empty_bearer",
@@ -83,7 +83,7 @@ CASES = [
         "ACT_001",
         "RF_007, RF_008",
         "Cruce activo, versión previa y observaciones registradas",
-        "Solicitar propuesta; verificar versión; construir atributos de cinco ventanas; consultar IA con timeout; calcular verdes/restricciones; persistir modelo/predicciones/plan; devolver PROPOSED",
+        "En Simulación, abrir Intervención y Modelo y pulsar Obtener propuesta del modelo; verificar versión; construir atributos de cinco ventanas; consultar IA con timeout; calcular verdes con restricciones; persistir modelo, predicciones y plan; devolver PROPOSED",
         "Versión obsoleta: 409; IA o datos inválidos: 40/40 con modo degradado y causa; BD caída: 503",
         "Propuesta persistida y sin cambio de color",
         "test_prediction_is_persisted_proposal_not_application, test_real_pipeline_through_internal_service_and_api",
@@ -105,7 +105,7 @@ CASES = [
         "ACT_001",
         "RF_010, RF_011",
         "Administrador, motivo, versión y duración de 1 a 10 ciclos",
-        "Introducir verdes complementarios; validar invariantes; reservar para siguiente ciclo; confirmar; respetar vigencia; caducar o solicitar retorno automático; auditar",
+        "En Intervención y Modelo, ajustar Verde NS (s), motivo y vigencia; solicitar intervención; validar verdes complementarios y reservar para el siguiente ciclo; confirmar en el monitor; esperar caducidad o solicitar retorno; auditar",
         "Verdes incompatibles o 11 ciclos: 422; versión antigua: 409; fuente/IA ausente: fallback tiene precedencia; no omitir peatones",
         "Intervención temporal y retorno controlado",
         "test_manual_invariants_and_expiry, test_manual_expiry_and_fallback_precedence",
@@ -127,7 +127,7 @@ CASES = [
         "ACT_001, ACT_005",
         "RF_012, RF_016",
         "Sesión válida y dashboard disponible",
-        "Seleccionar cruce; actualizar cada 2 s; leer modo, colas y tiempos; revisar frescura; exportar JSON; distinguir solicitud pendiente de plan activo",
+        "Elegir Simulación y el cruce en la barra superior o el mapa; leer fase, modo y colas junto al mapa; abrir Monitor en vivo para los tiempos; exportar JSON en Comparador y Auditoría; distinguir solicitud pendiente de plan activo",
         "Más de 5 s sin heartbeat: colores desconocidos; token vencido: iniciar sesión; API ausente: mostrar dirección y tipo de error",
         "Monitor y exportación con datos sintéticos identificados",
         "test_login_dashboard_renders_without_backend, reports/smoke.json",
@@ -138,7 +138,7 @@ CASES = [
         "ACT_001",
         "RF_014",
         "Administrador autenticado",
-        "Abrir auditoría; pedir página; mostrar actor, entidad, antes/después, motivo, instante y correlación; seguir referencia a plan",
+        "Abrir Comparador y Auditoría en cualquiera de las dos vistas; desplegar Auditoría reciente y pulsar Consultar auditoría; revisar actor, entidad, antes/después, motivo, instante y correlación",
         "Viewer: 403; API/BD caída: no mostrar éxito; no permitir editar/borrar desde rol runtime",
         "Trazabilidad de decisiones y cambios",
         "test_permissions, reports/smoke.json",
@@ -149,7 +149,7 @@ CASES = [
         "ACT_001 o ACT_005. ACT_004 provee los datos",
         "RF_017",
         "Sesión válida, punto del catálogo y clave TomTom configurada en el servidor",
-        "Elegir Tráfico real (TomTom) y un punto del catálogo; consultar el tramo cercano por medio de FastAPI; mostrar geometría, velocidades, tiempos, confianza, cierre y hora de consulta; actualizar al minuto o a demanda; volver a Simulación desde el selector",
+        "Elegir Tráfico real (TomTom) y un punto del catálogo en la barra superior o en el mapa; consultar el tramo cercano por medio de FastAPI; leer geometría, velocidades, tiempos, confianza, cierre y hora de consulta; esperar el minuto o pulsar Actualizar ahora; volver a Simulación desde el selector",
         "Punto desconocido: 404. Clave ausente, rechazada o cuota agotada: 503. Fallo de red o datos inválidos: 502. La vista permite regresar a la simulación",
         "Tramo y métricas actuales disponibles para consulta",
         "tests/test_tomtom.py, tests/test_dashboard.py, DOC_005 RES_007",
@@ -160,7 +160,7 @@ CASES = [
         "ACT_001 o ACT_005. ACT_004 aporta lecturas que falten o hayan vencido",
         "RF_018",
         "Vista TomTom abierta, sesión válida y al menos dos puntos de catálogo",
-        "Pulsar Comparar puntos; consultar GET /tomtom/comparison para hasta cinco puntos; reutilizar lecturas recientes o consultar TomTom dentro del presupuesto; ordenar los tramos disponibles por demora adicional e indicar cierres o datos ausentes; seleccionar una fila para abrir su tramo en el mapa",
+        "En Comparador y Auditoría, pulsar Comparar puntos; consultar GET /tomtom/comparison para hasta cinco puntos; reutilizar lecturas recientes o consultar TomTom dentro del presupuesto; ordenar los tramos disponibles por demora adicional e indicar cierres o datos ausentes; seleccionar una fila para actualizar el mapa y los indicadores",
         "Lista inválida o punto desconocido reciben 422 o 404. Falta de clave recibe 503. Ante un cierre, una referencia nula o una lectura indisponible, la fila conserva el estado correspondiente. Un 429 activa la pausa del proveedor",
         "Comparación bajo demanda con demora, aumento, confianza, hora de lectura y estado",
         "tests/test_tomtom.py, tests/test_dashboard.py, DOC_004 PRU_015 y DOC_005 RES_009",
@@ -175,7 +175,7 @@ def capitalize_first(value):
 
 def cases_document():
     parts = [
-        "# DOC_002 Especificación de casos de uso\n\nVersión 1.3 · Cuauhtémoc · 23 de noviembre de 2026.\n\nEl sistema combina control semafórico simulado y monitoreo vial. El administrador (ACT_001) gestiona y consulta. El proveedor de observaciones (ACT_002) y el evaluador académico (ACT_003) aportan datos o evidencia. TomTom (ACT_004) aporta lecturas para CU_011 y CU_012. Un usuario lector (ACT_005) puede iniciar sesión, consultar, comparar demoras y exportar observaciones. El trabajador y la IA son componentes internos.\n"
+        "# DOC_002 Especificación de casos de uso\n\nVersión 1.4 · Cuauhtémoc · 23 de noviembre de 2026.\n\nEl sistema combina control semafórico simulado y monitoreo vial. El administrador (ACT_001) gestiona y consulta. El proveedor de observaciones (ACT_002) y el evaluador académico (ACT_003) aportan datos o evidencia. TomTom (ACT_004) aporta lecturas para CU_011 y CU_012. Un usuario lector (ACT_005) puede iniciar sesión, consultar, comparar demoras y exportar observaciones. El trabajador y la IA son componentes internos.\n"
     ]
     for i, (title, actor, req, pre, steps, exceptions, post, evidence, acceptance) in enumerate(
         CASES, 1
@@ -199,7 +199,7 @@ def main():
     exp = json.loads(Path("reports/experiment.json").read_text())
     memo = """# DOC_001 Memoria técnica del sistema de semáforos simulados de Cuauhtémoc
 
-Versión 1.3 · 23 de noviembre de 2026 · ENT_001. Proyecto académico para cuatro integrantes.
+Versión 1.4 · 23 de noviembre de 2026 · ENT_001. Proyecto académico para cuatro integrantes.
 
 Esta memoria reúne descripción, fundamentos, análisis, diseño, desarrollo y verificación de un
 prototipo que adapta semáforos **simulados** a la demanda vehicular pronosticada. El alcance es
@@ -549,7 +549,7 @@ normalizada. La ruta de consulta permite operar la simulación de forma independ
 | COMP_003 | Simulador | backend/worker.py | Reloj, fuente, aplicación al ciclo y fallback |
 | COMP_004 | Colas | backend/app/simulation.py | Conservación y esperas por política |
 | COMP_005 | IA | ml_model/ | Generación, entrenamiento, servicio, evaluación y registro |
-| COMP_006 | Interfaz | frontend/dashboard.py | Monitor simulado y vista TomTom |
+| COMP_006 | Interfaz | frontend/dashboard.py | Acceso, barra superior, mapa Leaflet, indicadores y pestañas operativas |
 | COMP_007 | BD | database/ | Migración, restricciones, catálogo y rol runtime |
 | COMP_008 | Operación | scripts/, compose.yaml | Inicio, carga, respaldo y evidencia |
 | COMP_009 | Adaptador TomTom | backend/app/tomtom.py | Consulta y validación del tramo cercano |
@@ -583,6 +583,13 @@ DOC_003 contiene instalación local y PostgreSQL, acceso, operación por tarea, 
 respaldo, reversión y retiro. `.env` guarda secretos y no entra en Git. `scripts.select_cuauhtemoc`
 prepara un escenario nuevo conservando el histórico anterior. Compose entrega procesos separados;
 la ausencia de Docker en el entorno de autoría impide afirmar que su ejecución fue probada.
+
+La interfaz Streamlit abre con una tarjeta de acceso de hasta 400 px. La barra superior reúne
+la vista, el cruce o punto, el estilo del mapa y las acciones de sesión. En pantallas panorámicas
+el mapa ocupa el 58 % y el panel operativo el 42 %. Sus indicadores permanecen visibles mientras
+se desplaza el contenido de Monitor en vivo, Intervención y Modelo o Comparador y Auditoría.
+Intervención y exportación son funciones de Simulación. La comparación de demoras está disponible
+en TomTom y Auditoría reciente aparece en ambas vistas con el permiso de FastAPI.
 
 ### DEV_005 Visualización de tráfico actual
 
@@ -629,8 +636,8 @@ Estos resultados pertenecen al experimento sintético de referencia previo a cal
 
 La integración TomTom se verificó con respuestas para los cinco puntos y con una navegación en
 Edge entre ambas vistas. DOC_005 RES_007 registra el alcance y los resultados de esa comprobación.
-RES_009 distingue la suite de la revisión con comparador, la prueba de cuota con proveedor
-simulado y la captura de cinco puntos con datos en vivo.
+RES_009 describe la prueba histórica de cuota con proveedor simulado. RES_008 registra las
+capturas vigentes y RES_010 presenta la regresión del tablero de la revisión aad52be.
 
 El anexo de resultados DOC_005 lee JUnit/cobertura, carga 5/50 y restauración si los reportes
 existen; un criterio fallido se conserva como resultado negativo. La cobertura no mide utilidad
