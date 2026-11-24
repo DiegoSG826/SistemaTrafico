@@ -47,16 +47,16 @@ silenciosamente un candidato.
 2. Reinicia el lanzador local. En Docker Compose, ejecuta `docker compose up -d --build api dashboard`
    para desplegar los cambios. Si solo cambias la configuración de TomTom, basta con
    `docker compose up -d api`.
-3. Inicia sesión en el dashboard y selecciona **Vista de tráfico → Tráfico real (TomTom)**.
-   Elige un punto en el mapa o en el menú lateral para consultar el tramo vial cercano.
+3. Inicia sesión en el dashboard y selecciona **Vista de tráfico → Tráfico real (TomTom)** en
+   la barra superior. Elige un punto en el mapa o en **Punto de consulta** para ver el tramo vial cercano.
 
 La vista muestra la geometría del tramo, las velocidades y tiempos de recorrido actuales y en
 flujo libre, el nivel de confianza y los cierres que reporte TomTom. Se actualiza cada minuto
 y también permite actualizar a demanda. El backend realiza la consulta de forma autenticada
 y conserva la clave en el servidor. Los puntos del catálogo son referencias académicas.
 
-Pulsa **Comparar puntos** para ordenar hasta cinco tramos por segundos adicionales de
-recorrido y ver el aumento porcentual. Selecciona una fila para inspeccionar su tramo en el
+En **Comparador y Auditoría**, pulsa **Comparar puntos** para ordenar hasta cinco tramos por
+segundos adicionales de recorrido y ver el aumento porcentual. Selecciona una fila para inspeccionar su tramo en el
 mapa. El comparador se ejecuta a demanda y comparte con el mapa las lecturas de los últimos
 dos minutos. Si falta una lectura o hay un cierre, la tabla identifica el estado del punto.
 
