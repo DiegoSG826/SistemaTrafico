@@ -51,8 +51,8 @@ por falta de `TEST_DATABASE_URL`. La prueba con TomTom confirma disponibilidad p
 puntos consultados en ese momento. Los resultados de PostgreSQL y carga de Fase 2 corresponden
 a la línea base académica y se documentan por separado en [DOC_005](../entrega_academica/DOC_005_Resultados.md).
 
-La demostración de la edición 1.3 recorrió en Edge el acceso, simulación, intervención,
-auditoría, visor y comparador en vivo. Las seis pantallas y su fecha se registran en
+La demostración de la edición 1.4 recorrió en Edge el acceso, simulación, intervención,
+auditoría, visor y comparador en vivo. Las seis pantallas vigentes y su fecha se registran en
 [CAPTURAS.json](../entrega_academica/figuras/CAPTURAS.json). El recorrido usa SQLite temporal
 y una cuenta de demostración.
 
@@ -65,10 +65,23 @@ y una cuenta de demostración.
 | RF_018 y CU_012 | Pausa tras 429 y recuperación según Retry-After | `tests/test_tomtom.py`, PRU_015 |
 | RF_018 y CU_012 | Consulta bajo demanda y selección de un tramo en el mapa | `tests/test_dashboard.py`, Edge y RES_009 |
 
-La suite de esta revisión registró 47 pruebas aprobadas y 4 de PostgreSQL omitidas por
+La suite histórica de `4f377b2` registró 47 pruebas aprobadas y 4 de PostgreSQL omitidas por
 falta de `TEST_DATABASE_URL`. La prueba en Edge con un proveedor simulado confirmó cinco
 llamadas al abrir el mapa, comparar, repetir y seleccionar una fila. FIG_012 registra la
 consulta en vivo. Ver [DOC_005](../entrega_academica/DOC_005_Resultados.md).
+
+### Verificación del tablero `aad52be`
+
+| Comprobación | Evidencia |
+|---|---|
+| Acceso sin Bearer vacío y tres pestañas operativas | `tests/test_dashboard.py` |
+| Selección de cruce desde el mapa y conservación del punto al cambiar de vista | `tests/test_dashboard.py` |
+| Cinco indicadores TomTom, cierre y comparación a demanda | `tests/test_dashboard.py` |
+| Recorrido en navegador del acceso, monitor, intervención, auditoría, visor y tabla | FIG_007 a FIG_012 en la entrega académica |
+
+La suite de esta revisión registró **47 pruebas aprobadas** y **4 omitidas** sin
+`TEST_DATABASE_URL`. El contrato OpenAPI coincide con las 14 rutas generadas por FastAPI.
+[Resultado JUnit](../reports/academico/dashboard-aad52be.xml) · [DOC_005 RES_010](../entrega_academica/DOC_005_Resultados.md#res_010-regresión-del-tablero-actual).
 
 ## 2. Familias de prueba de Fase 1
 
@@ -111,7 +124,7 @@ Ningún estado constituye aceptación por el representante académico.
 | RF-13 Comparación | evaluate.py, simulation.py | experiment.json | Implementado: 50 pares reproducibles |
 | RF-14 Auditoría | services.py, models.py | pruebas de flujo y /audit | Implementado; rol PostgreSQL de solo inserción de bitácora |
 | RF-15 Modelos | registry.py, promote.py | test_model_service.py, manifiestos | Parcial: control técnico listo; revisión y reversión operativa pendientes |
-| RF-16 Exportar | dashboard.py, evaluate.py | JSON con unidades/metadatos | Implementado en JSON; CSV no expuesto |
+| RF-16 Exportar | dashboard.py, evaluate.py | JSON con unidades/metadatos | Exportación de observaciones JSON en Simulación, pestaña Comparador y Auditoría |
 
 ## 4. Reglas de negocio y requisitos no funcionales
 

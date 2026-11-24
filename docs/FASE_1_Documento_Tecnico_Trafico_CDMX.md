@@ -17,6 +17,8 @@
 original. La implementación posterior incorpora la vista TomTom y su comparador de demoras.
 El alcance de actuación semafórica sigue siendo simulado. Consulta la
 [integración implementada en Fase 2](FASE_2_Desarrollo_Implementacion.md#11-vista-de-tráfico-real-con-tomtom).
+El [tablero vigente](FASE_2_Desarrollo_Implementacion.md#8-dashboard) organiza el mapa, los
+indicadores y las tareas en un panel de dos columnas con barra superior.
 El plan de 45 días y sus cinco días de reserva pertenecen a esta línea base. La calendarización
 de la ampliación y los hitos del repositorio se exponen en la
 [Fase 2](FASE_2_Desarrollo_Implementacion.md#101-calendarización-de-la-ampliación-tomtom).

@@ -8,108 +8,108 @@ oficiales.
 
 3
 00:00:16,667 --> 00:00:27,833
-El generador aporta observaciones al controlador simulado. FastAPI comparte las lecturas de TomTom entre el mapa y el comparador por ciento veinte segundos. El presupuesto de llamadas se
+La barra superior alterna entre Simulación y TomTom. El generador aporta observaciones al controlador simulado. FastAPI comparte las lecturas de TomTom entre el mapa y el comparador por
 
 4
-00:00:27,833 --> 00:00:32,833
-aplica en el backend. Fuente: DOC_001 DEV_005 y DEV_006, FIG_005.
+00:00:27,833 --> 00:00:33,833
+ciento veinte segundos y aplica el presupuesto de consultas. Fuente: DOC_001 DEV_004 a DEV_006, FIG_005.
 
 5
-00:00:32,833 --> 00:00:44,833
+00:00:33,833 --> 00:00:45,833
 El dataset incluye horario, día, clima, historial y velocidad. La etiqueta es el promedio de llegadas de cinco minutos futuros. El pipeline separa entrenamiento y prueba. Los datos no fueron
 
 6
-00:00:44,833 --> 00:00:49,833
+00:00:45,833 --> 00:00:50,833
 calibrados con Cuauhtémoc. Fuente: reports/model_evaluation.json y REF_005.
 
 7
-00:00:49,833 --> 00:01:02,167
+00:00:50,833 --> 00:01:03,167
 Con demanda prevista de treinta vehículos por minuto en norte sur y diez en este oeste, el objetivo proporcional es sesenta veinte. Desde cuarenta cuarenta se limita a cuarenta y cinco
 
 8
-00:01:02,167 --> 00:01:11,000
+00:01:03,167 --> 00:01:12,000
 treinta y cinco. El rojo se deriva del ciclo. Este es un ejemplo de las reglas, no un resultado medido de calle.
 
 9
-00:01:11,000 --> 00:01:41,000
+00:01:12,000 --> 00:01:42,000
 Demostración sintética generada con controller.phase: verde 45/35, peatones exclusivos y despejes. No es una grabación de tráfico real.
 
 10
-00:01:41,000 --> 00:01:52,667
+00:01:42,000 --> 00:01:53,667
 El ciclo conserva exclusión de movimientos y una oportunidad peatonal. Automático limita la variación. Si faltan datos o IA, prevalece un plan fijo cuarenta cuarenta. Manual tiene motivo y
 
 11
-00:01:52,667 --> 00:01:57,667
+00:01:53,667 --> 00:01:58,667
 caducidad. Los tiempos son didácticos, no reglamentarios.
 
 12
-00:01:57,667 --> 00:02:09,333
+00:01:58,667 --> 00:02:10,333
 DOC_002 y FIG_003 describen doce casos y cinco actores. CU_012 extiende la vista TomTom cuando el usuario pulsa Comparar puntos. Seleccionar una fila abre el tramo correspondiente en el
 
 13
-00:02:09,333 --> 00:02:14,333
+00:02:10,333 --> 00:02:15,333
 mapa.
 
 14
-00:02:14,333 --> 00:02:25,500
+00:02:15,333 --> 00:02:26,500
 El esquema SQL contiene intersecciones, grupos, observaciones, predicciones, modelos y planes. Un índice parcial impide dos activos y los triggers comprueban todas las fases de un plan al
 
 15
-00:02:25,500 --> 00:02:30,500
+00:02:26,500 --> 00:02:31,500
 confirmar. El modelo entidad relación completo está en FIG_004.
 
 16
-00:02:30,500 --> 00:02:43,333
+00:02:31,500 --> 00:02:44,333
 El Gantt y PERT estiman ocho días para el visor y cinco para el comparador. La ruta crítica de la ampliación es P–Q–S–T–U–V–X. Git registra el comparador el veintitrés de noviembre. Fuentes:
 
 17
-00:02:43,333 --> 00:02:48,333
+00:02:44,333 --> 00:02:49,333
 reports/pert.json y DOC_001 CAL_002.
 
 18
-00:02:48,333 --> 00:03:00,667
-La captura FIG_008 muestra la versión actual del dashboard en una instancia temporal. El mapa permite seleccionar un cruce y el monitor muestra la animación, las fases y los tiempos del
+00:02:49,333 --> 00:03:02,500
+FIG_008 muestra el tablero actual. El mapa y los indicadores siguen visibles al desplazarse por el panel derecho. En Monitor en vivo se ven la animación y los tiempos del plan. La pestaña
 
 19
-00:03:00,667 --> 00:03:05,667
-plan.
+00:03:02,500 --> 00:03:07,500
+Intervención y Modelo concentra las acciones administrativas.
 
 20
-00:03:05,667 --> 00:03:17,333
+00:03:07,500 --> 00:03:19,167
 En la prueba sintética reservada, el error absoluto medio fue uno punto diecinueve vehículos por minuto, frente a uno punto cuarenta y cinco de persistencia. Esto evalúa predicción; el
 
 21
-00:03:17,333 --> 00:03:22,333
+00:03:19,167 --> 00:03:24,167
 control requiere otro experimento. Fuente: reports/model_evaluation.json.
 
 22
-00:03:22,333 --> 00:03:34,333
+00:03:24,167 --> 00:03:36,167
 La evaluación usó cincuenta pares con las mismas llegadas. En escenarios no sobresaturados la reducción media de demora fue veintinueve punto treinta y siete por ciento. El resultado no es
 
 23
-00:03:34,333 --> 00:03:39,333
+00:03:36,167 --> 00:03:41,167
 uniforme ni representa una medición en calles de Cuauhtémoc. Fuente: reports/experiment.json.
 
 24
-00:03:39,333 --> 00:03:51,333
-La revisión con comparador aprobó cuarenta y siete pruebas. Edge con proveedor simulado confirmó cinco llamadas en total al comparar, repetir y seleccionar un tramo. La captura en vivo es
+00:03:41,167 --> 00:03:52,833
+La revisión actual aprobó cuarenta y siete pruebas. En el ensayo previo con proveedor simulado se registraron cinco llamadas en total al comparar, repetir y seleccionar un tramo. Las
 
 25
-00:03:51,333 --> 00:03:56,333
-una comprobación separada. Fuentes: DOC_004 PRU_015 y DOC_005 RES_009.
+00:03:52,833 --> 00:03:59,167
+capturas en vivo pertenecen a una comprobación separada. Fuentes: DOC_004 PRU_015 y DOC_005 RES_009 y RES_010.
 
 26
-00:03:56,333 --> 00:04:09,167
-FIG_012 muestra la comparación con datos en vivo. La tabla ordena por tiempo adicional y abre el tramo de la fila seleccionada. El mapa y la tabla reutilizan lecturas por ciento veinte
+00:03:59,167 --> 00:04:11,500
+FIG_012 muestra la comparación con datos en vivo. En Comparador y Auditoría, la tabla ordena por tiempo adicional y seleccionar una fila actualiza el mapa y los indicadores del tramo. El
 
 27
-00:04:09,167 --> 00:04:14,167
-segundos y comparten el presupuesto de consultas. Fuente: DOC_003 MAN_014.
+00:04:11,500 --> 00:04:19,167
+mapa y la tabla reutilizan lecturas por ciento veinte segundos y comparten el presupuesto de consultas. Fuente: DOC_003 MAN_014.
 
 28
-00:04:14,167 --> 00:04:25,333
+00:04:19,167 --> 00:04:30,333
 La entrega cubre el simulador, el visor TomTom y el comparador. Los indicadores de FIG_012 corresponden al momento de la consulta. La evaluación del controlador procede de experimentos
 
 29
-00:04:25,333 --> 00:04:30,333
+00:04:30,333 --> 00:04:35,333
 sintéticos. La aceptación del docente y la calibración territorial siguen pendientes.

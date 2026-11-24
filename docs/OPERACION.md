@@ -38,19 +38,24 @@ planes activos/pendientes antiguos para no afirmar estados previos no confirmado
 
 ## Guion de demostración
 
-1. Iniciar sesión y seleccionar uno de los cinco cruces sintéticos.
-2. Comprobar fechas, fuente, tabla, demanda y colas. `SIM_SPEED=10` avanza diez segundos
+1. Iniciar sesión en la tarjeta de acceso. En la barra superior, elegir **Simulación** y seleccionar
+   un cruce en **Intersección simulada** o en el mapa.
+2. Revisar las colas y la fase junto al mapa y abrir **Monitor en vivo** para ver los tiempos.
+   En **Comparador y Auditoría → Observaciones de tráfico** comprobar fechas, fuente y demanda.
+   `SIM_SPEED=10` avanza diez segundos
    simulados por segundo real como máximo; no promete tiempo real si los servicios tardan.
 3. Sin modelo promovido, observar `degraded`, razón y plan fijo 40/40. El peatón conserva su fase.
 4. Entrenar/evaluar con los comandos del README. Revisar la ficha y experimentos con otro
    integrante. Promover solo después de revisión real y reiniciar IA.
-5. Consultar `/predict_light`; comprobar que una propuesta no cambia colores. Solicitar aplicar
+5. En **Intervención y Modelo**, pulsar **Obtener propuesta del modelo** (`POST /predict_light`).
+   Comprobar que una propuesta no cambia colores. Solicitar aplicar mediante la API
    con versión y siguiente ciclo; consultar `/plans/{id}` para confirmar.
-6. Con IA y datos válidos, pedir intervención 50/30 por dos ciclos y motivo. Observar aplicación
+6. En la misma pestaña, con IA y datos válidos, pedir intervención 50/30 por dos ciclos y motivo. Observar aplicación
    diferida, caducidad y retorno al automático. Si hay fallback, prevalece sobre la intervención.
 7. Detener IA: el siguiente ciclo usa fijo. Detener trabajador: después de 5 s el dashboard marca
    estado desconocido. Reiniciar y observar despeje. Registrar evidencia de la demostración.
-8. Consultar auditoría y exportar JSON. Ningún paso actúa sobre semáforos físicos.
+8. Abrir **Comparador y Auditoría** para exportar las observaciones JSON. Como administrador,
+   desplegar **Auditoría reciente** y pulsar **Consultar auditoría**. El ejercicio opera en simulación.
 
 El cliente `python -m scripts.simulate_waze --once` reenvía cinco ventanas sintéticas al backend
 y sirve para demostrar idempotencia. El trabajador ya es la fuente sintética integrada; este
@@ -63,8 +68,8 @@ cliente opcional no requiere Waze ni debe ejecutarse con otra semilla contra el 
 2. Reiniciar el lanzador local o el proceso FastAPI. Al desplegar la actualización en Compose,
    ejecutar `docker compose up -d --build api dashboard`. Si solo cambia la clave, basta con
    `docker compose up -d api`.
-3. Iniciar sesión y elegir **Vista de tráfico → Tráfico real (TomTom)**. Seleccionar un punto
-   del catálogo en el menú lateral o en el mapa.
+3. Iniciar sesión y elegir **Vista de tráfico → Tráfico real (TomTom)** en la barra superior.
+   Seleccionar un punto del catálogo en **Punto de consulta** o en el mapa.
 4. Verificar el tramo resaltado, la hora de consulta y los indicadores. El visor consulta cada
    minuto y también al pulsar **Actualizar ahora**. Volver a **Simulación** para revisar colas,
    fases y planes del simulador.
@@ -83,10 +88,11 @@ backend. La simulación puede operar aunque TomTom no esté disponible. Ver [Ope
 
 ### Comparador de demoras y cuota
 
-En la vista TomTom, pulsa **Comparar puntos**. El comparador llama a
+En la vista TomTom, abre **Comparador y Auditoría** y pulsa **Comparar puntos**. El comparador llama a
 `GET /tomtom/comparison` para los primeros cinco puntos del catálogo. Ordena los tramos
 disponibles por demora adicional, muestra el aumento porcentual respecto al flujo libre y
-permite abrir un tramo en el mapa seleccionando su fila. Los cierres y los tramos sin
+permite actualizar el mapa y los indicadores seleccionando una fila. Desplázate horizontalmente
+en la tabla para leer las columnas que queden fuera de vista. Los cierres y los tramos sin
 referencia se indican por separado. La hora de cada fila corresponde a la lectura que se usó.
 Un resultado de 0 s indica que el tiempo actual fue igual o menor que el de flujo libre.
 

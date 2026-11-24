@@ -1,6 +1,6 @@
 # DOC_001 Memoria técnica del sistema de semáforos simulados de Cuauhtémoc
 
-Versión 1.3 · 23 de noviembre de 2026 · ENT_001. Proyecto académico para cuatro integrantes.
+Versión 1.4 · 23 de noviembre de 2026 · ENT_001. Proyecto académico para cuatro integrantes.
 
 Esta memoria reúne descripción, fundamentos, análisis, diseño, desarrollo y verificación de un
 prototipo que adapta semáforos **simulados** a la demanda vehicular pronosticada. El alcance es
@@ -608,7 +608,7 @@ normalizada. La ruta de consulta permite operar la simulación de forma independ
 | COMP_003 | Simulador | backend/worker.py | Reloj, fuente, aplicación al ciclo y fallback |
 | COMP_004 | Colas | backend/app/simulation.py | Conservación y esperas por política |
 | COMP_005 | IA | ml_model/ | Generación, entrenamiento, servicio, evaluación y registro |
-| COMP_006 | Interfaz | frontend/dashboard.py | Monitor simulado y vista TomTom |
+| COMP_006 | Interfaz | frontend/dashboard.py | Acceso, barra superior, mapa Leaflet, indicadores y pestañas operativas |
 | COMP_007 | BD | database/ | Migración, restricciones, catálogo y rol runtime |
 | COMP_008 | Operación | scripts/, compose.yaml | Inicio, carga, respaldo y evidencia |
 | COMP_009 | Adaptador TomTom | backend/app/tomtom.py | Consulta y validación del tramo cercano |
@@ -642,6 +642,13 @@ DOC_003 contiene instalación local y PostgreSQL, acceso, operación por tarea, 
 respaldo, reversión y retiro. `.env` guarda secretos y no entra en Git. `scripts.select_cuauhtemoc`
 prepara un escenario nuevo conservando el histórico anterior. Compose entrega procesos separados;
 la ausencia de Docker en el entorno de autoría impide afirmar que su ejecución fue probada.
+
+La interfaz Streamlit abre con una tarjeta de acceso de hasta 400 px. La barra superior reúne
+la vista, el cruce o punto, el estilo del mapa y las acciones de sesión. En pantallas panorámicas
+el mapa ocupa el 58 % y el panel operativo el 42 %. Sus indicadores permanecen visibles mientras
+se desplaza el contenido de Monitor en vivo, Intervención y Modelo o Comparador y Auditoría.
+Intervención y exportación son funciones de Simulación. La comparación de demoras está disponible
+en TomTom y Auditoría reciente aparece en ambas vistas con el permiso de FastAPI.
 
 ### DEV_005 Visualización de tráfico actual
 
@@ -688,8 +695,8 @@ Estos resultados pertenecen al experimento sintético de referencia previo a cal
 
 La integración TomTom se verificó con respuestas para los cinco puntos y con una navegación en
 Edge entre ambas vistas. DOC_005 RES_007 registra el alcance y los resultados de esa comprobación.
-RES_009 distingue la suite de la revisión con comparador, la prueba de cuota con proveedor
-simulado y la captura de cinco puntos con datos en vivo.
+RES_009 describe la prueba histórica de cuota con proveedor simulado. RES_008 registra las
+capturas vigentes y RES_010 presenta la regresión del tablero de la revisión aad52be.
 
 El anexo de resultados DOC_005 lee JUnit/cobertura, carga 5/50 y restauración si los reportes
 existen; un criterio fallido se conserva como resultado negativo. La cobertura no mide utilidad

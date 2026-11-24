@@ -41,6 +41,15 @@ Al inicio, sin modelo promovido, se utiliza **modo degradado 40/40**. El simulad
 registra observaciones, incluye peatones y muestra la causa. El entrenamiento no activa
 silenciosamente un candidato.
 
+## Tablero
+
+Tras iniciar sesión, usa **Vista de tráfico** en la barra superior. En **Simulación** puedes elegir
+un cruce en **Intersección simulada** o en el mapa. Consulta la animación y los tiempos en
+**Monitor en vivo**. Las acciones administrativas están en **Intervención y Modelo**. En
+**Comparador y Auditoría** puedes exportar las observaciones de Simulación y consultar la auditoría
+con una cuenta de administrador. El mapa y los indicadores quedan a la vista en pantallas panorámicas
+mientras te desplazas dentro de una pestaña. [Manual ilustrado](entrega_academica/DOC_003_Manual.md).
+
 ## Vista de tráfico real con TomTom
 
 1. Agrega `TOMTOM_API_KEY=<tu_clave>` al archivo `.env` con una clave habilitada para Traffic API.
@@ -56,8 +65,8 @@ y también permite actualizar a demanda. El backend realiza la consulta de forma
 y conserva la clave en el servidor. Los puntos del catálogo son referencias académicas.
 
 En **Comparador y Auditoría**, pulsa **Comparar puntos** para ordenar hasta cinco tramos por
-segundos adicionales de recorrido y ver el aumento porcentual. Selecciona una fila para inspeccionar su tramo en el
-mapa. El comparador se ejecuta a demanda y comparte con el mapa las lecturas de los últimos
+segundos adicionales de recorrido y ver el aumento porcentual. Selecciona una fila para inspeccionar
+su tramo en el mapa. El comparador se ejecuta a demanda y comparte con el mapa las lecturas de los últimos
 dos minutos. Si falta una lectura o hay un cierre, la tabla identifica el estado del punto.
 
 El backend permite hasta 1,000 llamadas a TomTom en 24 horas móviles por proceso. Ajusta
